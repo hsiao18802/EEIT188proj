@@ -7,7 +7,7 @@
                 <div class="row">
                     <div class="col text-start">
                         <button type="button" class="btn btn-primary"
-                                @click="emits('openRent', 'rent', item.productId)">預定產品</button>
+                                @click="emits('openRent', 'rent', item.productId)">商品詳細</button>
                     </div>
                 </div>
             </div>
