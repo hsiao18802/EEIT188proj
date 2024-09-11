@@ -15,7 +15,25 @@
           <li class="nav-item">
             <RouterLink class="nav-link active" aria-current="page" to="/productpage">我們的商品</RouterLink>
           </li>
-          
+          <li class="nav-item">
+                        <RouterLink class="nav-link active" aria-current="page" to="/pages/Cart">購物車</RouterLink>
+                    </li>
+
+                    <li class="nav-item">
+                        <RouterLink class="nav-link active" aria-current="page" to="/pages/Order">訂單詳情</RouterLink>
+                    </li>
+
+
+
+                    <li class="nav-item dropdown">
+                        <span class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">功能</span>
+                        <ul class="dropdown-menu">
+                  
+                            <li><RouterLink class="dropdown-item" to="/pages/products">產品</RouterLink></li>
+                            <li><RouterLink class="dropdown-item" to="/cart">購物車</RouterLink></li>
+                            <li><RouterLink class="dropdown-item" to="/pages/Card">訂單管理</RouterLink></li>
+                        </ul>
+                    </li>
         </ul>
         <ul class="navbar-nav ms-auto">
           
