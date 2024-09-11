@@ -14,9 +14,9 @@
                     </div> -->
                     <div class="btn-group col text-start">
                         <a class="btn btn-primary"
-                            @click="$emit('open-update', 'update', item.productId)">修改</a>
+                            @click="$emit('openUpdate', 'update', item.productId)">修改</a>
                         <a class="btn btn-outline-primary"
-                            @click="$emit('open-update', 'changePic', item.productId)">換圖</a>
+                            @click="$emit('openChangePic', 'changePic', item.productId)">換圖</a>
                     </div>
                     <div class="col text-end">
                         <button class="btn btn-danger"
@@ -30,7 +30,7 @@
     
 <script setup>
     const props = defineProps(["item"]);
-    const emits = defineEmits(["delete", "openUpdate"]);
+    const emits = defineEmits(["delete", "openUpdate", "openChangePic"]);
 </script>
     
 <style>

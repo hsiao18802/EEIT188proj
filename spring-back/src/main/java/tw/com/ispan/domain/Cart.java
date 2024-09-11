@@ -1,4 +1,4 @@
-package tw.com.ispan.domain;
+	package tw.com.ispan.domain;
 
 
 import java.util.List;

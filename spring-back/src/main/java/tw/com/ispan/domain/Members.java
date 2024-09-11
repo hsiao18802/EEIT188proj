@@ -17,14 +17,17 @@ import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
+
+@ToString
 @NoArgsConstructor
-@Getter
 @Setter
+@Getter
 @Entity
-@Table(name="members")
+@Table(name = "members")
 public class Members {
-	
+
 //  member - cart 一對一
     @OneToOne(mappedBy = "members")
     private Cart cart;
@@ -40,8 +43,7 @@ public class Members {
 	@Column(name="members_password")
 	private byte[] password;
 	
-	
-	@Column(name="realname")
+	@Column(name = "realname")
 	private String realName;
 	
 	@Column(name="email", unique = true)
@@ -67,104 +69,6 @@ public class Members {
 	@Column(name="member_photo")
 	private byte[] memberPhoto;
 
-	public Cart getCart() {
-		return cart;
 	}
 
 
-	public void setCart(Cart cart) {
-		this.cart = cart;
-	}
-
-
-
-
-
-	public Integer getMembersId() {
-		return membersId;
-	}
-
-
-	public void setMembersId(Integer membersId) {
-		this.membersId = membersId;
-	}
-
-
-	public String getUsername() {
-		return username;
-	}
-
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-
-	public byte[] getPassword() {
-		return password;
-	}
-
-
-	public void setPassword(byte[] password) {
-		this.password = password;
-	}
-
-
-	public String getEmail() {
-		return email;
-	}
-
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-
-	public String getPhone() {
-		return phone;
-	}
-
-
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-
-
-	public String getAddress() {
-		return address;
-	}
-
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-
-	public Date getRegistrationDate() {
-		return registrationDate;
-	}
-
-
-	public void setRegistrationDate(Date registrationDate) {
-		this.registrationDate = registrationDate;
-	}
-
-
-	public byte[] getMemberPhoto() {
-		return memberPhoto;
-	}
-
-
-	public void setMemberPhoto(byte[] memberPhoto) {
-		this.memberPhoto = memberPhoto;
-	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-}
