@@ -68,6 +68,11 @@ public class MemberService {
         if (membersRepository.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("用戶名已存在");
         }
+        
+     // 檢查 email 是否已存在
+        if (membersRepository.findByEmail(email).isPresent()) {
+            throw new IllegalArgumentException("Email 已被使用");
+        }
 
         System.out.println("Real Name in Service: " + realName);
         
@@ -106,6 +111,12 @@ public class MemberService {
             }
         }
         return false;
+    }
+    
+    
+    public Members getMemberByUsername(String username) {
+        Optional<Members> optionalMember = membersRepository.findByUsername(username);
+        return optionalMember.orElse(null);
     }
 
 

@@ -10,4 +10,5 @@ import tw.com.ispan.domain.Members;
 @Repository
 public interface MembersRepository extends JpaRepository<Members, Integer> {
 	Optional<Members> findByUsername(String username);
+	 Optional<Members> findByEmail(String email);
 }

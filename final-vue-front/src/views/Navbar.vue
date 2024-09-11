@@ -54,7 +54,7 @@
               aria-expanded="false">會員頁面</span>
             <ul class="dropdown-menu">
               <li>
-                <RouterLink class="dropdown-item" to="/member/memberdata">會員資料</RouterLink>
+                <RouterLink class="dropdown-item" to="/members/info">會員資料</RouterLink>
               </li>
               <li>
                 <RouterLink class="dropdown-item" to="/member/memberorder">會員訂單</RouterLink>

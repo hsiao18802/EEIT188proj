@@ -8,6 +8,8 @@ import Home from '@/views/Home.vue';
 
 import Login from '@/secure/Login.vue';
 import Register from '@/secure/Register.vue';
+import MembersInfo from '@/members/MembersInfo.vue';
+
 
 
 
@@ -42,6 +44,7 @@ import ReservedPlaceholder from '@/views/error/ReservedPlaceholder.vue';
 
 
 
+
 const routes = [
   { path: "/", name: "home-link", component: Home, meta: { navbar: 'PublicNavbar' } },
 
@@ -51,6 +54,7 @@ const routes = [
 
   { path: "/secure/login", name: "secure-login-link", component: Login },
   { path: "/secure/register", name: "secure-register-link", component: Register },
+  { path: "/members/info", name: "secure-membersinfo-link", component: MembersInfo },
 
 
 

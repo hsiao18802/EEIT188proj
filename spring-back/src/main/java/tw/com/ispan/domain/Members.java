@@ -44,7 +44,7 @@ public class Members {
 	@Column(name="realname")
 	private String realName;
 	
-	@Column(name="email")
+	@Column(name="email", unique = true)
 	private String email;
 	
 	@Column(name="phone")
