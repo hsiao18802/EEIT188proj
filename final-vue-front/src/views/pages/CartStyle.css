@@ -1,0 +1,160 @@
+
+.cart-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 1s ease-in;
+  }
+  
+  .cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .cart-table th, .cart-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cart-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .cart-item:hover {
+    background-color: #f1faff;
+  }
+  
+  .product-image {
+    width: 100px;
+    height: auto;
+    border-radius: 8px;
+    transition: transform 0.3s;
+  }
+  
+  .product-image:hover {
+    transform: scale(1.1);
+  }
+  
+  /* 用於包裹數量按鈕和數字的容器 */
+  .quantity-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* 調整按鈕與數字之間的間距 */
+  }
+  
+  /* 數量按鈕樣式 */
+  .quantity-btn {
+    padding: 5px 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .quantity-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .shipping-method, .shipping-fee, .total-price, .payment-method, .credit-card-info {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  input[type="date"] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+  
+  input[type="text"] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .checkout-btn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .checkout-btn:hover {
+    background-color: #218838;
+  }
+  
+  /* Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .delete-btn {
+    padding: 5px 10px;
+    border: none;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .delete-btn:hover {
+    background-color: #c82333;
+
+    .discount-code {
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      .discount-code input[type="text"] {
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        width: calc(100% - 130px); /* Adjusted to fit the button */
+        margin-right: 10px;
+      }
+      
+      .apply-discount-btn {
+        padding: 8px 16px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      
+      .apply-discount-btn:hover {
+        background-color: #0056b3;
+      }
+      
+  }

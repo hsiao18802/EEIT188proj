@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://unpkg.com/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
+    <script src="https://unpkg.com/axios@1.7.4/dist/axios.min.js"></script>
+</head>
+<body>
+    <h3>Login</h3>
+    <table>
+        <tr>
+            <td>帳號</td>
+            <td><input type="text" name="username"></td>
+            <td><span id="error"></span></td>
+        </tr>
+        <tr>
+            <td>密碼</td>
+            <td><input type="text" name="password"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><button type="button" onclick="login()">登入</button></td>
+        </tr>
+    </table>
+
+
+    <script>
+        function login() {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+
+            let username = document.querySelector("input[name='username']").value;
+            if(username==="") {
+                username = null;
+            }
+
+            let password = document.querySelector("input[name='password']").value;
+            if(password==="") {
+                password = null;
+            }
+            
+            let body = {
+                "username": username,
+                "password": password
+            }
+            axios.post("http://localhost:8080/ajax/secure/login", body).then(function(response) {
+                console.log("response", response);
+                if(response.data.success) {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "success",
+                    }).then(function(result) {
+                        window.location.href = "/products.html";
+                    });
+                } else {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "error",
+                    });
+                }
+            }).catch(function(error) {
+                console.log("error", error);
+                Swal.fire({
+                    text: "錯誤："+error.message,
+                    icon: "error",
+                });
+            }).finally(function() {
+                console.log("finally");
+
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<template>
+    <h1 style="font-family: '微軟正黑體', sans-serif; font-size: xx-large; font-weight: bold;">首頁（員工用）</h1>
+    </template>
+    
+    <script setup>
+    
+    </script>
+    
+    <style>
+    
+    </style>
