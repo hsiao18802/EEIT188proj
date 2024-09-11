@@ -24,7 +24,7 @@
             :is-show-insert-button="isShowInsertButton"
             @insert="callCreate" @update="callModify">
     </ProductModal>
-    <EmpChangePic ref="picModal" v-model:product="product"></EmpChangePic>
+    <EmpChangePic ref="picModal" v-model:product="product" @imageSelected="handleImageSelected" @changepic="callChangePic"></EmpChangePic>
 </template>
 
 <script setup>
@@ -108,6 +108,7 @@ import ProductCard from '@/components/product_and_emp/emp_product/EmpProductCard
                     icon: "success",
                 }).then(function(result) {
                     productModal.value.hideModal();
+                    console.log("callCreate 正在調用 callFind, current.value:", current.value);
                     callFind(current.value);
                 });
             } else {
@@ -309,16 +310,23 @@ import ProductCard from '@/components/product_and_emp/emp_product/EmpProductCard
             });
         });
 }
+let selectedImage = ref(null);  // 在父組件保存圖片
+function handleImageSelected(image) {
+    selectedImage.value = image;  // 保存來自子組件的圖片文件
+    console.log("父組件收到圖片:", image);
+}
 
 function callChangePic() {
+    console.log("圖片上傳開始");
     Swal.fire({
         text: "圖片上傳中......",
         showConfirmButton: false,
         allowOutsideClick: false,
     });
 
-    // 確保選擇了圖片
-    if (!selectedImage) {
+    // 確保已選擇圖片
+    if (!selectedImage.value) {
+        console.log("未選擇圖片");
         Swal.fire({
             text: "請選擇一張圖片",
             icon: "error",
@@ -326,15 +334,20 @@ function callChangePic() {
         return;
     }
 
+    console.log("選擇的圖片: ", selectedImage.value);
+
     // 將圖片文件轉換為 base64 字符串
     const reader = new FileReader();
     reader.onloadend = function() {
         const base64String = reader.result.split(",")[1];  // 取得 base64 資料
+        console.log("圖片已轉換為 base64: ", base64String);
 
         // 準備要傳送的數據
         let body = {
             mainPhoto: base64String
         };
+
+        console.log("準備發送的 body: ", body);
 
         // 發送 PUT 請求到後端
         axiosapi.put(`/rent/product/${product.value.productId}/photo`, body).then(function(response) {
@@ -342,14 +355,19 @@ function callChangePic() {
             console.log("response.data:", response.data);
 
             if (response.data && response.data.success) {
+                console.log("圖片上傳成功，準備刷新頁面");
+
+                // 增加 SweetAlert2 成功提示
                 Swal.fire({
                     text: response.data.message || '圖片上傳成功',
                     icon: "success",
                 }).then(function(result) {
-                    callFind(current.value); // 刷新頁面
-                    productModal.value.hideModal(); // 隱藏圖片上傳的 Modal
+                    picModal.value.hideModal();
+                    console.log("圖片上傳成功後的 current.value:", current.value);
+                    callFind(current.value);  // 刷新頁面
                 });
             } else {
+                console.log("圖片上傳失敗，錯誤訊息: ", response.data.message);
                 Swal.fire({
                     text: response.data.message || '發生錯誤，請稍後再試',
                     icon: "error",
@@ -364,11 +382,93 @@ function callChangePic() {
         });
     };
 
-    // 將選中的圖片讀取為 base64 字符串
-    reader.readAsDataURL(selectedImage);
+    reader.onerror = function(error) {
+        console.log("圖片讀取失敗: ", error);
+        Swal.fire({
+            text: "圖片讀取失敗，請稍後再試",
+            icon: "error",
+        });
+    };
+
+    reader.readAsDataURL(selectedImage.value);
 }
 
 
+// function callChangePic() {
+//     console.log("圖片上傳開始");
+//     Swal.fire({
+//         text: "圖片上傳中......",
+//         showConfirmButton: false,
+//         allowOutsideClick: false,
+//     });
+
+//     // 確保選擇了圖片
+//     if (!selectedImage.value) {
+//         console.log("未選擇圖片");
+//         Swal.fire({
+//             text: "請選擇一張圖片",
+//             icon: "error",
+//         });
+//         return;
+//     }
+
+//     console.log("選擇的圖片: ", selectedImage.value);
+
+//     // 將圖片文件轉換為 base64 字符串
+//     const reader = new FileReader();
+//     reader.onloadend = function() {
+//         const base64String = reader.result.split(",")[1];  // 取得 base64 資料
+//         console.log("圖片已轉換為 base64: ", base64String);
+
+//         // 準備要傳送的數據
+//         let body = {
+//             mainPhoto: base64String
+//         };
+
+//         console.log("準備發送的 body: ", body);
+
+//         // 發送 PUT 請求到後端
+//         axiosapi.put(`/rent/product/${product.value.productId}/photo`, body).then(function(response) {
+//             console.log("callChangePic 成功 response:", response);
+//             console.log("response.data:", response.data);
+
+//             if (response.data && response.data.success) {
+//                 console.log("圖片上傳成功");
+                
+//                 // 增加 SweetAlert2 成功提示
+//                 Swal.fire({
+//                     text: response.data.message || '圖片上傳成功',
+//                     icon: "success",
+//             }).then(function(result) {
+//                 callFind(current.value);
+//                 picModal.value.hideModal();
+//                 });
+//             } else {
+//                 console.log("圖片上傳失敗，錯誤訊息: ", response.data.message);
+//                 Swal.fire({
+//                     text: response.data.message || '發生錯誤，請稍後再試',
+//                     icon: "error",
+//                 });
+//             }
+//         }).catch(function(error) {
+//             console.log("callChangePic 發生錯誤:", error);
+//             Swal.fire({
+//                 text: "錯誤：" + error.message,
+//                 icon: "error",
+//             });
+//         });
+//     };
+
+//     reader.onerror = function(error) {
+//         console.log("圖片讀取失敗: ", error);
+//         Swal.fire({
+//             text: "圖片讀取失敗，請稍後再試",
+//             icon: "error",
+//         });
+//     };
+
+//     reader.readAsDataURL(selectedImage.value);
+// }
 
     onMounted(function() {
         callFind();

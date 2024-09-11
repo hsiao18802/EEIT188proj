@@ -15,19 +15,15 @@
                         <tr>
                             <td>名稱</td>
                             <td>{{ product.productName }}</td>
-                        </tr>
-                        
-                        <!-- <tr>
+                        </tr>                        
+                        <tr>
                             <td>選擇圖片</td>
-                            <td>選擇圖片的按鈕會放這裡</td>
-                        </tr> -->
-                        
+                            <td><input type="file" accept="image/*" @change="onImageSelected"></td>
+                        </tr>                        
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" v-show="isShowInsertButton" @click="emits('insert')">新增</button>
-                    <button class="btn btn-primary" v-show="!isShowInsertButton" @click="emits('update')">修改</button>
-                    <!-- <button class="btn btn-primary" v-show="!isShowInsertButton" @click="emits('???')">上傳圖檔</button> -->
+                    <button class="btn btn-primary" @click="emits('changepic')">上傳圖檔</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                 </div>
             </div>
@@ -36,14 +32,9 @@
 </template>
 
 <script setup>
-    const props = defineProps(["product", "isShowInsertButton"])
-    const emits = defineEmits(["update:product", "insert", "update"])
-    function doInput(key, event) {
-        emits("update:product", {
-            ...props.product,
-            [key]: event.target.value
-        });
-    }
+
+    const props = defineProps(["product"])
+    const emits = defineEmits(["update:product", "changepic", 'imageSelected'])
 
     import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js'
     import { ref, onMounted } from 'vue';
@@ -59,28 +50,16 @@
     function hideModal() {
         exampleObj.value.hide();
     }
-
+    function onImageSelected(event) {
+    const file = event.target.files[0];
+    if (file) {
+        console.log("圖片已選擇:", file);
+        emits('imageSelected', file);  // 通過 emit 傳遞圖片文件給父組件
+    }
+}
     defineExpose({
         showModal, hideModal
     });
-
-    // 定義一個函數來格式化日期並調整時區
-    function formatDate(utcDateString) {
-        if (!utcDateString) return ""; // 防止空值報錯
-        const date = new Date(utcDateString);
-        // 調整時區+8
-        // date.setHours(date.getHours() + 8);
-
-        // 格式化為 yyyy-MM-dd HH:mm:ss
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-        // const seconds = String(date.getSeconds()).padStart(2, "0");
-
-        return `${year}年${month}月${day}日 ${hours}時${minutes}分`;
-    }
 </script>
 
 <style>

@@ -18,4 +18,4 @@ spring:
       enabled: always
 jwt:
   token:
-    expire: 1
+    expire: 10
