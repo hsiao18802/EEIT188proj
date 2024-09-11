@@ -14,44 +14,14 @@
                         </tr>
                         <tr>
                             <td>名稱</td>
-                            <td><input type="text" name="name" v-model="product.productName"></td>
+                            <td>{{ product.productName }}</td>
                         </tr>
-                        <tr>
-                            <td>價格</td>
-                            <td><input type="number" name="price" v-model="product.dailyFeeOriginal"></td>
-                        </tr>
-                        <tr>
-                            <td>庫存量</td>
-                            <td><input type="number" name="maxQuantity" v-model="product.maxAvailableQuantity"></td>
-                        </tr>
+                        
                         <!-- <tr>
                             <td>選擇圖片</td>
                             <td>選擇圖片的按鈕會放這裡</td>
                         </tr> -->
-                        <tr>
-                            <td>描述</td>
-                            <td><textarea name="description" v-model="product.description"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td>分類編號</td>
-                            <td><input type="number" name="categoryId" v-model="product.categoryId"></td>
-                        </tr>
-                        <tr v-show="!isShowInsertButton">
-                            <td>新增員工ID</td>
-                            <td><input type="number" name="addEmployeeId" v-model="product.addEmployeeId" readonly></td>
-                        </tr>
-                        <tr v-show="!isShowInsertButton">
-                            <td>新增日期</td>
-                            <td>{{ formatDate(product.addDatetime) }}</td>
-                        </tr>
-                        <tr v-show="!isShowInsertButton">
-                            <td>最後更新員工ID</td>
-                            <td><input type="number" name="lastUpdateEmployeeId" v-model="product.lastUpdateEmployeeId" readonly></td>
-                        </tr>
-                        <tr v-show="!isShowInsertButton">
-                            <td>最後更新日期</td>
-                            <td>{{ formatDate(product.lastUpdateDatetime) }}</td>
-                        </tr>
+                        
                     </table>
                 </div>
                 <div class="modal-footer">
