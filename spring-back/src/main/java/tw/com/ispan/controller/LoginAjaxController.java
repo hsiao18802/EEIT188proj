@@ -1,5 +1,6 @@
 package tw.com.ispan.controller;
 
+import java.util.Map;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -8,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletRequest;
 import tw.com.ispan.domain.Members;
 import tw.com.ispan.service.MemberService;
-import tw.com.ispan.util.DatetimeConverter;
 import tw.com.ispan.util.JsonWebTokenUtility;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/ajax/secure")
@@ -20,38 +21,52 @@ import tw.com.ispan.util.JsonWebTokenUtility;
 public class LoginAjaxController {
 
     @Autowired
-    private JsonWebTokenUtility jsonWebTokenUtility;
-
-    @Autowired
     private MemberService memberService;
 
-    // 登入邏輯
+    @Autowired
+    private JsonWebTokenUtility jsonWebTokenUtility;
+
+    // Google 登錄的 API
+    @PostMapping("/google-login")
+    public String googleLogin(@RequestBody Map<String, String> tokenMap) {
+        String idTokenString = tokenMap.get("token");
+
+        // 调用 service 层来处理 Google 登录逻辑
+        JSONObject responseJson = memberService.googleLogin(idTokenString);
+
+        // 返回 JSON 响应
+        System.out.println("Response JSON: " + responseJson.toString());  // 打印完整响应
+        return responseJson.toString();
+    }
+
+
+    // 一般登錄邏輯
     @PostMapping("/login")
     public String login(@RequestBody String json) {
         JSONObject responseJson = new JSONObject();
 
-        //接收資料
+        // 接收資料
         JSONObject obj = new JSONObject(json);
         String username = obj.isNull("username") ? null : obj.getString("username");
         String password = obj.isNull("password") ? null : obj.getString("password");
 
-        //驗證資料
-        if(username == null || username.isEmpty() || password == null || password.isEmpty()) {
+        // 驗證資料
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
             responseJson.put("success", false);
             responseJson.put("message", "請輸入帳號/密碼以便執行登入");
             return responseJson.toString();
         }
 
-        //呼叫業務邏輯
+        // 呼叫業務邏輯
         Members member = memberService.login(username, password);
-        if(member == null) {
+        if (member == null) {
             responseJson.put("success", false);
             responseJson.put("message", "登入失敗");
         } else {
             responseJson.put("success", true);
             responseJson.put("message", "登入成功");
             // JWT 建立並返回給前端
-            String date = DatetimeConverter.toString(member.getRegistrationDate(), "yyyy-MM-dd");
+            String date = new JSONObject().put("date", member.getRegistrationDate()).toString();
             JSONObject user = new JSONObject()
                 .put("membername", member.getUsername())
                 .put("realname", member.getRealName())
@@ -102,7 +117,7 @@ public class LoginAjaxController {
         return responseJson.toString();
     }
 
-    // 新增的登出邏輯
+    // 登出邏輯
     @PostMapping("/logout")
     public String logout(HttpServletRequest request) {
         JSONObject responseJson = new JSONObject();

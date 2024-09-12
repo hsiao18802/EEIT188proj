@@ -16,6 +16,11 @@ spring:
   output:
     ansi:
       enabled: always
+  servlet:
+    multipart:
+      max-file-size: 5MB   # 單個文件最大上傳大小
+      max-request-size: 5MB # 整個請求最大上傳大小
+
 jwt:
   token:
-    expire: 10
+    expire: 1
