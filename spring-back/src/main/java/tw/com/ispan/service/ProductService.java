@@ -28,6 +28,42 @@ public class ProductService {
         Optional<Product> rentBean = productRepository.findById(id);
         return rentBean.orElse(null); // 如果找不到，返回 null
     }
+
+    // 刪除產品
+    public boolean deleteProduct(Integer productId) {
+        try {
+            Optional<Product> optionalProduct = productRepository.findById(productId);
+            if (optionalProduct.isPresent()) {
+                productRepository.deleteById(productId);
+                System.out.println("產品刪除成功，ID: " + productId);
+                return true;
+            } else {
+                System.out.println("找不到產品，ID: " + productId);
+                return false;
+            }
+        } catch (Exception e) {
+            System.err.println("刪除產品時發生錯誤: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // 新增商品
+    public Product addProduct(Product product) {
+        System.out.println("準備新增產品: " + product.getProductName());
+        
+        try {
+            // 儲存產品
+        	product.setAddDatetime(new Date());
+            Product savedProduct = productRepository.save(product);
+            System.out.println("產品新增成功: " + savedProduct.getProductId());
+            return savedProduct;
+        } catch (Exception e) {
+            System.out.println("產品新增失敗: " + e.getMessage());
+            return null;
+        }
+    }
+
     // 更新產品資訊
     public Product updateProduct(Integer productId, Product updatedProduct) {
         // 根據 productId 查詢產品
@@ -52,39 +88,8 @@ public class ProductService {
             return null; // 找不到產品則回傳 null
         }
     }
-    // 刪除產品
-    public boolean deleteProduct(Integer productId) {
-        try {
-            Optional<Product> optionalProduct = productRepository.findById(productId);
-            if (optionalProduct.isPresent()) {
-                productRepository.deleteById(productId);
-                System.out.println("產品刪除成功，ID: " + productId);
-                return true;
-            } else {
-                System.out.println("找不到產品，ID: " + productId);
-                return false;
-            }
-        } catch (Exception e) {
-            System.err.println("刪除產品時發生錯誤: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
     
-    public Product addProduct(Product product) {
-        System.out.println("準備新增產品: " + product.getProductName());
-        try {
-            // 儲存產品
-        	product.setAddDatetime(new Date());
-            Product savedProduct = productRepository.save(product);
-            System.out.println("產品新增成功: " + savedProduct.getProductId());
-            return savedProduct;
-        } catch (Exception e) {
-            System.out.println("產品新增失敗: " + e.getMessage());
-            return null;
-        }
-    }
-    
+    // 更新商品圖片
     public Product updateProductPhoto(Integer productId, byte[] newPhoto) {
         // 根據 productId 查詢產品
         Optional<Product> optionalProduct = productRepository.findById(productId);
@@ -94,6 +99,8 @@ public class ProductService {
 
             // 更新圖片
             existingProduct.setMainPhoto(newPhoto);
+         // 設定最後更新時間為當前時間
+            existingProduct.setLastUpdateDatetime(new Date());
             Product updatedProduct = productRepository.save(existingProduct);
 
             System.out.println("產品圖片更新成功，產品ID: " + productId);

@@ -4,130 +4,59 @@
         <div class="col-2">
             <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
         </div>
-        <!-- <div class="col-6">
-            <input type="text" placeholder="請輸入查詢條件" v-model="findName" @input="callFind">
-        </div> -->
         <div class="col-4">
-            <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind">
-            </ProductSelect>
+            <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind"></ProductSelect>
         </div>
     </div>
     <br>
 
     <div class="row">
-        <ProductCard v-for="product in products" :key="product.id"
-                    :item="product" @delete="callRemove" @open-update="openModal" @open-change-pic="openChangePic">
-        </ProductCard>
+        <ProductCard v-for="product in products" :key="product.id" :item="product" @delete="callRemove" @open-update="openModal" @open-change-pic="openChangePic"></ProductCard>
     </div>
 
-    <ProductModal ref="productModal" v-model:product="product"
-            :is-show-insert-button="isShowInsertButton"
-            @insert="callCreate" @update="callModify">
-    </ProductModal>
+    <ProductModal ref="productModal" v-model:product="product" :is-show-insert-button="isShowInsertButton" @insert="callCreate" @update="callModify" @imageSelected="handleImageSelected"></ProductModal>
     <EmpChangePic ref="picModal" v-model:product="product" @imageSelected="handleImageSelected" @changepic="callChangePic"></EmpChangePic>
 </template>
 
 <script setup>
 import ProductCard from '@/components/product_and_emp/emp_product/EmpProductCard.vue';
-    // import ProductSelect from '@/components/ProductSelect.vue';
-    import Swal from 'sweetalert2';
-    import axiosapi from '@/plugins/axios';
-    import { onMounted, ref } from 'vue';
+import Swal from 'sweetalert2';
+import axiosapi from '@/plugins/axios';
+import { onMounted, ref } from 'vue';
 
-    //分頁 start
-    import Paginate from "vuejs-paginate-next";
-    const start = ref(0);
-    const max = ref(3);
-    const current = ref(1);
-    const pages = ref(0);
-    const total = ref(0);
-    const lastPageRows = ref(0);
-    
-    //分頁 end
-        //modal start
-        import ProductModal from '@/components/product_and_emp/emp_product/EmpProductModal.vue';
-    const productModal = ref(null);
-    const product = ref({ });
-    const isShowInsertButton = ref(true);
-    function openModal(action, id) {
-        if(action==='insert') {
-            isShowInsertButton.value = true;
-            product.value = {};
-        } else {
-            isShowInsertButton.value = false;
-            callFindById(id);
-        }
-        productModal.value.showModal();
+import ProductModal from '@/components/product_and_emp/emp_product/EmpProductModal.vue';
+import EmpChangePic from '@/components/product_and_emp/emp_product/EmpChangePic.vue';
+
+const start = ref(0);
+const max = ref(3);
+const current = ref(1);
+const total = ref(0);
+const lastPageRows = ref(0);
+const productModal = ref(null);
+const picModal = ref(null);
+const product = ref({});
+const isShowInsertButton = ref(true);
+const findName = ref("");
+const products = ref([]);
+
+function openModal(action, id) {
+    if (action === 'insert') {
+        isShowInsertButton.value = true;
+        product.value = {};
+    } else {
+        isShowInsertButton.value = false;
+        callFindById(id);
     }
-    //modal end
-    //changepic start
-    import EmpChangePic from '@/components/product_and_emp/emp_product/EmpChangePic.vue';
-    const picModal = ref(null);
-    function openChangePic(action, id) {
+    productModal.value.showModal();
+}
 
-            product.value = {};
-            callFindById(id);
-            picModal.value.showModal();
-    }
-    //changepic end
+function openChangePic(action, id) {
+    product.value = {};
+    callFindById(id);
+    picModal.value.showModal();
+}
 
-    const findName = ref("");
-    const products = ref([]);
-
-    async function callCreate() {
-        Swal.fire({
-            text: "Loading......",
-            showConfirmButton: false,
-            allowOutsideClick: false,
-        });
-
-        if(product.value.id==="") {
-            product.value.id = null;
-        }
-        if(product.value.name==="") {
-            product.value.name = null;
-        }
-        if(product.value.price==="") {
-            product.value.price = null;
-        }
-        if(product.value.make==="") {
-            product.value.make = null;
-        }
-        if(product.value.expire==="") {
-            product.value.expire = null;
-        }
-        let body = product.value;
-        console.log("body", body);
-
-        try {
-            const response = await axiosapi.post("/rent/product/add", body);
-            console.log("callCreate response", response);
-            if(response.data.success) {
-                Swal.fire({
-                    text: response.data.message,
-                    icon: "success",
-                }).then(function(result) {
-                    productModal.value.hideModal();
-                    console.log("callCreate 正在調用 callFind, current.value:", current.value);
-                    callFind(current.value);
-                });
-            } else {
-                Swal.fire({
-                    text: response.data.message,
-                    icon: "error",
-                });
-            }
-        } catch(error) {
-            console.log("callCreate error", error);
-            Swal.fire({
-                text: "錯誤："+error.message,
-                icon: "error",
-            });
-        }
-    }
-
-    function callRemove(id) {
-    console.log("開始刪除，ID:", id);
+function callRemove(id) {
     Swal.fire({
         text: "確定刪除？",
         icon: "question",
@@ -135,81 +64,106 @@ import ProductCard from '@/components/product_and_emp/emp_product/EmpProductCard
         allowOutsideClick: false,
     }).then(function(result) {
         if (result.isConfirmed) {
-            console.log("使用者確認刪除，ID:", id);
             Swal.fire({
                 text: "Loading......",
                 showConfirmButton: false,
                 allowOutsideClick: false,
             });
-
-            // 進行刪除請求
             axiosapi.delete(`/rent/product/${id}`)
                 .then(function(response) {
-                    console.log("callRemove response", response); // 查看完整回應
                     if (response.data && response.data.success) {
-                        Swal.fire({
-                            text: response.data.message,
-                            icon: "success",
-                        }).then(function(result) {
-                            if (current.value > 1 && lastPageRows.value === 1) {
-                                current.value = current.value - 1;
-                            }
-                            callFind(current.value);
-                            productModal.value.hideModal();
-                        });
+                        handleSuccess(response.data.message, productModal.value);
                     } else {
-                        console.log("callRemove response data 無 success 屬性", response.data);
-                        Swal.fire({
-                            text: response.data.message || "刪除失敗，請稍後再試",
-                            icon: "error",
-                        });
+                        handleError(new Error(response.data.message || "刪除失敗，請稍後再試"));
                     }
                 })
-                .catch(function(error) {
-                    console.log("callRemove error", error);
-                    Swal.fire({
-                        text: "錯誤：" + (error.response ? error.response.data.message : error.message),
-                        icon: "error",
-                    });
-                });
+                .catch(handleError);
         }
     });
 }
-    function callFindById(id) {
+
+function callFindById(id) {
     Swal.fire({
         text: "Loading......",
         showConfirmButton: false,
         allowOutsideClick: false,
     });
-    
+
     axiosapi.get(`/rent/product/${id}`).then(function(response) {
-        console.log("callFindById response", response);
-        
-        // 如果 response.data 是物件而非 list，直接賦值給 product
         if (response.data) {
-            product.value = response.data; // 直接使用 response.data
+            product.value = response.data;
         } else {
             Swal.fire({
                 text: "找不到產品資料",
                 icon: "error",
             });
         }
-
         setTimeout(function() {
             Swal.close();
         }, 500);
-    }).catch(function(error) {
-        console.log("callFindById error", error);
-        Swal.fire({
-            text: "錯誤：" + error.message,
-            icon: "error",
-        });
-    });
+    }).catch(handleError);
 }
 
-    function callModify() {
+function callFind(page) {
+    current.value = page || 1;
+    start.value = (current.value - 1) * max.value;
+    findName.value = findName.value || null;
 
-        Swal.fire({
+    let body = { start: start.value, max: max.value, dir: false, order: "id", name: findName.value };
+    axiosapi.get("/rent/product/find", body)
+        .then(function(response) {
+            if (response.data) {
+                products.value = response.data;
+                total.value = response.data.count;
+            }
+            setTimeout(function() {
+                Swal.close();
+            }, 500);
+        })
+        .catch(handleError);
+}
+
+async function callCreate() {
+    Swal.fire({
+        text: "Loading......",
+        showConfirmButton: false,
+        allowOutsideClick: false,
+    });
+
+    let body = product.value;
+
+    try {
+        if (selectedImage.value) {
+            const reader = new FileReader();
+            reader.onloadend = async function() {
+                body.mainPhoto = reader.result.split(",")[1];
+                await sendCreateRequest(body);
+            };
+            reader.onerror = handleError;
+            reader.readAsDataURL(selectedImage.value);
+        } else {
+            await sendCreateRequest(body);
+        }
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+async function sendCreateRequest(body) {
+    try {
+        const response = await axiosapi.post("/rent/product/add", body);
+        if (response.data.success) {
+            handleSuccess(response.data.message, productModal.value);
+        } else {
+            handleError(new Error(response.data.message));
+        }
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+function callModify() {
+    Swal.fire({
         text: "Loading......",
         showConfirmButton: false,
         allowOutsideClick: false,
@@ -223,260 +177,84 @@ import ProductCard from '@/components/product_and_emp/emp_product/EmpProductCard
         description: product.value.description || null,
         categoryId: product.value.categoryId || null,
     };
+
     axiosapi.put(`/rent/product/${body.productId}`, body).then(function(response) {
-        console.log("callModify 成功 response:", response);
-        console.log("response.data:", response.data);
-
-        if (response.data && response.data.success) {
-            Swal.fire({
-                text: response.data.message || '修改成功',
-                icon: "success",
-            }).then(function(result) {
-                callFind(current.value);
-                productModal.value.hideModal();
-            });
+        if (selectedImage.value) {
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                const base64String = reader.result.split(",")[1];
+                let photoBody = { mainPhoto: base64String };
+                axiosapi.put(`/rent/product/${product.value.productId}/photo`, photoBody).then(function(response) {
+                    if (response.data.success) {
+                        handleSuccessReload(response.data.message);
+                    } else {
+                        handleError(new Error(response.data.message));
+                    }
+                }).catch(handleError);
+            };
+            reader.onerror = handleError;
+            reader.readAsDataURL(selectedImage.value);
         } else {
-            Swal.fire({
-                text: response.data.message || '發生錯誤，請稍後再試',
-                icon: "error",
-            });
-        }
-    }).catch(function(error) {
-        console.log("callModify 發生錯誤:", error);
-        Swal.fire({
-            text: "錯誤：" + error.message,
-            icon: "error",
-        });
-    });
-}
-
-    function callFind(page) {
-    console.log("callFind triggered, page:", page);
-
-    if (page) {
-        current.value = page;
-        start.value = (page - 1) * max.value;
-    } else {
-        current.value = 1;
-        start.value = 0;
-    }
-
-    console.log("Pagination values - start:", start.value, "max:", max.value, "current:", current.value);
-
-    if (findName.value === "") {
-        findName.value = null;
-    }
-
-    console.log("Search name value:", findName.value);
-
-    let body = {
-        "start": start.value,
-        "max": max.value,
-        "dir": false,
-        "order": "id",
-        "name": findName.value
-    };
-
-    console.log("Request body:", body);
-
-    axiosapi.get("/rent/product/find", body)
-        .then(function(response) {
-            console.log("callFind response received:", response);
-
-            // Check if response structure is as expected
-            if (response.data && response.data) {
-                products.value = response.data;
-                total.value = response.data.count;
-                pages.value = Math.ceil(total.value / max.value);
-                lastPageRows.value = total.value % max.value;
-
-                console.log("Updated products:", products.value);
-                console.log("Total count:", total.value, "Pages:", pages.value, "Last page rows:", lastPageRows.value);
+            if (response.data.success) {
+                handleSuccess(response.data.message, productModal.value);
             } else {
-                console.warn("Unexpected response structure:", response);
+                handleError(new Error(response.data.message));
             }
-
-            setTimeout(function() {
-                Swal.close();
-            }, 500);
-        })
-        .catch(function(error) {
-            console.log("callFind error:", error);
-            console.log("Error details - message:", error.message, "code:", error.code);
-
-            Swal.fire({
-                text: "錯誤：" + error.message,
-                icon: "error",
-            });
-        });
+        }
+    }).catch(handleError);
 }
-let selectedImage = ref(null);  // 在父組件保存圖片
+
+let selectedImage = ref(null);
+
 function handleImageSelected(image) {
-    selectedImage.value = image;  // 保存來自子組件的圖片文件
-    console.log("父組件收到圖片:", image);
+    selectedImage.value = image;
 }
 
 function callChangePic() {
-    console.log("圖片上傳開始");
-    Swal.fire({
-        text: "圖片上傳中......",
-        showConfirmButton: false,
-        allowOutsideClick: false,
-    });
-
-    // 確保已選擇圖片
     if (!selectedImage.value) {
-        console.log("未選擇圖片");
-        Swal.fire({
-            text: "請選擇一張圖片",
-            icon: "error",
-        });
+        Swal.fire({ text: "請選擇一張圖片", icon: "error" });
         return;
     }
 
-    console.log("選擇的圖片: ", selectedImage.value);
-
-    // 將圖片文件轉換為 base64 字符串
     const reader = new FileReader();
     reader.onloadend = function() {
-        const base64String = reader.result.split(",")[1];  // 取得 base64 資料
-        console.log("圖片已轉換為 base64: ", base64String);
-
-        // 準備要傳送的數據
-        let body = {
-            mainPhoto: base64String
-        };
-
-        console.log("準備發送的 body: ", body);
-
-        // 發送 PUT 請求到後端
+        let body = { mainPhoto: reader.result.split(",")[1] };
         axiosapi.put(`/rent/product/${product.value.productId}/photo`, body).then(function(response) {
-            console.log("callChangePic 成功 response:", response);
-            console.log("response.data:", response.data);
-
-            if (response.data && response.data.success) {
-                console.log("圖片上傳成功，準備刷新頁面");
-
-                // 增加 SweetAlert2 成功提示
-                Swal.fire({
-                    text: response.data.message || '圖片上傳成功',
-                    icon: "success",
-                }).then(function(result) {
-                    picModal.value.hideModal();
-                    console.log("圖片上傳成功後的 current.value:", current.value);
-                    callFind(current.value);  // 刷新頁面
-                });
+            if (response.data.success) {
+                handleSuccessReload(response.data.message);
             } else {
-                console.log("圖片上傳失敗，錯誤訊息: ", response.data.message);
-                Swal.fire({
-                    text: response.data.message || '發生錯誤，請稍後再試',
-                    icon: "error",
-                });
+                handleError(new Error(response.data.message));
             }
-        }).catch(function(error) {
-            console.log("callChangePic 發生錯誤:", error);
-            Swal.fire({
-                text: "錯誤：" + error.message,
-                icon: "error",
-            });
-        });
+        }).catch(handleError);
     };
-
-    reader.onerror = function(error) {
-        console.log("圖片讀取失敗: ", error);
-        Swal.fire({
-            text: "圖片讀取失敗，請稍後再試",
-            icon: "error",
-        });
-    };
-
+    reader.onerror = handleError;
     reader.readAsDataURL(selectedImage.value);
 }
 
+// 共用的錯誤提示函數
+function handleError(error) {
+    console.log("發生錯誤:", error);
+    Swal.fire({ text: "錯誤：" + (error.response ? error.response.data.message : error.message), icon: "error" });
+}
 
-// function callChangePic() {
-//     console.log("圖片上傳開始");
-//     Swal.fire({
-//         text: "圖片上傳中......",
-//         showConfirmButton: false,
-//         allowOutsideClick: false,
-//     });
-
-//     // 確保選擇了圖片
-//     if (!selectedImage.value) {
-//         console.log("未選擇圖片");
-//         Swal.fire({
-//             text: "請選擇一張圖片",
-//             icon: "error",
-//         });
-//         return;
-//     }
-
-//     console.log("選擇的圖片: ", selectedImage.value);
-
-//     // 將圖片文件轉換為 base64 字符串
-//     const reader = new FileReader();
-//     reader.onloadend = function() {
-//         const base64String = reader.result.split(",")[1];  // 取得 base64 資料
-//         console.log("圖片已轉換為 base64: ", base64String);
-
-//         // 準備要傳送的數據
-//         let body = {
-//             mainPhoto: base64String
-//         };
-
-//         console.log("準備發送的 body: ", body);
-
-//         // 發送 PUT 請求到後端
-//         axiosapi.put(`/rent/product/${product.value.productId}/photo`, body).then(function(response) {
-//             console.log("callChangePic 成功 response:", response);
-//             console.log("response.data:", response.data);
-
-//             if (response.data && response.data.success) {
-//                 console.log("圖片上傳成功");
-                
-//                 // 增加 SweetAlert2 成功提示
-//                 Swal.fire({
-//                     text: response.data.message || '圖片上傳成功',
-//                     icon: "success",
-//             }).then(function(result) {
-//                 callFind(current.value);
-//                 picModal.value.hideModal();
-//                 });
-//             } else {
-//                 console.log("圖片上傳失敗，錯誤訊息: ", response.data.message);
-//                 Swal.fire({
-//                     text: response.data.message || '發生錯誤，請稍後再試',
-//                     icon: "error",
-//                 });
-//             }
-//         }).catch(function(error) {
-//             console.log("callChangePic 發生錯誤:", error);
-//             Swal.fire({
-//                 text: "錯誤：" + error.message,
-//                 icon: "error",
-//             });
-//         });
-//     };
-
-//     reader.onerror = function(error) {
-//         console.log("圖片讀取失敗: ", error);
-//         Swal.fire({
-//             text: "圖片讀取失敗，請稍後再試",
-//             icon: "error",
-//         });
-//     };
-
-//     reader.readAsDataURL(selectedImage.value);
-// }
-
-    onMounted(function() {
-        callFind();
+// 共用的成功提示函數 (頁面刷新)
+function handleSuccessReload(message) {
+    Swal.fire({ text: message || '操作成功', icon: "success" }).then(function() {
+        window.location.reload();
     });
+}
 
+// 共用的成功提示函數 (無頁面刷新)
+function handleSuccess(message, modalToHide = null) {
+    Swal.fire({ text: message || '操作成功', icon: "success" }).then(function() {
+        if (modalToHide) modalToHide.hideModal();
+        callFind(current.value);
+    });
+}
 
+onMounted(function() {
+    callFind();
+});
 </script>
 
-<style>
-
-</style>
+<style></style>
