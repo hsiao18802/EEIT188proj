@@ -2,16 +2,26 @@
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "product")
 public class Product {
 	
+    @OneToMany(mappedBy = "product")
+    private Set<Cart> cart;
 	
-	@OneToMany(mappedBy = "product")
-    private List<ProductCart> productCarts;  // 產品對應的購物車中介表
+
+	
 	
 
     @Id
@@ -61,103 +71,5 @@ public class Product {
     @Column(name = "last_update_employee_id")
     private Integer lastUpdateEmployeeId;
 
-    // Getters and Setters
-
     
-
-    public List<ProductCart> getProductCarts() {
-		return productCarts;
-	}
-
-	public void setProductCarts(List<ProductCart> productCarts) {
-		this.productCarts = productCarts;
-	}
-
-	public Integer getProductId() {
-		return productId;
-	}
-
-	public void setProductId(Integer productId) {
-		this.productId = productId;
-	}
-
-	public String getProductName() {
-        return productName;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
-    public Integer getDailyFeeOriginal() {
-        return dailyFeeOriginal;
-    }
-
-    public void setDailyFeeOriginal(Integer dailyFeeOriginal) {
-        this.dailyFeeOriginal = dailyFeeOriginal;
-    }
-
-    public Integer getMaxAvailableQuantity() {
-        return maxAvailableQuantity;
-    }
-
-    public void setMaxAvailableQuantity(Integer maxAvailableQuantity) {
-        this.maxAvailableQuantity = maxAvailableQuantity;
-    }
-
-    public byte[] getMainPhoto() {
-        return mainPhoto;
-    }
-
-    public void setMainPhoto(byte[] mainPhoto) {
-        this.mainPhoto = mainPhoto;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Integer getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Date getAddDatetime() {
-        return addDatetime;
-    }
-
-    public void setAddDatetime(Date addDatetime) {
-        this.addDatetime = addDatetime;
-    }
-
-    public Integer getAddEmployeeId() {
-        return addEmployeeId;
-    }
-
-    public void setAddEmployeeId(Integer addEmployeeId) {
-        this.addEmployeeId = addEmployeeId;
-    }
-
-    public Date getLastUpdateDatetime() {
-        return lastUpdateDatetime;
-    }
-
-    public void setLastUpdateDatetime(Date lastUpdateDatetime) {
-        this.lastUpdateDatetime = lastUpdateDatetime;
-    }
-
-    public Integer getLastUpdateEmployeeId() {
-        return lastUpdateEmployeeId;
-    }
-
-    public void setLastUpdateEmployeeId(Integer lastUpdateEmployeeId) {
-        this.lastUpdateEmployeeId = lastUpdateEmployeeId;
-    }
 }

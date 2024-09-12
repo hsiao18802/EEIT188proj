@@ -2,7 +2,14 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router/router.js';
 import pinia from './plugins/pinia.js';
-import useUserStore from '@/stores/user.js';  // ¤Þ¤J Pinia ªº store
+import useUserStore from '@/stores/user.js';  // ï¿½Þ¤J Pinia ï¿½ï¿½ store
+
+
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+
+
+pinia.use(piniaPluginPersistedstate)
+
 
 const app = createApp(App)
   .use(router)
@@ -10,21 +17,21 @@ const app = createApp(App)
 
 app.directive('default-img', {
   mounted(el, binding) {
-    const defaultImg = '/public/NoPic256.jpg'; // ´À¥N¹Ï¤ù¸ô®|
+    const defaultImg = '/public/NoPic256.jpg'; // ï¿½ï¿½ï¿½Nï¿½Ï¤ï¿½ï¿½ï¿½ï¿½|
     el.onerror = () => {
-      el.src = defaultImg; // ¦pªG¹Ï¤ù¥[¸ü¥¢±Ñ¡A«hÅã¥Ü´À¥N¹Ï¤ù
+      el.src = defaultImg; // ï¿½pï¿½Gï¿½Ï¤ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡Aï¿½hï¿½ï¿½Ü´ï¿½ï¿½Nï¿½Ï¤ï¿½
     };
-    el.src = binding.value ? 'data:image/jpeg;base64,' + binding.value : defaultImg; // ¦pªG¹Ï¤ù¬° null¡A«hÅã¥Ü´À¥N¹Ï¤ù
+    el.src = binding.value ? 'data:image/jpeg;base64,' + binding.value : defaultImg; // ï¿½pï¿½Gï¿½Ï¤ï¿½ï¿½ï¿½ nullï¿½Aï¿½hï¿½ï¿½Ü´ï¿½ï¿½Nï¿½Ï¤ï¿½
   }
 });
 
 app.mount('#app');
 
-// À³¥Î±Ò°Ê«áÀË¬d Pinia ª¬ºA¬O§_±q sessionStorage «ì´_
+// ï¿½ï¿½ï¿½Î±Ò°Ê«ï¿½ï¿½Ë¬d Pinia ï¿½ï¿½ï¿½Aï¿½Oï¿½_ï¿½q sessionStorage ï¿½ï¿½_
 const userStore = useUserStore();
 const savedLogin = localStorage.getItem('login');
 if (savedLogin !== null) {
-  userStore.setLogin(savedLogin === 'true');  // «ì´_ login ª¬ºA¬° true ©Î false
+  userStore.setLogin(savedLogin === 'true');  // ï¿½ï¿½_ login ï¿½ï¿½ï¿½Aï¿½ï¿½ true ï¿½ï¿½ false
   console.log('Login status manually set to:', savedLogin);
 } else {
   console.log('No login status found in sessionStorage');

@@ -74,20 +74,23 @@
     // +進購物車
 // 添加購物車邏輯
 const addCart = () => {
+    console.log('Adding to cart:', product.value); // 添加日志输出
     if (props.product) {
         cartStore.addCart({
-            id: props.product.id, // 商品 id
-            name: props.product.name, // 商品名稱
-         //   picture: props.product.mainPictures[0], // 商品圖片
-            price: props.product.price, // 最新價格
-            count: count.value, // 商品數量
-            selected: true // 商品是否選中
-        })
-        console.log('商品已加入購物車', cartStore.cart)
+            
+            id: props.product.productId, // 商品id
+            name: props.product.productName, // 商品名称
+            picture: props.product.mainPhoto, // 图片
+            price: props.product.dailyFeeOriginal, // 最新价格
+            count: count.value, // 商品数量
+            selected: true // 商品是否选中
+        });
+        console.log('商品已加入購物車', cartStore.cart);
     } else {
-        console.log('無法添加商品，product 未定義')
+        console.log('無法添加商品，product 未定義');
     }
-}
+};
+
 
 
 

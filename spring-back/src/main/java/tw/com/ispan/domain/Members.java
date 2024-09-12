@@ -1,6 +1,7 @@
 package tw.com.ispan.domain;
 
 import java.util.Date;
+import java.util.Set;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -9,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -28,9 +30,9 @@ import lombok.ToString;
 @Table(name = "members")
 public class Members {
 
-//  member - cart 一對一
-    @OneToOne(mappedBy = "members")
-    private Cart cart;
+
+    @OneToMany(mappedBy = "members")
+    private Set<Cart> cart;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

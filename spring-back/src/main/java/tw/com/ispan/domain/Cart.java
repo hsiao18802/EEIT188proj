@@ -1,7 +1,9 @@
 	package tw.com.ispan.domain;
 
 
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,21 +17,29 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name="cart")
 public class Cart {
 	
-	// cart - member 1:1 
-	
 	
 
-
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+	
+    
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "members_id")
     private Members members;
-	
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,111 +47,23 @@ public class Cart {
 	private Integer cartId;
 	
 	
-
-	@OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
-	    private List<ProductCart> productCart;  // 產品在購物車中的條目
-    
-	@Column(name = "total_price")
-    private Integer totalPrice;  // 總價
+	@Column(name = "count")
+	private Integer count;  // 租借的數量
 	
-	@Column(name = "deposit")
-    private Integer deposit;  // 押金
 	
-	@Column(name = "remarks")
-    private String remarks;  // 備註
-	 
-	@Column(name = "shipping_fee")
-    private Integer shippingFee;  // 運輸費用
+	@Column(name = "rental_start_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date rentalStartDate;  // 租借開始日期
 	
-	 @Column(name = "shipping_method")
-    private String shippingMethod;  // 運輸方式
-	 
-	 @Column(name = "pay_method")
-	 private String payMethod;  // 付款方式
-
-	public Members getMembers() {
-		return members;
-	}
-
-	public void setMembers(Members members) {
-		this.members = members;
-	}
-
-	public Integer getCartId() {
-		return cartId;
-	}
-
-	public void setCartId(Integer cartId) {
-		this.cartId = cartId;
-	}
-
-	public Integer getTotalPrice() {
-		return totalPrice;
-	}
-
-	public void setTotalPrice(Integer totalPrice) {
-		this.totalPrice = totalPrice;
-	}
-
-	public Integer getDeposit() {
-		return deposit;
-	}
-
-	public void setDeposit(Integer deposit) {
-		this.deposit = deposit;
-	}
-
-	public String getRemarks() {
-		return remarks;
-	}
-
-	public void setRemarks(String remarks) {
-		this.remarks = remarks;
-	}
-
-	public Integer getShippingFee() {
-		return shippingFee;
-	}
-
-	public void setShippingFee(Integer shippingFee) {
-		this.shippingFee = shippingFee;
-	}
-
-	public String getShippingMethod() {
-		return shippingMethod;
-	}
-
-	public void setShippingMethod(String shippingMethod) {
-		this.shippingMethod = shippingMethod;
-	}
-
-	public String getPayMethod() {
-		return payMethod;
-	}
-
-	public void setPayMethod(String payMethod) {
-		this.payMethod = payMethod;
-	}
+	@Column(name = "rental_end_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date rentalEndDate;  // 租借結束日期
 	
-
-	  public List<ProductCart> getProductCart() {
-		return productCart;
-	}
-
-	public void setProductCart(List<ProductCart> productCart) {
-		this.productCart = productCart;
+	
+	
 	}
 
 
     
     
-    
-	
-	
-
-
-	
-
-	
-
-}
+   
