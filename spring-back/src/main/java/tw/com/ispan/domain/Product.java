@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,7 @@ import lombok.Setter;
 @Table(name = "product")
 public class Product {
 	
+	@JsonIgnore
     @OneToMany(mappedBy = "product")
     private Set<Cart> cart;
 	
