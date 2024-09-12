@@ -24,10 +24,10 @@
                             <td>庫存量</td>
                             <td><input type="number" name="maxQuantity" v-model="product.maxAvailableQuantity"></td>
                         </tr>
-                        <!-- <tr>
+                        <tr>
                             <td>選擇圖片</td>
-                            <td>選擇圖片的按鈕會放這裡</td>
-                        </tr> -->
+                            <td><input type="file" accept="image/*" @change="onImageSelected"></td>
+                        </tr> 
                         <tr>
                             <td>描述</td>
                             <td><textarea name="description" v-model="product.description"></textarea></td>
@@ -89,6 +89,14 @@
     function hideModal() {
         exampleObj.value.hide();
     }
+    
+    function onImageSelected(event) {
+    const file = event.target.files[0];
+    if (file) {
+        console.log("圖片已選擇:", file);
+        emits('imageSelected', file);  // 通過 emit 傳遞圖片文件給父組件
+    }
+}
 
     defineExpose({
         showModal, hideModal

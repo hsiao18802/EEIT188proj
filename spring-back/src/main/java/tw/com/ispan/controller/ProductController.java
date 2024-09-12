@@ -40,26 +40,6 @@ public class ProductController {
         return productService.findById(id); // 直接回傳 RentBean 物件
     }
     
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable("id") Integer productId, @RequestBody Product product) {
-        // 假設這裡進行產品的更新邏輯
-        Product updatedProduct = productService.updateProduct(productId, product);
-
-        if (updatedProduct != null) {
-            // 回傳成功訊息
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "產品更新成功");
-            response.put("product", updatedProduct);
-            return ResponseEntity.ok(response);
-        } else {
-            // 回傳失敗訊息
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "產品更新失敗");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
     // 刪除產品
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> deleteProduct(@PathVariable Integer id) {
@@ -103,6 +83,27 @@ public class ProductController {
             response.put("message", "新增產品失敗，錯誤訊息: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProduct(@PathVariable("id") Integer productId, @RequestBody Product product) {
+    	// 假設這裡進行產品的更新邏輯
+    	Product updatedProduct = productService.updateProduct(productId, product);
+    	
+    	if (updatedProduct != null) {
+    		// 回傳成功訊息
+    		Map<String, Object> response = new HashMap<>();
+    		response.put("success", true);
+    		response.put("message", "產品更新成功");
+    		response.put("product", updatedProduct);
+    		return ResponseEntity.ok(response);
+    	} else {
+    		// 回傳失敗訊息
+    		Map<String, Object> response = new HashMap<>();
+    		response.put("success", false);
+    		response.put("message", "產品更新失敗");
+    		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    	}
     }
     
     // 更新產品圖片
