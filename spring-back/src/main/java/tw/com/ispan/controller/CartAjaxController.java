@@ -7,39 +7,38 @@ import org.springframework.web.bind.annotation.*;
 
 import tw.com.ispan.domain.Cart;
 import tw.com.ispan.domain.Product;
-import tw.com.ispan.domain.ProductCart;
+
 import tw.com.ispan.domain.Members;
 import tw.com.ispan.repository.CartRepository;
 import tw.com.ispan.repository.MembersRepository;
-import tw.com.ispan.repository.ProductCartRepository;
+
 import tw.com.ispan.repository.ProductRepository;
 import tw.com.ispan.service.CartService;
 
+
 import java.util.List;
 
-@RestController
-@RequestMapping("/ajax/pages/cart")
 @CrossOrigin
+@RestController
+@RequestMapping("/rent/cart")
 public class CartAjaxController {
-//
-//    @Autowired
-//    private CartService cartService;
-//
-//    @Autowired
-//    private CartRepository cartRepository;
-//
-//    @Autowired
-//    private MembersRepository membersRepository;
-//
-//    @Autowired
-//    private ProductRepository productRepository;
-//
-//    @Autowired
-//    private ProductCartRepository productCartRepository;
-//
-//    /**
-//     * 新增商品到購物車
-//     */
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private MembersRepository membersRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+
+
+     //新增商品到購物車
+
 //    @PostMapping("/add")
 //    public String addToCart(@RequestBody String json) {
 //        JSONObject requestJson = new JSONObject(json);

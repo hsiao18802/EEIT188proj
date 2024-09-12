@@ -6,7 +6,14 @@ import tw.com.ispan.domain.Order;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+
+@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "order")  
 public class Order {
@@ -44,141 +51,6 @@ public class Order {
     private String remarks;  // 備註
 
 
-    
-    
-    // 公共的無參構造函數
-    public Order() {}
-
-
-
-
-	public Integer getOrderId() {
-		return orderId;
-	}
-
-
-
-
-	public void setOrderId(Integer orderId) {
-		this.orderId = orderId;
-	}
-
-
-
-
-	public Members getMembers() {
-		return members;
-	}
-
-
-
-
-	public void setMembers(Members members) {
-		this.members = members;
-	}
-
-
-
-
-	public List<OrderProduct> getOrderProduct() {
-		return orderProduct;
-	}
-
-
-
-
-	public void setOrderProduct(List<OrderProduct> orderProduct) {
-		this.orderProduct = orderProduct;
-	}
-
-
-
-
-	public Date getOrderDate() {
-		return orderDate;
-	}
-
-
-
-
-	public void setOrderDate(Date orderDate) {
-		this.orderDate = orderDate;
-	}
-
-
-
-
-	public Integer getTotalPrice() {
-		return totalPrice;
-	}
-
-
-
-
-	public void setTotalPrice(Integer totalPrice) {
-		this.totalPrice = totalPrice;
-	}
-
-
-
-
-	public Integer getShippingFee() {
-		return shippingFee;
-	}
-
-
-
-
-	public void setShippingFee(Integer shippingFee) {
-		this.shippingFee = shippingFee;
-	}
-
-
-
-
-	public String getShippingMethod() {
-		return shippingMethod;
-	}
-
-
-
-
-	public void setShippingMethod(String shippingMethod) {
-		this.shippingMethod = shippingMethod;
-	}
-
-
-
-
-	public String getPayMethod() {
-		return payMethod;
-	}
-
-
-
-
-	public void setPayMethod(String payMethod) {
-		this.payMethod = payMethod;
-	}
-
-
-
-
-	public String getRemarks() {
-		return remarks;
-	}
-
-
-
-
-	public void setRemarks(String remarks) {
-		this.remarks = remarks;
-	}
-
-
-
-
-	
 
     
 }
