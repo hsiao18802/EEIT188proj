@@ -18,8 +18,8 @@ public class SpringBootConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jsonWebTokenInterceptor).addPathPatterns(
 				"/jax/pages/products/**",
-				"/ent/product/**",
-				"/ent/member/info"
+				"/ent/produc/**",
+				"/ent/membe/info"
 				);
     }
 }
