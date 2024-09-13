@@ -19,7 +19,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import useUserStore from './stores/user';
+import { onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -40,12 +41,14 @@ const layoutClass = computed(() => {
 });
 
 onMounted(() => {
- 
+
   const token = localStorage.getItem('token');
   if (token) {
-
+    userStore.setToken(token);
+    userStore.setLogin(true);
+    console.log('Login state restored');
   } else {
-
+    console.log('No token found in sessionStorage');
   }
 });
 

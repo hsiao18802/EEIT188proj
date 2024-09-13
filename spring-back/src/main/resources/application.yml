@@ -9,7 +9,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.SQLServerDialect
@@ -23,4 +23,4 @@ spring:
 
 jwt:
   token:
-    expire: 1
+    expire: 100
