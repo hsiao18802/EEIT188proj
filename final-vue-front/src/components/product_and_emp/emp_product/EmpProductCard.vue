@@ -5,13 +5,7 @@
 
             <div class="card-body">
                 <h5 class="card-title">{{ item.productName }}</h5> <!-- 顯示產品名稱 -->
-                <div class="row">
-                    <!-- <div class="btn-group col text-start">
-                        <a class="btn btn-primary"
-                        @click="emits('openUpdate', 'update', item.productId)">修改</a>
-                        <a class="btn btn-outline-primary"
-                        @click="emits('openUpdate', 'changePic', item.productId)">換圖</a>
-                    </div> -->
+                <!-- <div class="row">
                     <div class="btn-group col text-start">
                         <a class="btn btn-primary"
                             @click="$emit('openUpdate', 'update', item.productId)">修改</a>
@@ -21,8 +15,16 @@
                     <div class="col text-end">
                         <button class="btn btn-danger"
                                 @click="emits('delete', item.productId)">刪除</button>
+                    </div> -->
+
+                    <!-- 拍照用 -->
+                    <div class="btn-group col text-end">
+                        <a class="btn btn-primary"
+                            @click="$emit('openUpdate', 'update', item.productId)">修改</a>
+                        <a class="btn btn-danger"
+                                @click="emits('delete', item.productId)">刪除</a>
                     </div>
-                </div>
+                <!-- </div> -->
             </div>
         </div>
     </div>
