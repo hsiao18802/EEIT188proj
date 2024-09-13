@@ -1,8 +1,11 @@
 package tw.com.ispan.controller;
 
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import tw.com.ispan.domain.Cart;
@@ -17,6 +20,7 @@ import tw.com.ispan.service.CartService;
 import tw.com.ispan.service.ProductService;
 
 import java.util.List;
+import java.util.Set;
 
 @CrossOrigin
 @RestController
@@ -40,109 +44,59 @@ public class CartAjaxController {
     
     
 
-     //新增商品到購物車
-
     @PostMapping("/add")
+    public ResponseEntity<?> addToCart(
+            @RequestParam("memberId") Integer memberId,
+            @RequestParam("productId") Integer productId) {
+
+        try {
+            // 呼叫服務層方法新增商品到購物車
+            Cart cart = cartService.addToCart(memberId, productId);
+
+            // 查找新增到購物車的商品
+            Product product = productService.findById(productId);
+            if (product == null) {
+            	  return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                          .body("Product not found with id: " + productId);
+              }
+
+              // 返回成功響應
+              return ResponseEntity.ok("Product added to cart successfully.");
+
+          } catch (Exception e) {
+              // 捕捉例外並返回錯誤響應
+              return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body("An error occurred: " + e.getMessage());
+          }
+      }
+  
     
-    public String addToCart() {
-    	
-    	Cart cart=cartService.addToCart(membersId, productId);
-    	Product product =productService.findById(null)
-    	
-    	
+    
+/**
+ * 根據會員 ID 查詢該會員的所有購物車項目
+ * @param memberId 會員 ID
+ * @return 會員的購物車項目列表
+ */
+
+@GetMapping("/members/{memberId}")
+public ResponseEntity<Set<Cart>> getMembersCart(@PathVariable("memberId") Integer memberId) {
+    try {
+        // 調用服務層方法來查詢會員的購物車
+        Set<Cart> carts = cartService.findMembersCart(memberId);
+
+        // 返回成功響應，包含會員的購物車項目
+        return ResponseEntity.ok(carts);
+    } catch (RuntimeException e) {
+        // 處理找不到會員的情況，返回 404 Not Found
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(null);
+    } catch (Exception e) {
+        // 處理其他可能的錯誤情況，返回 500 Internal Server Error
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null);
     }
-    
-    
-    
-    
-    
-//    public String addToCart(@RequestBody String json) {
-//        JSONObject requestJson = new JSONObject(json);
-//        JSONObject responseJson = new JSONObject();
-//
-//        try {
-//            Integer memberId = requestJson.getInt("memberId");
-//            Integer productId = requestJson.getInt("productId");
-//            Integer count = requestJson.getInt("count");
-//
-//            Members member = membersRepository.findById(memberId)
-//                .orElseThrow(() -> new RuntimeException("Member not found"));
-//
-//            Product product = productRepository.findById(productId)
-//                .orElseThrow(() -> new RuntimeException("Product not found"));
-//
-//            Cart cart = cartRepository.findByMembers(member);
-//            if (cart == null) {
-//                cart = new Cart();
-//                cart.setMembers(member);
-//                cart.setTotalPrice(0);
-//                cart.setDeposit(0);
-//                cart.setRemarks("");
-//                cart.setShippingFee(0);
-//                cart.setShippingMethod("");
-//                cart.setPayMethod("");
-//                cartRepository.save(cart);
-//            }
-//
-//            ProductCart productCart = new ProductCart();
-//            productCart.setCart(cart);
-//            productCart.setProductId(productId);
-//            productCart.setCount(count);
-//            productCart.setDailyFeeOriginal(product.getDailyFeeOriginal());
-//            productCart.setTotalPrice(count * product.getDailyFeeOriginal());
-//
-//            productCartRepository.save(productCart);
-//
-//            // 更新購物車的總價
-//            int totalPrice = cart.getTotalPrice() + (count * product.getDailyFeeOriginal());
-//            cart.setTotalPrice(totalPrice);
-//            cartRepository.save(cart);
-//
-//            responseJson.put("success", true);
-//            responseJson.put("message", "商品已新增到購物車");
-//        } catch (Exception e) {
-//            responseJson.put("success", false);
-//            responseJson.put("message", "新增商品到購物車失敗: " + e.getMessage());
-//        }
-//
-//        return responseJson.toString();
-//    }
-//
-//    /**
-//     * 查詢用戶的購物車
-//     */
-//    @GetMapping("/member/{memberId}")
-//    public String getCartByMemberId(@PathVariable("memberId") Integer memberId) {
-//        JSONObject responseJson = new JSONObject();
-//        JSONArray cartArray = new JSONArray();
-//
-//        try {
-//            Cart cart = cartRepository.findByMembers(membersRepository.findById(memberId)
-//                .orElseThrow(() -> new RuntimeException("Member not found")));
-//            if (cart != null) {
-//                List<ProductCart> productCarts = productCartRepository.findByCart(cart);
-//                for (ProductCart productCart : productCarts) {
-//                    JSONObject cartJson = new JSONObject();
-//                    cartJson.put("productId", productCart.getProductId());
-//                    cartJson.put("productName", productCart.getProduct().getProductName());
-//                    cartJson.put("count", productCart.getCount());
-//                    cartJson.put("price", productCart.getPrice());
-//                    cartJson.put("totalPrice", productCart.getTotalPrice());
-//                    cartArray.put(cartJson);
-//                }
-//                responseJson.put("success", true);
-//                responseJson.put("cart", cartArray);
-//            } else {
-//                responseJson.put("success", false);
-//                responseJson.put("message", "購物車為空");
-//            }
-//        } catch (Exception e) {
-//            responseJson.put("success", false);
-//            responseJson.put("message", "查詢購物車失敗: " + e.getMessage());
-//        }
-//
-//        return responseJson.toString();
-//    }
+}
+}
 //
 //    /**
 //     * 更新購物車中的商品數量和價格
@@ -285,4 +239,4 @@ public class CartAjaxController {
 //
 //         return responseJson.toString();
 //     }
- }
+ 

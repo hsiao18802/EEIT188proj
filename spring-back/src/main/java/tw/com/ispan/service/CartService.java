@@ -40,13 +40,21 @@ public class CartService {
 			return existCart;
 		}
 		
-		Optional<Members> optional = membersRepo.findById(membersId);
-		Members members = optional.get();
+		 // 查找會員
+		Optional<Members> optionalMember = membersRepo.findById(membersId);
+		if (!optionalMember.isPresent()) {
+	        throw new RuntimeException("Member not found with id: " + membersId);
+	    }
+		Members members = optionalMember.get();
 		
-		Optional<Product> optional2 = productRepo.findById(productId);
-		Product product = optional2.get();
-		
-		
+		// 查找產品
+	    Optional<Product> optionalProduct = productRepo.findById(productId);
+	    if (!optionalProduct.isPresent()) {
+	        throw new RuntimeException("Product not found with id: " + productId);
+	    }
+	    Product product = optionalProduct.get();
+	    
+	    
 		
 		// Cart Entity 給值
 		Cart cart = new Cart();
@@ -58,7 +66,7 @@ public class CartService {
 	}
 	
     public Set<Cart> findMembersCart(Integer membersId) {
-        // 使用 Members 实体来查询
+        // 使用 Members 来查询
         Members members = membersRepo.findById(membersId)
             .orElseThrow(() -> new RuntimeException("会员ID不存在: " + membersId));
         
