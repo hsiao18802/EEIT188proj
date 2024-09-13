@@ -56,22 +56,7 @@ public class CartServiceTest {
     
 
     
-    
-    
-	 //@test
-	// 車內商品數量 -1
-	@Transactional
-	public void testminusOne(Integer productId, Integer membersId) {
-		Cart existCart = cartRepo.findByMembersIdAndProductId(membersId, productId);
-		
-		if(existCart.getCount() == 1) {
-			cartRepo.delete(existCart);
-		}else {
-			existCart.setCount(existCart.getCount() - 1);
-		}
-		
-	}
-
+  
 
 }
 

@@ -14,7 +14,7 @@ import tw.com.ispan.repository.MembersRepository;
 
 import tw.com.ispan.repository.ProductRepository;
 import tw.com.ispan.service.CartService;
-
+import tw.com.ispan.service.ProductService;
 
 import java.util.List;
 
@@ -33,13 +33,29 @@ public class CartAjaxController {
     private MembersRepository membersRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductService productService;
 
 
+    
+    
+    
 
      //新增商品到購物車
 
-//    @PostMapping("/add")
+    @PostMapping("/add")
+    
+    public String addToCart() {
+    	
+    	Cart cart=cartService.addToCart(membersId, productId);
+    	Product product =productService.findById(null)
+    	
+    	
+    }
+    
+    
+    
+    
+    
 //    public String addToCart(@RequestBody String json) {
 //        JSONObject requestJson = new JSONObject(json);
 //        JSONObject responseJson = new JSONObject();

@@ -14,8 +14,9 @@ import MembersInfo from '@/members/MembersInfo.vue';
 
 
 
-
+//hsiao
 import Cart from "@/views/pages/Cart.vue";
+import Order from "@/views/pages/Order.vue";
 
 
 
@@ -58,9 +59,10 @@ const routes = [
 
 
 
-
+//hsiao
 
   { path: "/pages/Cart", name: "Cart-link", component: Cart },
+  { path: "/pages/Order", name: "Order-link", component: Order },
 
 
 

@@ -1,7 +1,11 @@
 <template>
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-      <span class="navbar-brand">購物首頁</span>
+      <div class="navbar-brand d-flex align-items-center">
+        <!-- 加入LOGO -->
+        <img src="/public/logo.webp" alt="Logo" width="40" height="40" class="me-2">
+        <span>趣露營</span>
+      </div>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
         aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -116,4 +120,11 @@ async function logout() {
 }
 </script>
 
-<style></style>
+<style>
+
+
+
+
+
+
+</style>

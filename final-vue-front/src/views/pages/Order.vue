@@ -1,80 +1,111 @@
 <template>
-    <div class="order-container">
-      <h1>結帳</h1>
-      <div v-if="orderData">
-        <h2>訂單摘要</h2>
-        <ul>
-          <li v-for="item in orderData.items" :key="item.product_cart_id">
-            {{ item.product_name }} - {{ item.count }} 件
-          </li>
-        </ul>
-        <h3>產品總計: {{ formatCurrency(orderData.totalAmount) }}</h3>
-        <h3>運輸費用: {{ formatCurrency(orderData.shippingFee) }}</h3>
-        <h3>折扣金額: {{ formatCurrency(orderData.discountAmount) }}</h3>
-        <h3>總計: {{ formatCurrency(orderData.totalAmount + orderData.shippingFee - orderData.discountAmount) }}</h3>
-        <button @click="submitOrder">提交訂單</button>
-      </div>
-    </div>
-  </template>
-  
-  <script>
-  import axios from 'axios';
-  import Swal from 'sweetalert2';
-  
-  export default {
-    data() {
-      return {
-        orderData: null
-      };
-    },
-    created() {
-      const { cartItems, totalPrice, shippingMethod, shippingFee, discountAmount } = this.$route.params;
-      this.orderData = {
-        items: JSON.parse(cartItems),
-        totalAmount: Number(totalPrice),
-        shippingMethod,
-        shippingFee: Number(shippingFee),
-        discountAmount: Number(discountAmount)
-      };
-    },
-    methods: {
-      formatCurrency(value) {
-        return `$${value.toFixed(2)}`;
-      },
-      async submitOrder() {
-        try {
-          const response = await axios.post('/api/checkout', {
-            items: this.orderData.items,
-            totalAmount: this.orderData.totalAmount,
-            shippingMethod: this.orderData.shippingMethod,
-            shippingFee: this.orderData.shippingFee,
-            discountAmount: this.orderData.discountAmount,
-            userId: 123 // 假設有一個用戶 ID
-          });
-  
-          if (response.status === 200) {
-            Swal.fire({
-              icon: 'success',
-              title: '訂單提交成功！',
-              showConfirmButton: false,
-              timer: 2000
-            });
-            this.$router.push('/'); // 跳轉到首頁或其他頁面
-          }
-        } catch (error) {
-          console.error('結帳失敗:', error);
-          Swal.fire({
-            icon: 'error',
-            title: '結帳失敗',
-            text: '請稍後再試。',
-          });
-        }
-      }
-    }
-  };
-  </script>
-  
-  <style scoped>
-  /* 添加樣式 */
-  </style>
-  
+  <v-container>
+    <v-card>
+      <v-card-title>
+        <h2>訂單歷史</h2>
+      </v-card-title>
+      <v-data-table
+        :headers="headers"
+        :items="orders"
+        item-key="order_id"
+        class="elevation-1"
+      >
+        <template v-slot:item.order_creation_date="{ item }">
+          {{ formatDate(item.order_creation_date) }}
+        </template>
+        <template v-slot:item.total_price_amount="{ item }">
+          {{ formatCurrency(item.total_price_amount) }}
+        </template>
+        <template v-slot:item.shipping_fee="{ item }">
+          {{ formatCurrency(item.shipping_fee) }}
+        </template>
+        <template v-slot:item.status="{ item }">
+          <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
+        </template>
+        <template v-slot:no-data>
+          <v-alert type="info" icon="mdi-information">
+            沒有訂單資料
+          </v-alert>
+        </template>
+      </v-data-table>
+    </v-card>
+  </v-container>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const headers = [
+  { text: '訂單 ID', value: 'order_id' },
+  { text: '會員 ID', value: 'members_id' },
+  { text: '創建日期', value: 'order_creation_date' },
+  { text: '總金額', value: 'total_price_amount' },
+  { text: '租借狀態', value: 'rent_retrun_status' },
+  { text: '付款方式', value: 'pay_method' },
+  { text: '備註', value: 'remarks' },
+  { text: '訂單狀態', value: 'status' },
+  { text: '運輸費用', value: 'shipping_fee' },
+  { text: '運輸方式', value: 'shipping_method' },
+];
+
+const orders = ref([
+  {
+    order_id: 1,
+    members_id: 1,
+    order_creation_date: '2024-09-10 12:00:00',
+    total_price_amount: 600,
+    rent_retrun_status: '未歸還',
+    pay_method: '信用卡',
+    remarks: '第一次租借',
+    status: '處理中',
+    shipping_fee: 100,
+    shipping_method: '標準運輸',
+  },
+  {
+    order_id: 2,
+    members_id: 2,
+    order_creation_date: '2024-09-12 14:30:00',
+    total_price_amount: 700,
+    rent_retrun_status: '已歸還',
+    pay_method: '現金',
+    remarks: '急件',
+    status: '已完成',
+    shipping_fee: 150,
+    shipping_method: '快遞',
+  },
+  {
+    order_id: 3,
+    members_id: 3,
+    order_creation_date: '2024-09-15 09:45:00',
+    total_price_amount: 800,
+    rent_retrun_status: '未歸還',
+    pay_method: '信用卡',
+    remarks: '特殊要求',
+    status: '處理中',
+    shipping_fee: 200,
+    shipping_method: '標準運輸',
+  }
+]);
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString();
+};
+
+const formatCurrency = (amount) => {
+  return `$${amount}`;
+};
+
+const getStatusColor = (status) => {
+  return status === '已完成' ? 'green' : 'orange';
+};
+</script>
+
+<style scoped>
+.v-data-table th {
+  background-color: #f5f5f5;
+}
+
+.v-chip {
+  font-size: 0.9rem;
+}
+</style>
