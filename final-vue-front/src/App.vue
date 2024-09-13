@@ -2,6 +2,11 @@
   <div id="app">
     <component :is="currentNavbar"></component>
     <router-view></router-view>
+
+
+
+
+
   </div>
 </template>
 
@@ -37,6 +42,10 @@ onMounted(() => {
 const currentNavbar = computed(() => {
   return route.meta.navbar === 'EmpNavbar' ? EmpNavbar : PublicNavbar;
 });
+
+
+
+
 
 </script>
 

@@ -5,6 +5,32 @@ import pinia from './plugins/pinia.js';
 import useUserStore from '@/stores/user.js';  // �ޤJ Pinia �� store
 
 
+
+// Vuetify
+import 'vuetify/styles';
+import { createVuetify } from 'vuetify';
+import * as components from 'vuetify/components';
+import * as directives from 'vuetify/directives';
+
+// CSS 重置或其他樣式 (如果需要)
+import 'vuetify/styles';
+import '@mdi/font/css/materialdesignicons.css'; // Material Design Icons
+
+const vuetify = createVuetify({
+  components,
+  directives,
+});
+
+//Element Plus 
+import ElementPlus from 'element-plus';
+import 'element-plus/dist/index.css';
+
+
+
+
+
+
+
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 
@@ -13,7 +39,9 @@ pinia.use(piniaPluginPersistedstate)
 
 const app = createApp(App)
   .use(router)
+  .use(ElementPlus)
   .use(pinia)
+  .use(vuetify)
 
 app.directive('default-img', {
   mounted(el, binding) {
