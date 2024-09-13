@@ -23,4 +23,4 @@ spring:
 
 jwt:
   token:
-    expire: 100
+    expire: 1

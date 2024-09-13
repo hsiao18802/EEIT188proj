@@ -2,7 +2,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router/router.js';
 import pinia from './plugins/pinia.js';
-import useUserStore from '@/stores/user.js';  // �ޤJ Pinia �� store
+import useUserStore from '@/stores/user.js';
 
 
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
@@ -17,21 +17,21 @@ const app = createApp(App)
 
 app.directive('default-img', {
   mounted(el, binding) {
-    const defaultImg = '/public/NoPic256.jpg'; // ���N�Ϥ����|
+    const defaultImg = '/public/NoPic256.jpg';
     el.onerror = () => {
-      el.src = defaultImg; // �p�G�Ϥ��[�����ѡA�h��ܴ��N�Ϥ�
+      el.src = defaultImg;
     };
-    el.src = binding.value ? 'data:image/jpeg;base64,' + binding.value : defaultImg; // �p�G�Ϥ��� null�A�h��ܴ��N�Ϥ�
+    el.src = binding.value ? 'data:image/jpeg;base64,' + binding.value : defaultImg;
   }
 });
 
 app.mount('#app');
 
-// ���αҰʫ��ˬd Pinia ���A�O�_�q sessionStorage ��_
+
 const userStore = useUserStore();
 const savedLogin = localStorage.getItem('login');
 if (savedLogin !== null) {
-  userStore.setLogin(savedLogin === 'true');  // ��_ login ���A�� true �� false
+  userStore.setLogin(savedLogin === 'true');
   console.log('Login status manually set to:', savedLogin);
 } else {
   console.log('No login status found in sessionStorage');

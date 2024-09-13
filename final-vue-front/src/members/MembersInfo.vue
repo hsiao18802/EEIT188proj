@@ -4,7 +4,7 @@
     <div v-if="member">
       <!-- 大頭貼顯示，點擊圖片觸發文件選擇 -->
       <p class="profile-photo-container" @click="onClickPhoto">
-        <img v-if="photoPreviewUrl" :src="photoPreviewUrl" alt="會員照片" class="profile-photo" />
+        <img :src="photoPreviewUrl || defaultPhoto" alt="會員照片" class="profile-photo" />
       </p>
 
       <!-- 隱藏的文件選擇器 -->
@@ -33,10 +33,8 @@
         <input type="text" v-model="member.address" />
       </p>
 
-      <!-- <p><strong>註冊日期:</strong> {{ member.registrationDate }}</p> -->
-
       <!-- 更新基本資料按鈕 -->
-      <button @click="updateMemberInfo">更新基本資料</button>
+      <button  @click="updateMemberInfo">更新基本資料</button>
 
     </div>
     <div v-else>
@@ -55,6 +53,7 @@ const member = ref(null);
 const router = useRouter();  // 初始化 Vue Router
 const selectedFile = ref(null);  // 存儲用戶選擇的文件
 const photoPreviewUrl = ref(null);  // 預覽圖片的 URL
+const defaultPhoto = '/public/640.jpeg';  // 你的默认占位符图片路径
 const fileInput = ref(null);  // 參考文件選擇器元素
 
 onMounted(() => {
@@ -81,7 +80,7 @@ onMounted(() => {
     }
   }).then(response => {
     member.value = response.data;  // 設置會員資料
-    // 初始化時顯示已存儲的會員圖片
+    // 初始化時顯示已存儲的會員圖片，如果沒有圖片，使用占位符
     if (member.value.memberPhoto) {
       photoPreviewUrl.value = 'data:image/jpeg;base64,' + member.value.memberPhoto;
     }
@@ -186,20 +185,22 @@ function updateMemberInfo() {
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 10px;
-  background-color: #f9f9f9;
+  background-color: #aaa0a0;
   position: relative;  /* 讓整個 member-info 區塊成為相對定位元素 */
 }
 
 .profile-photo {
-  max-width: 200px;  /* 調整大頭貼的大小 */
-  height: auto;
-  border-radius: 50%;
-  object-fit: cover;
+  width: 200px;  /* 固定框的寬度 */
+  height: 200px;  /* 固定框的高度 */
+  border-radius: 50%;  /* 使大頭貼圓形 */
+  object-fit: cover;  /* 確保圖片在框內填滿，且保持比例 */
+  object-position: center;  /* 圖片在框內置中 */
   position: absolute;
-  top: -50px;  /* 與 member-info 區塊的頂部保持 10px 距離 */
-  right: 10px;  /* 與 member-info 區塊的右側保持 10px 距離 */
-  cursor: pointer; /* 添加鼠標樣式 */
+  top: -50px;  /* 調整圖片位置 */
+  right: 10px;
+  cursor: pointer;
 }
+
 
 input {
   display: block;
@@ -209,7 +210,7 @@ input {
 button {
   margin-top: 10px;
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: #53575a;
   color: white;
   border: none;
   border-radius: 5px;

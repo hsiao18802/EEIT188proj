@@ -1,26 +1,35 @@
 <template>
-  <div class="login-container">
-    <h3>登入</h3>
-    <form @submit.prevent="login" class="login-form">
-      <div class="form-group">
-        <label for="username">帳號：</label>
-        <input type="text" id="username" v-model="username" required />
-        <span class="error">{{ message }}</span>
-      </div>
-      <div class="form-group">
-        <label for="password">密碼：</label>
-        <input type="password" id="password" v-model="password" required />
-        <span class="error"></span>
-      </div>
-      <div class="form-group">
-        <button type="submit" class="submit-btn">登入</button>
-      </div>
-    </form>
+  <div class="login-page">
+    <div class="login-container">
+      <!-- 登錄框 -->
+      <div class="login-form-container">
+        <h3>登入</h3>
+        <form @submit.prevent="login" class="login-form">
+          <div class="form-group">
+            <label for="username">帳號：</label>
+            <input type="text" id="username" v-model="username" required />
+            <span class="error">{{ message }}</span>
+          </div>
+          <div class="form-group">
+            <label for="password">密碼：</label>
+            <input type="password" id="password" v-model="password" required />
+            <span class="error"></span>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="submit-btn">登入</button>
+          </div>
+        </form>
 
-    <!-- Google 登錄 -->
-    <div class="google-login-container">
-      <h4>或使用 Google 登錄</h4>
-      <button @click="googleSignIn" class="google-btn">Google 登錄</button>
+        <!-- Google 登錄 -->
+        <div class="google-login-container">
+          <h4>或使用 Google 登錄</h4>
+          <button @click="googleSignIn" class="google-btn">Google 登錄</button>
+        </div>
+      </div>
+
+      <!-- 圖片部分 -->
+    <!-- 圖片部分 -->
+    <div class="login-image-container"></div> <!-- 圖片改為背景 -->
     </div>
   </div>
 </template>
@@ -62,7 +71,7 @@ function login() {
   axiosapi.post("/ajax/secure/login", body).then(function (response) {
     console.log("Realname from login response:", response.data.realname);  // 調試這裡
     if (response.data.success) {
-      userStore.setToken(response.data.token);
+      // userStore.setToken(response.data.token);
       userStore.setLogin(true);
       userStore.setRealname(response.data.realname);  // 確保這裡的 realname 設置成功
 
@@ -99,33 +108,33 @@ onMounted(() => {
     const idToken = response.credential;
 
     axiosapi.post('/ajax/secure/google-login', { token: idToken }).then(res => {
-  console.log("Realname from Google login response:", res.data.realname);  // 調試這裡
-  if (res.data.success) {
-    userStore.setToken(res.data.token);
-    userStore.setLogin(true);
-    userStore.setRealname(res.data.realname);  // 確保這裡的 realname 設置成功
-    console.log("Realname stored in Pinia:", userStore.realname);  // 檢查 realname 是否正確存入
+      console.log("Realname from Google login response:", res.data.realname);  // 調試這裡
+      if (res.data.success) {
+        // userStore.setToken(res.data.token);
+        userStore.setLogin(true);
+        userStore.setRealname(res.data.realname);  // 確保這裡的 realname 設置成功
+        console.log("Realname stored in Pinia:", userStore.realname);  // 檢查 realname 是否正確存入
 
-    localStorage.setItem('token', res.data.token);
-    axiosapi.defaults.headers.authorization = `Bearer ${res.data.token}`;
-    Swal.fire({
-      text: 'Google 登錄成功',
-      icon: 'success'
-    }).then(() => {
-      router.push({ name: 'home-link' });
+        localStorage.setItem('token', res.data.token);
+        axiosapi.defaults.headers.authorization = `Bearer ${res.data.token}`;
+        Swal.fire({
+          text: 'Google 登錄成功',
+          icon: 'success'
+        }).then(() => {
+          router.push({ name: 'home-link' });
+        });
+      } else {
+        Swal.fire({
+          text: res.data.message,
+          icon: 'error'
+        });
+      }
+    }).catch(error => {
+      Swal.fire({
+        text: 'Google 登錄失敗，請稍後再試',
+        icon: 'error'
+      });
     });
-  } else {
-    Swal.fire({
-      text: res.data.message,
-      icon: 'error'
-    });
-  }
-}).catch(error => {
-  Swal.fire({
-    text: 'Google 登錄失敗，請稍後再試',
-    icon: 'error'
-  });
-});
   };
 
   // 初始化 Google 登錄 API
@@ -137,18 +146,31 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* 讓內容貼近上方 */
+  height: 100vh;
+  background-color: white;
+  padding-top: 0; /* 可選，移除 padding */
 }
 
-h3 {
-  text-align: center;
-  margin-bottom: 20px;
+
+.login-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: #413f3f;
+  padding: 20px;
+  margin-top: 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  width: 100%;
+}
+
+.login-form-container {
+  flex: 1;
+  padding-right: 20px;
 }
 
 .login-form {
@@ -177,7 +199,7 @@ h3 {
 .submit-btn {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #53575a;
   color: white;
   border: none;
   border-radius: 5px;
@@ -196,7 +218,7 @@ h3 {
 }
 
 .google-btn {
-  background-color: #4285F4;
+  background-color: #53575a;
   color: white;
   border: none;
   border-radius: 5px;
@@ -216,4 +238,29 @@ h3 {
   margin-top: 10px;
   text-align: center;
 }
+
+.login-image-container {
+  flex: 1;
+  background-image: url('/public/rent1.jpg');  /* 設置背景圖片 */
+  background-size: cover;  /* 確保圖片完全覆蓋容器 */
+  background-position: center;  /* 讓圖片在容器中居中 */
+  border-radius: 10px;  /* 圖片的圓角效果 */
+}
+
+.login-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: white; /* 字體顏色設置為白色 */
+}
+h3,h4 {
+  color: white ;
+}
+
 </style>

@@ -6,8 +6,8 @@
 </template>
 
 <script setup>
-import useUserStore from '@/stores/user'; //
-import { onMounted } from 'vue'; // 
+import useUserStore from '@/stores/user'; 
+import { onMounted } from 'vue';  
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import EmpNavbar from './views/product_and_emp/EmpNavbar.vue'
@@ -21,7 +21,7 @@ const userStore = useUserStore();
 
 
 onMounted(() => {
- 
+
   const token = localStorage.getItem('token');
   if (token) {
     userStore.setToken(token);  
