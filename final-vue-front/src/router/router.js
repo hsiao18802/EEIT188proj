@@ -9,6 +9,7 @@ import Home from '@/views/Home.vue';
 import Login from '@/secure/Login.vue';
 import Register from '@/secure/Register.vue';
 import MembersInfo from '@/members/MembersInfo.vue';
+import ForgetPassword from '@/secure/ForgetPassword.vue';
 
 
 
@@ -55,6 +56,7 @@ const routes = [
 
   { path: "/secure/login", name: "secure-login-link", component: Login },
   { path: "/secure/register", name: "secure-register-link", component: Register },
+  { path: "/secure/forget", name: "secure-forget-link", component: ForgetPassword },
   { path: "/members/info", name: "secure-membersinfo-link", component: MembersInfo },
 
 

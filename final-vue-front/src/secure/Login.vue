@@ -20,6 +20,11 @@
           </div>
         </form>
 
+        <!-- 忘記密碼按鈕 -->
+        <div class="forgot-password-container">
+          <router-link to="/secure/forget" class="forgot-password-link">忘記密碼？</router-link>
+        </div>
+
         <!-- Google 登錄 -->
         <div class="google-login-container">
           <h4>或使用 Google 登錄</h4>
@@ -28,8 +33,7 @@
       </div>
 
       <!-- 圖片部分 -->
-    <!-- 圖片部分 -->
-    <div class="login-image-container"></div> <!-- 圖片改為背景 -->
+      <div class="login-image-container"></div> <!-- 圖片改為背景 -->
     </div>
   </div>
 </template>
@@ -69,11 +73,9 @@ function login() {
   userStore.setLogin(false);
 
   axiosapi.post("/ajax/secure/login", body).then(function (response) {
-    console.log("Realname from login response:", response.data.realname);  // 調試這裡
     if (response.data.success) {
-      // userStore.setToken(response.data.token);
       userStore.setLogin(true);
-      userStore.setRealname(response.data.realname);  // 確保這裡的 realname 設置成功
+      userStore.setRealname(response.data.realname);
 
       localStorage.setItem('token', response.data.token);
       axiosapi.defaults.headers.authorization = `Bearer ${response.data.token}`;
@@ -108,12 +110,9 @@ onMounted(() => {
     const idToken = response.credential;
 
     axiosapi.post('/ajax/secure/google-login', { token: idToken }).then(res => {
-      console.log("Realname from Google login response:", res.data.realname);  // 調試這裡
       if (res.data.success) {
-        // userStore.setToken(res.data.token);
         userStore.setLogin(true);
-        userStore.setRealname(res.data.realname);  // 確保這裡的 realname 設置成功
-        console.log("Realname stored in Pinia:", userStore.realname);  // 檢查 realname 是否正確存入
+        userStore.setRealname(res.data.realname);
 
         localStorage.setItem('token', res.data.token);
         axiosapi.defaults.headers.authorization = `Bearer ${res.data.token}`;
@@ -137,7 +136,6 @@ onMounted(() => {
     });
   };
 
-  // 初始化 Google 登錄 API
   google.accounts.id.initialize({
     client_id: '817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com',  // 替換為你的 Google 客戶端 ID
     callback: handleCredentialResponse
@@ -210,6 +208,21 @@ onMounted(() => {
 
 .submit-btn:hover {
   background-color: #0056b3;
+}
+
+.forgot-password-container {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.forgot-password-link {
+  color: #357ae8;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
 }
 
 .google-login-container {

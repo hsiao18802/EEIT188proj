@@ -21,6 +21,22 @@ spring:
       max-file-size: 5MB   # 單個文件最大上傳大小
       max-request-size: 5MB # 整個請求最大上傳大小
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: kwkw4183704@gmail.com
+    password: coyyichtyvntpfog
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
 jwt:
   token:
     expire: 100
+redis:
+    host: localhost  # Redis 伺服器的主機名
+    port: 6379 
