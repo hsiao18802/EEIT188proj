@@ -34,6 +34,7 @@ public class Product {
 
     @Column(name = "product_name")
     private String productName;
+    
 
     @Column(name = "daily_fee_original")
     private Integer dailyFeeOriginal;
@@ -53,6 +54,9 @@ public class Product {
 
     @Column(name = "description")
     private String description;
+    
+    @Column(name = "description_two")
+    private boolean descriptionTwo;
 
     @Column(name = "category_id")
     private Integer categoryId;

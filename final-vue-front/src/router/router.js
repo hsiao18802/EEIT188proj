@@ -53,16 +53,16 @@ const routes = [
 
 
 
-  { path: "/secure/login", name: "secure-login-link", component: Login },
-  { path: "/secure/register", name: "secure-register-link", component: Register },
-  { path: "/members/info", name: "secure-membersinfo-link", component: MembersInfo },
+  { path: "/secure/login", name: "secure-login-link", component: Login, meta: { navbar: 'PublicNavbar' } },
+  { path: "/secure/register", name: "secure-register-link", component: Register, meta: { navbar: 'PublicNavbar' } },
+  { path: "/members/info", name: "secure-membersinfo-link", component: MembersInfo, meta: { navbar: 'PublicNavbar' } },
 
 
 
-//hsiao
+  //hsiao
 
-  { path: "/pages/Cart", name: "Cart-link", component: Cart },
-  { path: "/pages/Order", name: "Order-link", component: Order },
+  { path: "/pages/Cart", name: "Cart-link", component: Cart, meta: { navbar: 'PublicNavbar' } },
+  { path: "/pages/Order", name: "Order-link", component: Order, meta: { navbar: 'PublicNavbar' } },
 
 
 
