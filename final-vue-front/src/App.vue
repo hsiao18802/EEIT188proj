@@ -10,17 +10,12 @@
     <div v-else>
       <router-view></router-view>
     </div>
-
-
-
-
-
   </div>
 </template>
 
 <script setup>
-import useUserStore from './stores/user';
-import { onMounted, computed } from 'vue';
+import useUserStore from './stores/user'; // 引入 Pinia 的 store
+import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -40,26 +35,16 @@ const layoutClass = computed(() => {
   return isEmpNavbar.value ? 'd-flex flex-row' : 'd-flex flex-column';
 });
 
+// 確認 Pinia 是否恢復了 token 和 login 狀態，這裡只是用來 debug
 onMounted(() => {
-
-  const token = localStorage.getItem('token');
-  if (token) {
-    userStore.setToken(token);
-    userStore.setLogin(true);
-    console.log('Login state restored');
-  } else {
-    console.log('No token found in sessionStorage');
-  }
+  console.log('Token from Pinia after refresh:', userStore.token);
+  console.log('Login status from Pinia after refresh:', userStore.login);
 });
 
 // 動態設置當前導航列
 const currentNavbar = computed(() => {
   return isEmpNavbar.value ? EmpNavbar : PublicNavbar;
 });
-
-
-
-
 </script>
 
 <style scoped>
@@ -70,6 +55,4 @@ const currentNavbar = computed(() => {
 .flex-grow-1 {
   margin-left: 0; /* 恢復預設的佈局，移除左側邊欄的間距 */
 }
-
-
 </style>

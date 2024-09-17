@@ -34,7 +34,7 @@
       </p>
 
       <!-- 更新基本資料按鈕 -->
-      <button  @click="updateMemberInfo">更新基本資料</button>
+      <button @click="updateMemberInfo">更新基本資料</button>
 
     </div>
     <div v-else>
@@ -48,6 +48,7 @@ import { ref, onMounted } from 'vue';
 import axiosapi from '@/plugins/axios.js';
 import { useRouter } from 'vue-router';  // 引入 router 來實現跳轉
 import Swal from 'sweetalert2';  // 引入 SweetAlert2 顯示提示
+import useUserStore from '@/stores/user.js';    // 引入 Pinia store
 
 const member = ref(null);
 const router = useRouter();  // 初始化 Vue Router
@@ -55,9 +56,10 @@ const selectedFile = ref(null);  // 存儲用戶選擇的文件
 const photoPreviewUrl = ref(null);  // 預覽圖片的 URL
 const defaultPhoto = '/public/640.jpeg';  // 你的默认占位符图片路径
 const fileInput = ref(null);  // 參考文件選擇器元素
+const userStore = useUserStore();  // 初始化 Pinia 的用户 store
 
 onMounted(() => {
-  const token = localStorage.getItem('token');  // 從 localStorage 取得 JWT token
+  const token = userStore.token;  // 从 Pinia 中获取 token
 
   if (!token) {
     // 如果沒有 token，顯示提示並跳轉到登入頁面
@@ -112,6 +114,8 @@ function onFileChange(event) {
 
 // 上傳大頭貼圖片到後端
 function uploadPhoto() {
+  const token = userStore.token;  // 从 Pinia 中获取 token
+
   if (!selectedFile.value) {
     Swal.fire({
       title: '請選擇圖片',
@@ -124,8 +128,6 @@ function uploadPhoto() {
   const formData = new FormData();
   formData.append('file', selectedFile.value);  // 將選擇的圖片添加到 FormData
   formData.append('username', member.value.username);  // 傳遞 username 作為參數
-
-  const token = localStorage.getItem('token');  // 從 localStorage 取得 JWT token
 
   // 發送上傳請求到後端
   axiosapi.post('/rent/member/upload-photo', formData, {
@@ -154,7 +156,7 @@ function uploadPhoto() {
 
 // 更新會員基本資料
 function updateMemberInfo() {
-  const token = localStorage.getItem('token');  // 從 localStorage 取得 JWT token
+  const token = userStore.token;  // 从 Pinia 中获取 token
 
   // 發送更新會員基本資料的請求
   axiosapi.put('/rent/member/update', member.value, {
@@ -186,21 +188,20 @@ function updateMemberInfo() {
   border: 1px solid #ccc;
   border-radius: 10px;
   background-color: #aaa0a0;
-  position: relative;  /* 讓整個 member-info 區塊成為相對定位元素 */
+  position: relative;
 }
 
 .profile-photo {
-  width: 200px;  /* 固定框的寬度 */
-  height: 200px;  /* 固定框的高度 */
-  border-radius: 50%;  /* 使大頭貼圓形 */
-  object-fit: cover;  /* 確保圖片在框內填滿，且保持比例 */
-  object-position: center;  /* 圖片在框內置中 */
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
   position: absolute;
-  top: -50px;  /* 調整圖片位置 */
+  top: -50px;
   right: 10px;
   cursor: pointer;
 }
-
 
 input {
   display: block;

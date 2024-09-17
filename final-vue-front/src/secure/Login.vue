@@ -68,16 +68,18 @@ function login() {
 
   let body = { "username": username.value, "password": password.value };
 
+  // 重置状态
   axiosapi.defaults.headers.authorization = "";
   userStore.setRealname("");
   userStore.setLogin(false);
 
   axiosapi.post("/ajax/secure/login", body).then(function (response) {
     if (response.data.success) {
+      // 使用 Pinia 存储登录状态和 token
       userStore.setLogin(true);
       userStore.setRealname(response.data.realname);
+      userStore.setToken(response.data.token); // 不再需要手动存储 token 到 localStorage
 
-      localStorage.setItem('token', response.data.token);
       axiosapi.defaults.headers.authorization = `Bearer ${response.data.token}`;
       Swal.fire({
         text: response.data.message,
@@ -111,10 +113,11 @@ onMounted(() => {
 
     axiosapi.post('/ajax/secure/google-login', { token: idToken }).then(res => {
       if (res.data.success) {
+        // 使用 Pinia 存储登录状态和 token
         userStore.setLogin(true);
         userStore.setRealname(res.data.realname);
+        userStore.setToken(res.data.token);  // 不再需要手动存储 token 到 localStorage
 
-        localStorage.setItem('token', res.data.token);
         axiosapi.defaults.headers.authorization = `Bearer ${res.data.token}`;
         Swal.fire({
           text: 'Google 登錄成功',
@@ -137,11 +140,16 @@ onMounted(() => {
   };
 
   google.accounts.id.initialize({
-    client_id: '817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com',  // 替換為你的 Google 客戶端 ID
+    client_id: '817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com',
     callback: handleCredentialResponse
   });
 });
 </script>
+
+<style scoped>
+/* 样式保持不变 */
+</style>
+
 
 <style scoped>
 .login-page {
@@ -230,16 +238,6 @@ onMounted(() => {
   text-align: center;
 }
 
-.google-btn {
-  background-color: #53575a;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
 
 .google-btn:hover {
   background-color: #357AE8;
@@ -275,5 +273,16 @@ onMounted(() => {
 h3,h4 {
   color: white ;
 }
+.google-btn {
+  background-color: #53575a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
 </style>
+
