@@ -56,7 +56,7 @@
   
   // 發送驗證碼並將 email 存儲在 localStorage
   function sendResetCode() {
-    axiosapi.post('/api/forgot-password/send-code', { email: email.value })
+    axiosapi.post('/ajax/secure/forgot-password/send-code', { email: email.value })
       .then(response => {
         if (response.data.success) {
           Swal.fire('驗證碼已發送', '請檢查您的信箱', 'success');
@@ -76,7 +76,7 @@
   
   // 重設密碼並在成功後清除 localStorage
   function resetPassword() {
-    axiosapi.post('/api/forgot-password/reset-password', {
+    axiosapi.post('/ajax/secure/forgot-password/reset-password', {
       email: email.value,
       code: verificationCode.value,
       newPassword: newPassword.value
