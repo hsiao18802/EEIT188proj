@@ -32,12 +32,11 @@ export const useCartStore = defineStore('cartStore', () => {
     const updateNewList = async () => {
         try {
             const res = await findNewCartListAPI(membersId.value);
-            console.log('API response for cart:', res.data); // 確保數據正確 //
-            //API response for cart:  [ , , ,]   no dailyFeeOriginal
-
+            console.log('API response for cart:', res.data);  //API response for cart:  [ , , ,]   
 
             cartList.value = res.data; // 更新 cartList
             console.log('Cart list after update:', JSON.parse(JSON.stringify(cartList.value)));
+            //Cart list after update:[ , , ,]   
 
 
         } catch (error) {
@@ -62,19 +61,39 @@ export const useCartStore = defineStore('cartStore', () => {
 
         try {
             const response = await addCartAPI({ productId, count, membersId: currentMembersId });
-            console.log('API response carstore:', response);
+            console.log('API response carstore:', response);  //API response carstore: 
+            //{success: true, message: 'Product added to cart successfully.', data: {…}}
 
             await updateNewList();
-            console.log('商品已加入購物車cartstore:', response.data.message);
-            // Swal.fire({
-            //     text: "商品已成功加入購物車",
-            //     icon: "success",
-            // });
+            // 判斷商品是否成功加入購物車
+            if (response.data && response.data.success) {
+                Swal.fire({
+                    title: '成功',
+                    text: "商品已成功加入購物車",
+                    icon: "success",
+                    showConfirmButton: false,
+                    timer: 1500, // 自動關閉時間
+                    position: 'center' // 將位置設為中央
+                });
+            } else {
+                Swal.fire({
+                    title: '失敗',
+                    text: response.data.message || "加入購物車失敗，請稍後再試。",
+                    icon: "error",
+                    confirmButtonText: '確定',
+                    position: 'center' // 將位置設為中央
+                });
+            }
         } catch (error) {
             console.error('添加到購物車失敗:', error);
+
+            // 當API請求失敗時顯示錯誤提示
             Swal.fire({
-                text: "添加到購物車失敗",
+                title: '錯誤',
+                text: "添加到購物車失敗，請稍後再試。",
                 icon: "error",
+                confirmButtonText: '確定',
+                position: 'center' // 將位置設為中央
             });
         }
     };

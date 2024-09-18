@@ -1,5 +1,6 @@
 <template>
-    <div ref="exampleModal" class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div ref="exampleModal" class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -7,7 +8,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <img class="card-img-top"  :alt="product.productName" v-default-img="product.mainPhoto">
+                    <img class="card-img-top" :alt="product.productName" v-default-img="product.mainPhoto">
                     <table>
                         <tr>
                             <td hidden>編號</td>
@@ -63,7 +64,7 @@ const exampleModal = ref(null);
 const exampleObj = ref(null);
 
 const cartStore = useCartStore();
-const userStore = useUserStore(); 
+const userStore = useUserStore();
 const count = ref(1);
 
 // 當組件掛載時，設置 membersId
@@ -82,33 +83,17 @@ const doInput = (name, event) => {
 
 
 // 添加商品到購物車
-const addCart = async () => {
+const addCart = () => {
     const membersId = userStore.membersId;
-   
 
-    try {
-        const response = await cartStore.addCart({
-            productId: props.product.productId,
-            productName: props.product.productName,
-            dailyFeeOriginal: props.product.dailyFeeOriginal,
-            count: count.value,
-            membersId: membersId
-        });
 
-        console.log('API response from addCart:', response);
-        
-        // 檢查 response 是否存在
-        if (response && response.success) {
-            console.log('商品已加入購物車', response.message);
-
-            // 顯示購物車視窗
-            showModal();
-        } else {
-            console.error('添加到購物車失敗:', response?.message || '未知錯誤');
-        }
-    } catch (error) {
-        console.error('添加到購物車失敗:', error);
-    }
+    cartStore.addCart({
+        productId: props.product.productId,
+        productName: props.product.productName,
+        dailyFeeOriginal: props.product.dailyFeeOriginal,
+        count: count.value,
+        membersId: membersId
+    });
 };
 
 
@@ -132,5 +117,4 @@ defineExpose({
 });
 </script>
 
-<style>
-</style>
+<style></style>

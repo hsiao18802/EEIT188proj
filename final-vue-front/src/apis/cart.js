@@ -5,16 +5,8 @@ import axios from 'axios'
 const BASE_URL = 'http://localhost:8080/rent/cart';
 
 
-export const addCartAPI = async (data) => {
-    try {
-        const response = await axios.post(`${BASE_URL}/add`, data);
-        console.log('API response:', response); // 查看 API 返回的完整響應
-
-        return response.data; // 確保返回的是期望的數據
-    } catch (error) {
-        console.error('API 請求失敗:', error);
-        throw error;
-    }
+export const addCartAPI = (data) => {
+    return axios.post(`${BASE_URL}/add`, data);
 };
 
 
