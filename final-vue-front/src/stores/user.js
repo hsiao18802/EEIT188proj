@@ -40,7 +40,7 @@ const useUserStore = defineStore('user', () => {
   persist: {
     enabled: true,  // 确保启用持久化
     storage: localStorage, // 使用 localStorage 进行存储
-    paths: ["login", "realname","token"],  // 持久化 login 和 token 状态
+    paths: ["login", "realname", "token"],  // 持久化 login 和 token 状态
   }
 });
 

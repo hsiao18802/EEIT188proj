@@ -34,9 +34,9 @@ axiosapi.interceptors.response.use(function (response) {
       userStore.setLogin(false); // 清除登入狀態
       userStore.setRealname('');   // 清除 email 等用戶信息
 
-      // 清除 sessionStorage 中的 token 和 login 狀態
-      localStorage.removeItem('token');
-      localStorage.removeItem('login');
+      // 清除 localStorage 中的狀態
+      localStorage.removeItem('forgot_password_email');
+      localStorage.removeItem('forgot_password_code_sent');
 
       // 跳轉到 403 頁面或登錄頁面
       router.push({ name: 'secure-login-link' });  // 使用 router 實例進行跳轉

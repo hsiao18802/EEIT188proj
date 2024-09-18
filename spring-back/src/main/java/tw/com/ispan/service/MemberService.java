@@ -9,9 +9,16 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -114,6 +121,14 @@ public class MemberService {
 			return responseJson;
 		}
 	}
+	
+	
+
+
+	
+	
+	
+	
 
 	// 一般註冊邏輯
 	public Members registerMember(String username, String password, String realName, String email, String phone,

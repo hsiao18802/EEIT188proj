@@ -45,6 +45,12 @@ onMounted(() => {
 const currentNavbar = computed(() => {
   return isEmpNavbar.value ? EmpNavbar : PublicNavbar;
 });
+
+
+
+
+
+
 </script>
 
 <style scoped>

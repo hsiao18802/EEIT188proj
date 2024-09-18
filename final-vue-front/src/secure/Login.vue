@@ -30,10 +30,18 @@
           <h4>或使用 Google 登錄</h4>
           <button @click="googleSignIn" class="google-btn">Google 登錄</button>
         </div>
+
+        <!-- 掃碼登錄按鈕 -->
+        <div class="qr-login-container">
+          <h4>或使用掃碼登錄</h4>
+          <button @click="generateQrCode" class="google-btn">生成 QR 掃碼登錄</button>
+          <!-- 顯示 QR Code -->
+          <canvas id="qrcode" style="margin-top: 20px;"></canvas>
+        </div>
       </div>
 
       <!-- 圖片部分 -->
-      <div class="login-image-container"></div> <!-- 圖片改為背景 -->
+      <div class="login-image-container"></div>
     </div>
   </div>
 </template>
@@ -41,15 +49,17 @@
 <script setup>
 import Swal from 'sweetalert2';
 import axiosapi from '@/plugins/axios.js';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';  // 引入 nextTick
 import { useRouter } from 'vue-router';
 import useUserStore from '@/stores/user.js';  // 引用 Pinia 的 store
+import QRCode from 'qrcode'; // 引入 qrcode 用來生成 QR code
 
 const userStore = useUserStore();
 const router = useRouter();
 const username = ref("");
 const password = ref("");
 const message = ref("");
+const qrCodeUrl = ref("");
 
 // 普通登入邏輯
 function login() {
@@ -106,6 +116,40 @@ function googleSignIn() {
   google.accounts.id.prompt();  // 手動觸發 Google 登錄提示框
 }
 
+// 掃碼登錄邏輯
+async function generateQrCode() {
+  // 使用實際的 Google OAuth 掃碼登錄 URL
+  qrCodeUrl.value = `https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com&redirect_uri=http://localhost:8080/ajax/secure/google-login&scope=email%20profile&state=${generateState()}`;
+
+  console.log("Before nextTick: QR Code URL is", qrCodeUrl.value);
+
+  // 等待 DOM 更新，確保 #qrcode 容器已被插入
+  await nextTick();
+
+  const canvasElement = document.getElementById('qrcode');
+  if (canvasElement) {
+    try {
+      QRCode.toCanvas(canvasElement, qrCodeUrl.value, function (error) {
+        if (error) {
+          console.error("QR Code generation error:", error);
+        } else {
+          console.log("QR code generated successfully for OAuth URL");
+        }
+      });
+    } catch (error) {
+      console.error("QRCode generation error:", error);
+    }
+  } else {
+    console.error('QR Code container not found after DOM update');
+  }
+}
+
+
+// 生成一個唯一的 state 用於 OAuth2 驗證
+const generateState = () => {
+  return Math.random().toString(36).substring(2, 15);
+};
+
 // 初始化 Google 登錄
 onMounted(() => {
   window.handleCredentialResponse = function (response) {
@@ -148,10 +192,6 @@ onMounted(() => {
 
 <style scoped>
 /* 样式保持不变 */
-</style>
-
-
-<style scoped>
 .login-page {
   display: flex;
   justify-content: center;
@@ -160,7 +200,6 @@ onMounted(() => {
   background-color: white;
   padding-top: 0; /* 可選，移除 padding */
 }
-
 
 .login-container {
   display: flex;
@@ -238,7 +277,6 @@ onMounted(() => {
   text-align: center;
 }
 
-
 .google-btn:hover {
   background-color: #357AE8;
 }
@@ -283,6 +321,4 @@ h3,h4 {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 </style>
-
