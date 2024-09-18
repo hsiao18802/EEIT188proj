@@ -55,8 +55,8 @@ public class Product {
     @Column(name = "description")
     private String description;
     
-    @Column(name = "description_two")
-    private boolean descriptionTwo;
+//    @Column(name = "description_two")
+//    private Boolean descriptionTwo;
 
     @Column(name = "category_id")
     private Integer categoryId;
