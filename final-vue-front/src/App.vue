@@ -1,21 +1,26 @@
 <template>
-  <div :class="[layoutClass, navbarClass]">
-    <!-- 動態導航列 -->
+  <div :class="layoutClass">
+    <!-- 動態導航列  :style="maxwidth" -->
+
     <component :is="currentNavbar"></component>
 
     <!-- 右側內容區 -->
-    <div class="flex-grow-1 p-3">
+    <div v-if="isEmpNavbar" class="flex-grow-1 p-3">
+      <router-view></router-view>
+    </div>
+    <div v-else>
       <router-view></router-view>
     </div>
   </div>
+
 </template>
 
 <script setup>
 import useUserStore from './stores/user';
 import { onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import 'bootstrap/dist/css/bootstrap.min.css';  // 靜態引入合併的 Bootstrap
-
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import EmpNavbar from './views/product_and_emp/EmpNavbar.vue';
 import PublicNavbar from './views/Navbar.vue';
 
@@ -23,18 +28,17 @@ const route = useRoute();
 const userStore = useUserStore();
 
 // 檢查當前的導航列是否為 EmpNavbar
-const isEmpNavbar = computed(() => route.meta.navbar === 'EmpNavbar');
-
-// 動態設置當前導航列
-const currentNavbar = computed(() => isEmpNavbar.value ? EmpNavbar : PublicNavbar);
+const isEmpNavbar = computed(() => {
+  return route.meta.navbar === 'EmpNavbar';
+});
 
 // 根據導航列決定佈局類別：EmpNavbar 時左右佈局，PublicNavbar 時上下佈局
-const layoutClass = computed(() => isEmpNavbar.value ? 'd-flex flex-row' : 'd-flex flex-column');
-
-// 根據導航列動態套用 .emp-navbar 類或 .public-navbar 類
-const navbarClass = computed(() => isEmpNavbar.value ? 'emp-navbar' : 'public-navbar');
+const layoutClass = computed(() => {
+  return isEmpNavbar.value ? 'container-fluid d-flex flex-row' : 'container-xxl d-flex flex-column';
+});
 
 onMounted(() => {
+
   const token = localStorage.getItem('token');
   if (token) {
     userStore.setToken(token);
@@ -44,10 +48,17 @@ onMounted(() => {
     console.log('No token found in sessionStorage');
   }
 });
+
+// 動態設置當前導航列
+const currentNavbar = computed(() => {
+  return isEmpNavbar.value ? EmpNavbar : PublicNavbar;
+});
+
 </script>
 
 <style scoped>
 #app {
   height: 100vh; /* 保持全屏高度 */
 }
+
 </style>
