@@ -15,13 +15,13 @@ const useUserStore = defineStore("user", () => {
     login.value = data;
   }
 
-  // �]�m realname
+
   function setRealname(data) {
     realname.value = data;
-    console.log("Realname stored in Pinia: ", realname.value); // �ˬd�O�_���T�s�x
+    console.log("Realname stored in Pinia: ", realname.value);
   }
 
-  // �]�m token
+
   function setToken(data) {
     token.value = data;
   }
