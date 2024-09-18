@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,8 +33,11 @@ import lombok.ToString;
 public class Members {
 
 
-    @OneToMany(mappedBy = "members")
-    private Set<Cart> cart;
+ //   @OneToMany(mappedBy = "members")
+//    @JsonIgnore
+//    private Set<Cart> cart;
+    //（例如：某個會員想要查看他加入購物車的所有商品）
+    //這樣可以讓你從 Members 實例中直接調用 members.getCart() 查詢到該會員的所有購物車記錄。
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

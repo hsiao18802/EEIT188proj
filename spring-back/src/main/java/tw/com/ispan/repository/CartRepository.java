@@ -14,12 +14,16 @@ import tw.com.ispan.domain.Members;
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Integer> {
 	
+	@Query("SELECT c FROM Cart c JOIN FETCH c.product WHERE c.members.membersId = :membersId")
+	Set<Cart> findByMembersIdWithProduct(@Param("membersId") Integer membersId);
+
 
 
 	 @Query("SELECT c FROM Cart c WHERE c.members.id = :membersId AND c.product.id = :productId")
 	    Cart findByMembersIdAndProductId(@Param("membersId") Integer membersId, @Param("productId") Integer productId);
 	 
 	 Set<Cart> findByMembers(Members members);
+	
 
 
 	

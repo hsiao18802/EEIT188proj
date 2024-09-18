@@ -57,14 +57,18 @@ function login() {
 
   axiosapi.defaults.headers.authorization = "";
   userStore.setRealname("");
+  userStore.setMembersId("");
   userStore.setLogin(false);
 
   axiosapi.post("/ajax/secure/login", body).then(function (response) {
     console.log("Realname from login response:", response.data.realname);  // 調試這裡
+    console.log("MembersId from login response:", response.data.membersId);  // 調試這裡
     if (response.data.success) {
       userStore.setToken(response.data.token);
       userStore.setLogin(true);
       userStore.setRealname(response.data.realname);  // 確保這裡的 realname 設置成功
+      userStore.setMembersId(response.data.membersId); // hsiao
+     // localStorage.setMembersId('membersId', response.data.membersId);
 
       localStorage.setItem('token', response.data.token);
       axiosapi.defaults.headers.authorization = `Bearer ${response.data.token}`;

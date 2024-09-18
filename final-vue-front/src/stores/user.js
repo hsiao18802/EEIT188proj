@@ -3,35 +3,44 @@ import { ref, computed } from "vue";
 
 const useUserStore = defineStore("user", () => {
   const login = ref(false);
-  const realname = ref(""); // ¨Ï¥Î realname ´À¥N email
-  const token = ref(""); // ¦sÀx JWT token
+  const realname = ref(""); // ï¿½Ï¥ï¿½ realname ï¿½ï¿½ï¿½N email
+  const token = ref(""); // ï¿½sï¿½x JWT token
+  const membersId = ref(); // æ–°å¢ž membersId
 
-  // ­pºâÄÝ©Ê¨Ó§PÂ_¬O§_µn¤J
+  // ï¿½pï¿½ï¿½ï¿½Ý©Ê¨Ó§Pï¿½_ï¿½Oï¿½_ï¿½nï¿½J
   const isLogin = computed(() => login.value);
 
-  // ³]¸mµn¤Jª¬ºA
+  // ï¿½]ï¿½mï¿½nï¿½Jï¿½ï¿½ï¿½A
   function setLogin(data) {
     login.value = data;
   }
 
-  // ³]¸m realname
+  // ï¿½]ï¿½m realname
   function setRealname(data) {
     realname.value = data;
-    console.log("Realname stored in Pinia: ", realname.value); // ÀË¬d¬O§_¥¿½T¦sÀx
+    console.log("Realname stored in Pinia: ", realname.value); // ï¿½Ë¬dï¿½Oï¿½_ï¿½ï¿½ï¿½Tï¿½sï¿½x
   }
 
-  // ³]¸m token
+  // ï¿½]ï¿½m token
   function setToken(data) {
     token.value = data;
   }
 
+  // æ›´æ–° membersId
+  function setMembersId(id) {
+    membersId.value = id;
+    console.log("MembersId stored in Pinia: ", membersId.value);
+  }
+
   return {
-    realname, setRealname, isLogin, setLogin, token, setToken
+    realname, setRealname, isLogin, setLogin, token, setToken,
+    membersId,
+    setMembersId // è¿”å›žæ›´æ–° membersId çš„å‡½æ•¸
   };
 }, {
   persist: {
     storage: localStorage,
-    paths: ["realname", "login", "token"] // ¦P¨B«ù¤[¤Æ realname, login ©M token
+    paths: ["realname", "login", "token", "membersId"] // ï¿½Pï¿½Bï¿½ï¿½ï¿½[ï¿½ï¿½ realname, login ï¿½M token
   }
 });
 

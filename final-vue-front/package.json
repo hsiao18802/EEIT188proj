@@ -10,18 +10,20 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
-    "axios": "^1.7.5",
+    "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "element-plus": "^2.8.2",
     "pinia": "^2.2.2",
     "pinia-plugin-persistedstate": "^3.2.3",
     "sweetalert2": "^11.12.4",
+    "v-click-outside": "^3.2.0",
     "vue": "^3.4.29",
     "vue-router": "^4.4.3",
     "vuejs-paginate-next": "^1.0.2",
-    "vuetify": "^3.7.0-beta.1"
+    "vuetify": "^3.7.2"
   },
   "devDependencies": {
+    "@types/bootstrap": "^5.2.10",
     "@vitejs/plugin-vue": "^5.0.5",
     "vite": "^5.3.1"
   }

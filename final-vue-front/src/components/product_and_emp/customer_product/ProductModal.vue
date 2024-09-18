@@ -7,7 +7,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <img class="card-img-top" :alt="product.productName" v-default-img="product.mainPhoto">
+                    <img class="card-img-top"  :alt="product.productName" v-default-img="product.mainPhoto">
                     <table>
                         <tr>
                             <td hidden>編號</td>
@@ -27,20 +27,12 @@
                         </tr>
                         <tr>
                             <td>租用數量</td>
-                            <td><input type="number"   v-model="count" @input="doInput('count', $event)"></td>
+                            <td><input type="number" v-model="count" @input="doInput('count', $event)"></td>
                         </tr>
-                        <!-- <tr>
-                            <td>租用日期</td>
-                            <td><input type="date" name="rentalStartDate" @input="doInput('rentalStartDate', $event)"></td>
-                        </tr>
-                        <tr>
-                            <td>歸還日期</td>
-                            <td><input type="date" name="rentalEndDate" @input="doInput('rentalEndDate', $event)"></td>
-                        </tr> -->
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary"  @click="addCart">加入購物車</button>
+                    <button type="button" class="btn btn-primary" @click="addCart">加入購物車</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                 </div>
             </div>
@@ -49,67 +41,96 @@
 </template>
 
 <script setup>
-    const props = defineProps(["product"])
+import { ref, onMounted } from 'vue';
+import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import { useCartStore } from '@/stores/cartStore';
+import useUserStore from '@/stores/user.js';
 
-    import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js'
-    import { ref, onMounted } from 'vue';
-    //hsiao
-    import  { useCartStore } from '@/stores/cartStore'
+const cartModal = ref(null); // 確保這裡是 null 或適當的引用
 
-
-    const exampleModal = ref(null);
-    const exampleObj = ref(null);
-
-
-    //hsiao
-    const cartStore = useCartStore()
-
-    // count hsiao
-    const count = ref(1)
-    const doInput = (count) => {
-    console.log(count);
-
+// 當 modal 元素存在時初始化
+onMounted(() => {
+    if (cartModal.value) {
+        exampleObj.value = new bootstrap.Modal(cartModal.value, null);
     }
+});
 
-    // +進購物車
-// 添加購物車邏輯
-const addCart = () => {
-    console.log('Adding to cart:', product.value); // 添加日志输出
-    if (props.product) {
-        cartStore.addCart({
-            
-            id: props.product.productId, // 商品id
-            name: props.product.productName, // 商品名称
-            picture: props.product.mainPhoto, // 图片
-            price: props.product.dailyFeeOriginal, // 最新价格
-            count: count.value, // 商品数量
-            selected: true // 商品是否选中
-        });
-        console.log('商品已加入購物車', cartStore.cart);
+const props = defineProps({
+    product: Object
+});
+
+const exampleModal = ref(null);
+const exampleObj = ref(null);
+
+const cartStore = useCartStore();
+const userStore = useUserStore(); 
+const count = ref(1);
+
+// 當組件掛載時，設置 membersId
+onMounted(() => {
+    const membersId = userStore.membersId;
+    if (membersId) {
+        cartStore.setMembersId(membersId);
     } else {
-        console.log('無法添加商品，product 未定義');
+        console.error('未找到 membersId，請檢查用戶登入狀態');
+    }
+});
+
+const doInput = (name, event) => {
+    console.log(name, event.target.value);
+};
+
+
+// 添加商品到購物車
+const addCart = async () => {
+    const membersId = userStore.membersId;
+   
+
+    try {
+        const response = await cartStore.addCart({
+            productId: props.product.productId,
+            productName: props.product.productName,
+            dailyFeeOriginal: props.product.dailyFeeOriginal,
+            count: count.value,
+            membersId: membersId
+        });
+
+        console.log('API response from addCart:', response);
+        
+        // 檢查 response 是否存在
+        if (response && response.success) {
+            console.log('商品已加入購物車', response.message);
+
+            // 顯示購物車視窗
+            showModal();
+        } else {
+            console.error('添加到購物車失敗:', response?.message || '未知錯誤');
+        }
+    } catch (error) {
+        console.error('添加到購物車失敗:', error);
     }
 };
 
 
 
+// Modal 的掛載與顯示控制
+onMounted(() => {
+    exampleObj.value = new bootstrap.Modal(exampleModal.value, null);
+});
 
+function showModal() {
+    exampleObj.value.show();
+}
 
-    onMounted(function () {
-        exampleObj.value = new bootstrap.Modal(exampleModal.value, null);
-    });
-    function showModal() {
-        exampleObj.value.show();
-    }
-    function hideModal() {
-        exampleObj.value.hide();
-    }
+function hideModal() {
+    exampleObj.value.hide();
+}
 
-    defineExpose({
-        showModal, hideModal
-    });
+defineExpose({
+    showModal,
+    hideModal,
+});
 </script>
 
 <style>
-
 </style>

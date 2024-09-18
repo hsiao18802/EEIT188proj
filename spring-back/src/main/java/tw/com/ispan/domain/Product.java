@@ -1,5 +1,6 @@
  package tw.com.ispan.domain;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -19,9 +20,12 @@ import lombok.Setter;
 @Table(name = "product")
 public class Product {
 	
-	@JsonIgnore
-    @OneToMany(mappedBy = "product")
-    private Set<Cart> cart;
+//	@JsonIgnore
+ //   @OneToMany(mappedBy = "product")
+  //  private Set<Cart> cart;
+	
+	//如果你想從商品的角度查詢該商品被加入了哪些購物車（例如：商品管理者想要查看某商品被租借的記錄）
+	//從 Product 實例中直接調用 product.getCart() 查詢該商品的購物車記錄。
 	
 
 	
@@ -73,6 +77,15 @@ public class Product {
 
     @Column(name = "last_update_employee_id")
     private Integer lastUpdateEmployeeId;
+
+	@Override
+	public String toString() {
+		return "Product [productId=" + productId + ", productName=" + productName + ", dailyFeeOriginal="
+				+ dailyFeeOriginal + ", maxAvailableQuantity=" + maxAvailableQuantity + ", mainPhoto="
+				 + ", description=" + description + ", categoryId=" + categoryId
+				+ ", addDatetime=" + addDatetime + ", addEmployeeId=" + addEmployeeId + ", lastUpdateDatetime="
+				+ lastUpdateDatetime + ", lastUpdateEmployeeId=" + lastUpdateEmployeeId + "]";
+	}
 
     
 }

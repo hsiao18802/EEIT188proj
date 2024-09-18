@@ -4,34 +4,60 @@ import router from './router/router.js';
 import pinia from './plugins/pinia.js';
 import useUserStore from '@/stores/user.js';  // �ޤJ Pinia �� store
 
-
-
 // Vuetify
-import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
+import 'vuetify/styles';
+import { aliases, fa } from 'vuetify/iconsets/fa'; // 或使用其他圖標集
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 
-// CSS 重置或其他樣式 (如果需要)
-import 'vuetify/styles';
+
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
+// CSS 和 JavaScript 引入
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import '@mdi/font/css/materialdesignicons.css'; // Material Design Icons
+import 'element-plus/dist/index.css'; // Element Plus
+//Element Plus 
+import ElementPlus from 'element-plus';
+import 'element-plus/dist/index.css';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+// v-click-outside
+import vClickOutside from 'v-click-outside';
+
 
 const vuetify = createVuetify({
   components,
   directives,
+  theme: {
+    themes: {
+      light: {
+        // 自訂主題顏色
+        primary: '#1976D2',
+        secondary: '#424242',
+        accent: '#82B1FF',
+        error: '#FF5252',
+        info: '#2196F3',
+        success: '#4CAF50',
+        warning: '#FFC107'
+      }
+    }
+  },
+  icons: {
+    defaultSet: 'fa', // 使用 Font Awesome 圖標集
+    aliases,
+    sets: {
+      fa
+    }
+  }
 });
 
-//Element Plus 
-import ElementPlus from 'element-plus';
-import 'element-plus/dist/index.css';
 
 
 
-
-
-
-
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 
 pinia.use(piniaPluginPersistedstate)
@@ -42,6 +68,7 @@ const app = createApp(App)
   .use(ElementPlus)
   .use(pinia)
   .use(vuetify)
+  .use(vClickOutside);
 
 app.directive('default-img', {
   mounted(el, binding) {

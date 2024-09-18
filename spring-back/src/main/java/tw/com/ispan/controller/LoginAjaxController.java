@@ -72,9 +72,12 @@ public class LoginAjaxController {
                 .put("realname", member.getRealName())
                 .put("email", member.getEmail())
                 .put("date", date);
+           
+            
             String token = jsonWebTokenUtility.createEncryptedToken(user.toString(), null);
             responseJson.put("token", token);
             responseJson.put("realname", member.getRealName());
+            responseJson.put("membersId", member.getMembersId());
         }
 
         return responseJson.toString();
