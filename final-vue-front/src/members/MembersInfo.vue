@@ -54,7 +54,7 @@ const member = ref(null);
 const router = useRouter();  // 初始化 Vue Router
 const selectedFile = ref(null);  // 存儲用戶選擇的文件
 const photoPreviewUrl = ref(null);  // 預覽圖片的 URL
-const defaultPhoto = '/public/640.jpeg';  // 你的默认占位符图片路径
+const defaultPhoto = '/640.jpeg';  // 你的默认占位符图片路径
 const fileInput = ref(null);  // 參考文件選擇器元素
 const userStore = useUserStore();  // 初始化 Pinia 的用户 store
 

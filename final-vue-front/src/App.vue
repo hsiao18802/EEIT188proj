@@ -11,6 +11,7 @@
     <div v-else>
       <router-view></router-view>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -55,3 +56,4 @@ const currentNavbar = computed(() => {
   height: 100vh; /* 保持全屏高度 */
 }
 
+</style>
