@@ -1,6 +1,5 @@
 <template>
-    <div ref="exampleModal" class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
+    <div ref="exampleModal" class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -8,7 +7,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <img class="card-img-top" :alt="product.productName" v-default-img="product.mainPhoto">
+                    <img class="card-img-top" :alt="product.productName" v-default-img="product.mainPhoto" ref="productImage">
+                    <div class="animation-container">
+                        <div class="animation-ball" ref="animationBall"></div>
+                    </div>
                     <table>
                         <tr>
                             <td hidden>編號</td>
@@ -42,17 +44,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { useCartStore } from '@/stores/cartStore';
 import useUserStore from '@/stores/user.js';
+import { gsap } from 'gsap';
 
-const cartModal = ref(null); // 確保這裡是 null 或適當的引用
 
-// 當 modal 元素存在時初始化
+const exampleModal = ref(null);
+const exampleObj = ref(null);
+const cartStore = useCartStore();
+const userStore = useUserStore();
+const count = ref(1);
+const animationBall = ref(null);
+
 onMounted(() => {
-    if (cartModal.value) {
-        exampleObj.value = new bootstrap.Modal(cartModal.value, null);
+    if (exampleModal.value) {
+        exampleObj.value = new bootstrap.Modal(exampleModal.value);
     }
 });
 
@@ -60,61 +68,157 @@ const props = defineProps({
     product: Object
 });
 
-const exampleModal = ref(null);
-const exampleObj = ref(null);
-
-const cartStore = useCartStore();
-const userStore = useUserStore();
-const count = ref(1);
-
-// 當組件掛載時，設置 membersId
-onMounted(() => {
-    const membersId = userStore.membersId;
-    if (membersId) {
-        cartStore.setMembersId(membersId);
-    } else {
-        console.error('未找到 membersId，請檢查用戶登入狀態');
-    }
-});
-
 const doInput = (name, event) => {
     console.log(name, event.target.value);
 };
 
-
 // 添加商品到購物車
-const addCart = () => {
+const addCart = async () => {
     const membersId = userStore.membersId;
 
+    if (!userStore.isLogin) {
+        // 未登入，跳轉到登入頁面
+        router.push('/secure/login');
+    } else {
+        try {
+            // 確認傳入了正確的商品資訊
+            await cartStore.addCart({
+                productId: props.product.productId,
+                productName: props.product.productName,
+                dailyFeeOriginal: props.product.dailyFeeOriginal,
+                count: count.value,
+                membersId: membersId,
+                mainPhoto: props.product.mainPhoto
+                
+            });
 
-    cartStore.addCart({
-        productId: props.product.productId,
-        productName: props.product.productName,
-        dailyFeeOriginal: props.product.dailyFeeOriginal,
-        count: count.value,
-        membersId: membersId
-    });
+            // 執行動畫效果
+            await nextTick();
+            if (animationBall.value) {
+                animationBall.value.style.display = 'block';
+                await nextTick();
+                
+                // GSAP 動畫
+                gsap.fromTo(animationBall.value, 
+                    { x: 0, y: 0, scale: 1 }, 
+                    { 
+                        duration: 1, 
+                        x: 400, 
+                        y: -300, 
+                        scale: 0, 
+                        ease: "power2.out",
+                        onComplete: async () => {
+                            animationBall.value.style.display = 'none';
+                            if (exampleObj.value) {
+                                exampleObj.value.hide();
+                            }
+                        }
+                    }
+                );
+            }
+        } catch (error) {
+            console.error('加入購物車失敗:', error);
+            Swal.fire({
+                title: '錯誤',
+                text: "加入購物車失敗，請稍後再試。",
+                icon: "error",
+                confirmButtonText: '確定',
+                position: 'center'
+            });
+        }
+    }
 };
 
+        
 
-
-// Modal 的掛載與顯示控制
-onMounted(() => {
-    exampleObj.value = new bootstrap.Modal(exampleModal.value, null);
-});
-
+// 顯示 Modal
 function showModal() {
-    exampleObj.value.show();
+    if (exampleObj.value) {
+        exampleObj.value.show();
+    } else {
+        console.error('Modal instance is not initialized.');
+    }
 }
 
+// 隱藏 Modal
 function hideModal() {
-    exampleObj.value.hide();
+    if (exampleObj.value) {
+        exampleObj.value.hide();
+    } else {
+        console.error('Modal instance is not initialized.');
+    }
 }
 
 defineExpose({
     showModal,
-    hideModal,
+    hideModal
 });
+
 </script>
 
-<style></style>
+<style >
+/* 動畫容器 */
+.animation-container {
+    position: absolute;
+    top: 50%;
+    right: 10%;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+/* 球體樣式 */
+.animation-ball {
+    width: 20px;
+    height: 20px;
+    background-color: #ff5722;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 10px;
+    display: none; /* 初始隱藏 */
+}
+
+/* 動畫效果 */
+@keyframes bounceToCart {
+    0% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(200px, -100px);
+    }
+    100% {
+        transform: translate(300px, 0);
+        opacity: 0;
+    }
+}
+
+/* 球體線條樣式 */
+.animation-ball::before {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 100px;
+    background: #ff5722;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
+    animation: drawLine 1s ease-in-out forwards;
+    display: none; /* 初始隱藏 */
+}
+
+@keyframes drawLine {
+    0% {
+        height: 0;
+    }
+    100% {
+        height: 100px;
+    }
+}
+
+/* 讓動畫球跳到右邊的購物車 */
+.product-animation {
+    animation: bounceToCart 1s ease-in-out forwards;
+}
+</style>

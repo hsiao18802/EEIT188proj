@@ -20,9 +20,13 @@ export const findNewCartListAPI = (membersId) => {
 // 從購物車中刪除商品
 export const removeFromCartAPI = (data) => axios.delete(`${BASE_URL}/remove`, { params: data })
 
-// 增加商品數量
-export const plusOneAPI = (data) => axios.post(`${BASE_URL}/plusOne`, data);
+// API 請求方法
+export const plusOneAPI = (params) => {
+    return axios.post(`${BASE_URL}/plusOne`, null, { params });
+};
 
-// 減少商品數量
-export const minusOneAPI = (data) => axios.post(`${BASE_URL}/minusOne`, data);
+export const minusOneAPI = (params) => {
+    return axios.post(`${BASE_URL}/minusOne`, null, { params });
+};
+
 

@@ -115,6 +115,10 @@ public class CartService {
         }
     }
     
+    public void clearCartByMembersId(String membersId) {
+        // 根據會員 ID 清空購物車資料
+    	cartRepo.deleteByMembersId(membersId);
+    }
 //  
 ////CartDTO 會包含來自購物車、產品和會員的數據，並可以將這些數據發送到前端。
 //    public CartDTO convertCartToDTO(Cart cart) {

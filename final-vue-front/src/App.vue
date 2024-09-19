@@ -3,10 +3,19 @@
     <!-- 動態導航列 -->
     <component :is="currentNavbar"></component>
 
+    <CartDrawer></CartDrawer>
+    <CartIcon ></CartIcon>
+
     <!-- 右側內容區 -->
     <div v-if="isEmpNavbar" class="flex-grow-1 p-3">
       <router-view></router-view>
     </div>
+
+
+
+
+
+
     <div v-else>
       <router-view></router-view>
     </div>
@@ -26,6 +35,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import EmpNavbar from './views/product_and_emp/EmpNavbar.vue';
 import PublicNavbar from './views/Navbar.vue';
+//hsiao
+import CartDrawer from './components/cart/CartDrawer.vue'
+import CartIcon from './components/cart/CartIcon.vue'
+
 
 
 const route = useRoute();
@@ -68,12 +81,12 @@ const currentNavbar = computed(() => {
 
 <style scoped>
 #app {
-  height: 100vh; /* 保持全屏高度 */
+  height: 100vh;
+  /* 保持全屏高度 */
 }
 
 .flex-grow-1 {
-  margin-left: 0; /* 恢復預設的佈局，移除左側邊欄的間距 */
+  margin-left: 0;
+  /* 恢復預設的佈局，移除左側邊欄的間距 */
 }
-
-
 </style>

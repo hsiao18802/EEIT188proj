@@ -1,6 +1,8 @@
 ## hsiao
 npm install v-click-outside
 npm install --save-dev @types/bootstrap
+npm install gsap
+
 
 
 

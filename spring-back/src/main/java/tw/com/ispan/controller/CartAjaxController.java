@@ -177,6 +177,23 @@ public ResponseEntity<String> removeFromCart(
                 .body("An error occurred: " + e.getMessage());
     }
 }
+
+//清空購物車
+//@PostMapping("/clear")
+//public ResponseEntity<String> clearCart(@RequestHeader("Authorization") String token) {
+//    try {
+//        // 從 token 中獲取會員 ID
+//        String membersId = jwtService.getMemberIdFromToken(token);
+//
+//        // 調用 service 清空該會員的購物車
+//        cartService.clearCartByMembersId(membersId);
+//
+//        return ResponseEntity.ok("購物車已清空");
+//    } catch (Exception e) {
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("清空購物車失敗");
+//    }
+//}
+
 }
 
 

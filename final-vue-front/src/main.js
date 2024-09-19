@@ -10,6 +10,8 @@ import 'vuetify/styles';
 import { aliases, fa } from 'vuetify/iconsets/fa'; // 或使用其他圖標集
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
+import 'vuetify/dist/vuetify.min.css';
+
 
 
 
