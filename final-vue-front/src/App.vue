@@ -1,6 +1,7 @@
 <template>
   <div :class="layoutClass">
-    <!-- 動態導航列 -->
+    <!-- 動態導航列  :style="maxwidth" -->
+
     <component :is="currentNavbar"></component>
 
     <!-- 右側內容區 -->
@@ -10,7 +11,6 @@
     <div v-else>
       <router-view></router-view>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -32,7 +32,7 @@ const isEmpNavbar = computed(() => {
 
 // 根據導航列決定佈局類別：EmpNavbar 時左右佈局，PublicNavbar 時上下佈局
 const layoutClass = computed(() => {
-  return isEmpNavbar.value ? 'd-flex flex-row' : 'd-flex flex-column';
+  return isEmpNavbar.value ? 'container-fluid d-flex flex-row' : 'container-xxl d-flex flex-column';
 });
 
 // 確認 Pinia 是否恢復了 token 和 login 狀態，這裡只是用來 debug
@@ -48,9 +48,6 @@ const currentNavbar = computed(() => {
 
 
 
-
-
-
 </script>
 
 <style scoped>
@@ -58,7 +55,3 @@ const currentNavbar = computed(() => {
   height: 100vh; /* 保持全屏高度 */
 }
 
-.flex-grow-1 {
-  margin-left: 0; /* 恢復預設的佈局，移除左側邊欄的間距 */
-}
-</style>

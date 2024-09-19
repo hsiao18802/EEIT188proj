@@ -54,6 +54,7 @@ const routes = [
 
 
 
+
   { path: "/secure/login", name: "secure-login-link", component: Login },
   { path: "/secure/register", name: "secure-register-link", component: Register },
   { path: "/secure/forget", name: "secure-forget-link", component: ForgetPassword },
@@ -101,7 +102,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (['NotFound', 'Forbidden', 'Unauthorized'].includes(to.name) && from.meta.navbar) {
-    to.meta.navbar = from.meta.navbar; // �]�m���~�����ϥΫe�@���� navbar
+    to.meta.navbar = from.meta.navbar;
   }
   next();
 })

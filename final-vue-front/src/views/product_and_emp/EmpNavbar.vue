@@ -76,15 +76,13 @@
   </script>
   
   <style scoped>
-  .btn-toggle {
+  /* .btn-toggle {
     font-weight: 600;
-    color: #fff; /* 白色文字 */
+    color: #fff;
     background-color: transparent;
-  }
+  } */
   
-  .btn-toggle:hover {
-    background-color: #495057; /* 懸停時的背景色 */
-  }
+
   
   .btn-toggle-nav a {
     padding: 0.1875rem 0.5rem;
@@ -103,6 +101,13 @@
     border-radius: 0.375rem;
   }
   
+  /* 懸停時的背景色 */
+  .link-body-emphasis:hover,
+  .btn-toggle-nav:hover {
+    /* color: #fff !important; */
+    background-color: LightSlateGray;
+  }
+
   /* 當按鈕被選中或點擊時增加白色邊框和圓角 */
   .link-body-emphasis:focus, .link-body-emphasis:active,
   .btn-toggle-nav a:focus, .btn-toggle-nav a:active {

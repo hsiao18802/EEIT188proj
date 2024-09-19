@@ -1,4 +1,4 @@
- package tw.com.ispan.domain;
+package tw.com.ispan.domain;
 
 import java.util.Date;
 import java.util.List;
@@ -29,11 +29,12 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_Id")
+    @Column(name = "product_id")
     private Integer productId;
 
     @Column(name = "product_name")
     private String productName;
+    
 
     @Column(name = "daily_fee_original")
     private Integer dailyFeeOriginal;
@@ -53,12 +54,18 @@ public class Product {
 
     @Column(name = "description")
     private String description;
+    
+    @Column(name = "description_two")
+    private Boolean descriptionTwo;
 
     @Column(name = "category_id")
     private Integer categoryId;
     // 這裡指的是產品類別，例如帳篷一類、登山杖一類、手電筒一類之類的
     // 寫id就表示有另外一張專門放類別的表，這裡放的是id的類別
     // 不過或許也可以直接把類別寫在這裡，不要另拆一張表就是了
+    
+    @Column(name = "status_id")
+    private Integer statusId;
 
     @Column(name = "add_datetime")
     private Date addDatetime;
