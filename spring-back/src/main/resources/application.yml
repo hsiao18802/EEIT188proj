@@ -40,7 +40,7 @@ spring:
 
 jwt:
   token:
-    expire: 1
+    expire: 10
 redis:
     host: localhost  # Redis 伺服器的主機名
     port: 6379 

@@ -29,7 +29,7 @@ const app = createApp(App)
 // 默认图片指令
 app.directive('default-img', {
   mounted(el, binding) {
-    const defaultImg = '/public/NoPic256.jpg';
+    const defaultImg = '/NoPic256.jpg';
     el.onerror = () => {
       el.src = defaultImg;
     };

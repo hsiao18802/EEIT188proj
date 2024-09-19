@@ -119,7 +119,7 @@ function googleSignIn() {
 // 掃碼登錄邏輯
 async function generateQrCode() {
   // 使用實際的 Google OAuth 掃碼登錄 URL
-  qrCodeUrl.value = `https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com&redirect_uri=http://localhost:8080/ajax/secure/google-login&scope=email%20profile&state=${generateState()}`;
+  qrCodeUrl.value = `https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com&redirect_uri=https://ad9f-1-160-11-201.ngrok-free.app/&scope=email%20profile&state=${generateState()}`;
 
   console.log("Before nextTick: QR Code URL is", qrCodeUrl.value);
 

@@ -2,10 +2,13 @@ import axios from 'axios';
 import useUserStore from '@/stores/user';  // 引用 Pinia 的 store
 import router from '../router/router.js';  // 引入 Vue Router 的實例
 
+console.log(import.meta.env.VITE_API_URL);
+
 const axiosapi = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
+console.log(axiosapi.defaults.baseURL);
 // 攔截請求，確保每個請求都附帶 Pinia 中的 token
 axiosapi.interceptors.request.use(function (config) {
   const userStore = useUserStore();  // 動態獲取 Pinia store
