@@ -2,7 +2,7 @@
     <h1 style="font-family: '微軟正黑體', sans-serif; font-size: xx-large; font-weight: bold;">商品管理</h1>
     <div class="row">
         <div class="col-2">
-            <button type="button" class="btn btn-primary" @click="openModal('insert')" style="color: white;">開啟新增</button>
+            <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
         </div>
         <div class="col-4">
             <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind"></ProductSelect>

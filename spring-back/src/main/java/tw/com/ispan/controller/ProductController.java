@@ -25,7 +25,7 @@ import tw.com.ispan.service.ProductService;
 @RequestMapping("/rent/product")
 @CrossOrigin
 public class ProductController {
-
+	
     @Autowired
     private ProductService productService;
 
