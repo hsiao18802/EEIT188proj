@@ -97,27 +97,44 @@ async function logout() {
 
     if (result.isConfirmed) {
       // 發送登出請求到後端
-      await axiosapi.post('/ajax/secure/logout');  // 發送請求到後端
+      await axiosapi.post('/ajax/secure/logout');
 
       // 清除 Pinia 狀態
       userStore.setLogin(false);
       userStore.setRealname('');
       userStore.setToken('');
+      userStore.setMembersId('');
 
-      // 清除 sessionStorage 中的 token
+      // 清除 sessionStorage 中的狀態
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('login');
+
+      // 清除 localStorage 中的狀態
       localStorage.removeItem('token');
       localStorage.removeItem('login');
+
+      // 清除 Google 的客戶端狀態
+      google.accounts.id.disableAutoSelect();
+      google.accounts.id.revoke(userStore.realname, done => {
+        console.log('Google user revoked.');
+      });
 
       // 跳轉到登入頁面
       router.push({ name: 'secure-login-link' }).then(() => {
         // 等導航完成後自動刷新頁面
-        window.location.reload();  // 強制刷新頁面
+        window.location.reload(); // 強制刷新頁面
       });
     }
   } catch (error) {
     console.error('登出失敗', error);
+    Swal.fire({
+      title: '登出失敗',
+      text: '請稍後再試。',
+      icon: 'error',
+    });
   }
 }
+
 </script>
 
 <style>
