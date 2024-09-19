@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="navbar-brand d-flex align-items-center">
         <!-- 加入LOGO -->
-        <img src="/public/logo.webp" alt="Logo" width="40" height="40" class="me-2">
+        <img src="/logo.webp" alt="Logo" width="40" height="40" class="me-2">
         <span>趣露營</span>
       </div>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"

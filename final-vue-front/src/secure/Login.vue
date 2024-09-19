@@ -81,15 +81,19 @@ function login() {
   // 重置状态
   axiosapi.defaults.headers.authorization = "";
   userStore.setRealname("");
+  userStore.setMembersId("");
   userStore.setLogin(false);
 
   axiosapi.post("/ajax/secure/login", body).then(function (response) {
+    console.log(response.data.membersId);
+    
+
     if (response.data.success) {
       // 使用 Pinia 存储登录状态和 token
       userStore.setLogin(true);
       userStore.setRealname(response.data.realname);
       userStore.setToken(response.data.token); // 不再需要手动存储 token 到 localStorage
-
+      userStore.setMembersId(response.data.membersId)
       axiosapi.defaults.headers.authorization = `Bearer ${response.data.token}`;
       Swal.fire({
         text: response.data.message,
@@ -119,7 +123,7 @@ function googleSignIn() {
 // 掃碼登錄邏輯
 async function generateQrCode() {
   // 使用實際的 Google OAuth 掃碼登錄 URL
-  qrCodeUrl.value = `https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com&redirect_uri=https://ad9f-1-160-11-201.ngrok-free.app/&scope=email%20profile&state=${generateState()}`;
+  qrCodeUrl.value = `https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com&redirect_uri=https://029f-1-160-11-201.ngrok-free.app/&scope=email%20profile&state=${generateState()}`;
 
   console.log("Before nextTick: QR Code URL is", qrCodeUrl.value);
 
@@ -154,13 +158,16 @@ const generateState = () => {
 onMounted(() => {
   window.handleCredentialResponse = function (response) {
     const idToken = response.credential;
+    console.log("Received ID Token from Google:", idToken); 
+
 
     axiosapi.post('/ajax/secure/google-login', { token: idToken }).then(res => {
       if (res.data.success) {
         // 使用 Pinia 存储登录状态和 token
         userStore.setLogin(true);
         userStore.setRealname(res.data.realname);
-        userStore.setToken(res.data.token);  // 不再需要手动存储 token 到 localStorage
+        userStore.setToken(res.data.token)  // 不再需要手动存储 token 到 localStorage
+        userStore.setMembersId(response.data.membersId);
 
         axiosapi.defaults.headers.authorization = `Bearer ${res.data.token}`;
         Swal.fire({

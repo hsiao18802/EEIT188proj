@@ -108,6 +108,7 @@ public class MemberService {
 				responseJson.put("success", true);
 				responseJson.put("token", token);
 				responseJson.put("realname", member.getRealName()); // 返回 realname
+				responseJson.put("membersId", member.getMembersId());
 				return responseJson;
 
 			} else {

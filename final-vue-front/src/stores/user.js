@@ -5,11 +5,12 @@ const useUserStore = defineStore('user', () => {
   const login = ref(false); // 登录状态
   const realname = ref(""); // 真实姓名
   const token = ref(""); // JWT token
+  const membersId = ref(); // 新增 membersId
 
-  // 计算属性：判断用户是否已登录
+
   const isLogin = computed(() => login.value);
 
-  // 设置登录状态
+
   function setLogin(data) {
     login.value = data;
     console.log("Login status stored in Pinia: ", login.value);
@@ -27,20 +28,20 @@ const useUserStore = defineStore('user', () => {
     console.log("Token stored in Pinia: ", token.value);
   }
 
+  // 更新 membersId
+  function setMembersId(id) {
+    membersId.value = id;
+    console.log("MembersId stored in Pinia: ", membersId.value);
+  }
+
   return {
-    login,
-    realname,
-    setRealname,
-    isLogin,
-    setLogin,
-    token,
-    setToken,
+    login, realname, setRealname, isLogin, setLogin, token, setToken, membersId, setMembersId
   };
 }, {
   persist: {
-    enabled: true,  // 确保启用持久化
-    storage: localStorage, // 使用 localStorage 进行存储
-    paths: ["login", "realname", "token"],  // 持久化 login 和 token 状态
+    enabled: true,
+    storage: localStorage,
+    paths: ["realname", "login", "token", "membersId"]
   }
 });
 

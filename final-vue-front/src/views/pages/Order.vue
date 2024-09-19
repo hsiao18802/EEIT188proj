@@ -29,11 +29,37 @@
         </template>
       </v-data-table>
     </v-card>
+    
+    <!-- Show CartDrawer only when drawerVisible is true -->
+    <CartDrawer/>
+    
+
   </v-container>
 </template>
 
 <script setup>
+
+// Sample cart list data
+
+
 import { ref } from 'vue';
+import CartDrawer from '@/components/cart/CartDrawer.vue';
+
+const drawerVisible = ref(false);
+
+const toggleDrawer = () => {
+  drawerVisible.value = !drawerVisible.value;
+};
+
+const hideDrawer = () => {
+  drawerVisible.value = false;
+};
+
+// Sample cart list data
+const cartList = ref([
+  { productId: 1, productName: '產品 A', count: 1, dailyFeeOriginal: 100 },
+  { productId: 2, productName: '產品 B', count: 2, dailyFeeOriginal: 150 }
+]);
 
 const headers = [
   { text: '訂單 ID', value: 'order_id' },
@@ -92,20 +118,10 @@ const formatDate = (date) => {
 };
 
 const formatCurrency = (amount) => {
-  return `$${amount}`;
+  return `$${amount.toFixed(2)}`;
 };
 
 const getStatusColor = (status) => {
   return status === '已完成' ? 'green' : 'orange';
 };
 </script>
-
-<style scoped>
-.v-data-table th {
-  background-color: #f5f5f5;
-}
-
-.v-chip {
-  font-size: 0.9rem;
-}
-</style>

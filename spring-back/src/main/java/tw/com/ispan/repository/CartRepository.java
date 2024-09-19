@@ -8,18 +8,27 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import jakarta.transaction.Transactional;
 import tw.com.ispan.domain.Cart;
 import tw.com.ispan.domain.Members;
 
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Integer> {
 	
+	@Query("SELECT c FROM Cart c JOIN FETCH c.product WHERE c.members.membersId = :membersId")
+	Set<Cart> findByMembersIdWithProduct(@Param("membersId") Integer membersId);
+
 
 
 	 @Query("SELECT c FROM Cart c WHERE c.members.id = :membersId AND c.product.id = :productId")
 	    Cart findByMembersIdAndProductId(@Param("membersId") Integer membersId, @Param("productId") Integer productId);
 	 
 	 Set<Cart> findByMembers(Members members);
+	 
+	// 根據 membersId 刪除購物車記錄
+//	    @Transactional
+//	    void deleteByMembersId(String membersId);
+	
 
 
 	

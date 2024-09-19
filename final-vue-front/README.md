@@ -1,3 +1,11 @@
+## hsiao
+npm install v-click-outside
+npm install --save-dev @types/bootstrap
+npm install gsap
+
+
+
+
 # vue-front
 
 This template should help get you started developing with Vue 3 in Vite.

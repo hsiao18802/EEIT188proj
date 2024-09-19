@@ -1,288 +1,199 @@
-//package tw.com.ispan.controller;
+package tw.com.ispan.controller;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import tw.com.ispan.DTO.ApiResponse;
+import tw.com.ispan.DTO.CartDTO;
+import tw.com.ispan.DTO.ConvertCartToDTO;
+import tw.com.ispan.domain.Cart;
+import tw.com.ispan.domain.Product;
+
+import tw.com.ispan.domain.Members;
+import tw.com.ispan.repository.CartRepository;
+import tw.com.ispan.repository.MembersRepository;
+
+import tw.com.ispan.repository.ProductRepository;
+import tw.com.ispan.service.CartService;
+import tw.com.ispan.service.ProductService;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@CrossOrigin
+@RestController
+@RequestMapping("/rent/cart")
+public class CartAjaxController {
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private MembersRepository membersRepository;
+
+    @Autowired
+    private ProductService productService;
+    
+    @Autowired
+    private ConvertCartToDTO convertCartTDTO;
+    
+
+    @PostMapping("/add")
+    public ResponseEntity<?> addToCart(@RequestBody CartDTO cartDTO) {
+        System.out.println("Received CartDTO: " + cartDTO);
+
+        try {
+            if (cartDTO.getMembersId() == null || cartDTO.getProductId() == null || cartDTO.getCount() == null) {
+                return ResponseEntity.badRequest().body(new ApiResponse(false, "Missing required fields in CartDTO"));
+            }
+            
+            Product product = productService.findById(cartDTO.getProductId());
+            if (product == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse(false, "Product not found with id: " + cartDTO.getProductId()));
+            }
+            
+            cartDTO.setProductName(product.getProductName());
+            cartDTO.setMainPhoto(product.getMainPhoto()); // 這裡設置 byte[] 圖片數據
+            cartDTO.getMainPhotoBase64(); // 這樣前端可以獲取 Base64 格式的圖片
+
+            cartDTO.setDailyFeeOriginal(product.getDailyFeeOriginal());
+            
+            System.out.println("Product dailyFeeOriginal: " + product.getDailyFeeOriginal());
+
+
+            Cart cart = cartService.addToCart(cartDTO);
+         // 使用 convertCartToDTO 將 Cart 轉換為 CartDTO
+            CartDTO responseDTO = convertCartTDTO.convertCartToDTO(cart);
+
+
+            return ResponseEntity.ok(new ApiResponse(true, "Product added to cart successfully.", cartDTO));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "An error occurred: " + e.getMessage()));
+        }
+    }
+
+
+    
+    
+    /**
+     * 查詢指定會員的購物車項目，返回 CartDTO 列表
+   
+     */
+    @GetMapping("/members/{membersId}/cart")
+    public ResponseEntity<Set<CartDTO>> getMembersCart(@PathVariable("membersId") Integer membersId) {
+        Set<Cart> carts = cartService.findCartsByMembesrId2(membersId);
+        
+        Set<CartDTO> cartDTOs = carts.stream()
+                .map(cart -> {
+                    System.out.println("cart: " + cart); // 打印 CartDTO 以檢查值
+                    CartDTO dto = convertCartTDTO.convertCartToDTO(cart); // 使用專門的類進行轉換
+                    System.out.println("CartDTO: " + dto); // 打印 CartDTO 以檢查值
+                    return dto;
+                })
+                .collect(Collectors.toSet());
+        
+        return ResponseEntity.ok(cartDTOs);
+    }
+
+
+  
+    
+    
+/**
+ * 根據會員 ID 查詢該會員的所有購物車項目
+ * @param memberId 會員 ID
+ * @return 會員的購物車項目列表
+ */
+
+@GetMapping("/members/{membersId}")
+public ResponseEntity<Set<Cart>> getMembersCart2(@PathVariable("membersId") Integer membersId) {
+    try {
+        // 調用服務層方法來查詢會員的購物車
+        Set<Cart> carts = cartService.findCartsByMembesrId(membersId);
+
+        // 返回成功響應，包含會員的購物車項目
+        return ResponseEntity.ok(carts);
+    } catch (RuntimeException e) {
+        // 處理找不到會員的情況，返回 404 Not Found
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(null);
+    } catch (Exception e) {
+        // 處理其他可能的錯誤情況，返回 500 Internal Server Error
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null);
+    }
+}
+
+@PostMapping("/plusOne")
+public ResponseEntity<?> plusOne(
+        @RequestParam("membersId") Integer membersId,
+        @RequestParam("productId") Integer productId) {
+    try {
+        Cart cart = cartService.plusOne(productId, membersId);
+        return ResponseEntity.ok("Quantity increased successfully.");
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("An error occurred: " + e.getMessage());
+    }
+}
+
+//如果數量變為 0，商品將從購物車中刪除。
+@PostMapping("/minusOne")
+public ResponseEntity<?> minusOne(
+        @RequestParam("membersId") Integer membersId,
+        @RequestParam("productId") Integer productId) {
+    try {
+        cartService.minusOne(productId, membersId);
+        return ResponseEntity.ok("Quantity decreased successfully.");
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("An error occurred: " + e.getMessage());
+    }
+}
+
+
+@DeleteMapping("/remove")
+public ResponseEntity<String> removeFromCart(
+        @RequestParam("membersId") Integer membersId,
+        @RequestParam("productId") Integer productId) {
+    try {
+        cartService.removeFromCart(membersId, productId);
+        return ResponseEntity.ok("Product removed from cart successfully.");
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Error: " + e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("An error occurred: " + e.getMessage());
+    }
+}
+
+//清空購物車
+//@PostMapping("/clear")
+//public ResponseEntity<String> clearCart(@RequestHeader("Authorization") String token) {
+//    try {
+//        // 從 token 中獲取會員 ID
+//        String membersId = jwtService.getMemberIdFromToken(token);
 //
-//import org.json.JSONArray;
-//import org.json.JSONObject;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.web.bind.annotation.*;
+//        // 調用 service 清空該會員的購物車
+//        cartService.clearCartByMembersId(membersId);
 //
-//import tw.com.ispan.domain.Cart;
-//import tw.com.ispan.domain.Product;
-//
-//import tw.com.ispan.domain.Members;
-//import tw.com.ispan.repository.CartRepository;
-//import tw.com.ispan.repository.MembersRepository;
-//
-//import tw.com.ispan.repository.ProductRepository;
-//import tw.com.ispan.service.CartService;
-//import tw.com.ispan.service.ProductService;
-//
-//import java.util.List;
-//
-//@CrossOrigin
-//@RestController
-//@RequestMapping("/rent/cart")
-//public class CartAjaxController {
-//
-//    @Autowired
-//    private CartService cartService;
-//
-//    @Autowired
-//    private CartRepository cartRepository;
-//
-//    @Autowired
-//    private MembersRepository membersRepository;
-//
-//    @Autowired
-//    private ProductService productService;
-//
-//
-//    
-//    
-//    
-//
-//     //新增商品到購物車
-//
-//    @PostMapping("/add")
-//    
-//    public String addToCart() {
-//    	
-//    	Cart cart=cartService.addToCart(membersId, productId);
-//    	Product product =productService.findById(null)
-//    	
-//    	
+//        return ResponseEntity.ok("購物車已清空");
+//    } catch (Exception e) {
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("清空購物車失敗");
 //    }
-//    
-//    
-//    
-//    
-//    
-////    public String addToCart(@RequestBody String json) {
-////        JSONObject requestJson = new JSONObject(json);
-////        JSONObject responseJson = new JSONObject();
-////
-////        try {
-////            Integer memberId = requestJson.getInt("memberId");
-////            Integer productId = requestJson.getInt("productId");
-////            Integer count = requestJson.getInt("count");
-////
-////            Members member = membersRepository.findById(memberId)
-////                .orElseThrow(() -> new RuntimeException("Member not found"));
-////
-////            Product product = productRepository.findById(productId)
-////                .orElseThrow(() -> new RuntimeException("Product not found"));
-////
-////            Cart cart = cartRepository.findByMembers(member);
-////            if (cart == null) {
-////                cart = new Cart();
-////                cart.setMembers(member);
-////                cart.setTotalPrice(0);
-////                cart.setDeposit(0);
-////                cart.setRemarks("");
-////                cart.setShippingFee(0);
-////                cart.setShippingMethod("");
-////                cart.setPayMethod("");
-////                cartRepository.save(cart);
-////            }
-////
-////            ProductCart productCart = new ProductCart();
-////            productCart.setCart(cart);
-////            productCart.setProductId(productId);
-////            productCart.setCount(count);
-////            productCart.setDailyFeeOriginal(product.getDailyFeeOriginal());
-////            productCart.setTotalPrice(count * product.getDailyFeeOriginal());
-////
-////            productCartRepository.save(productCart);
-////
-////            // 更新購物車的總價
-////            int totalPrice = cart.getTotalPrice() + (count * product.getDailyFeeOriginal());
-////            cart.setTotalPrice(totalPrice);
-////            cartRepository.save(cart);
-////
-////            responseJson.put("success", true);
-////            responseJson.put("message", "商品已新增到購物車");
-////        } catch (Exception e) {
-////            responseJson.put("success", false);
-////            responseJson.put("message", "新增商品到購物車失敗: " + e.getMessage());
-////        }
-////
-////        return responseJson.toString();
-////    }
-////
-////    /**
-////     * 查詢用戶的購物車
-////     */
-////    @GetMapping("/member/{memberId}")
-////    public String getCartByMemberId(@PathVariable("memberId") Integer memberId) {
-////        JSONObject responseJson = new JSONObject();
-////        JSONArray cartArray = new JSONArray();
-////
-////        try {
-////            Cart cart = cartRepository.findByMembers(membersRepository.findById(memberId)
-////                .orElseThrow(() -> new RuntimeException("Member not found")));
-////            if (cart != null) {
-////                List<ProductCart> productCarts = productCartRepository.findByCart(cart);
-////                for (ProductCart productCart : productCarts) {
-////                    JSONObject cartJson = new JSONObject();
-////                    cartJson.put("productId", productCart.getProductId());
-////                    cartJson.put("productName", productCart.getProduct().getProductName());
-////                    cartJson.put("count", productCart.getCount());
-////                    cartJson.put("price", productCart.getPrice());
-////                    cartJson.put("totalPrice", productCart.getTotalPrice());
-////                    cartArray.put(cartJson);
-////                }
-////                responseJson.put("success", true);
-////                responseJson.put("cart", cartArray);
-////            } else {
-////                responseJson.put("success", false);
-////                responseJson.put("message", "購物車為空");
-////            }
-////        } catch (Exception e) {
-////            responseJson.put("success", false);
-////            responseJson.put("message", "查詢購物車失敗: " + e.getMessage());
-////        }
-////
-////        return responseJson.toString();
-////    }
-////
-////    /**
-////     * 更新購物車中的商品數量和價格
-////     */
-////    @PutMapping("/update")
-////    public String updateCart(@RequestBody String json) {
-////        JSONObject requestJson = new JSONObject(json);
-////        JSONObject responseJson = new JSONObject();
-////
-////        try {
-////            Integer memberId = requestJson.getInt("memberId");
-////            Integer productId = requestJson.getInt("productId");
-////            Integer count = requestJson.getInt("count");
-////
-////            Members member = membersRepository.findById(memberId)
-////                .orElseThrow(() -> new RuntimeException("Member not found"));
-////
-////            Cart cart = cartRepository.findByMembers(member);
-////            if (cart == null) {
-////                throw new RuntimeException("Cart not found for member: " + memberId);
-////            }
-////
-////            Product product = productRepository.findById(productId)
-////                .orElseThrow(() -> new RuntimeException("Product not found"));
-////
-////            ProductCart productCart = productCartRepository.findByCartAndProductId(cart, productId);
-////            if (productCart != null) {
-////                // 更新商品數量和價格
-////                productCart.setCount(count);
-////                productCart.setPrice(product.getDailyFeeOriginal());
-////                productCart.setTotalPrice(count * product.getDailyFeeOriginal());
-////                productCartRepository.save(productCart);
-////
-////                // 更新購物車的總價
-////                int totalPrice = productCartRepository.findByCart(cart).stream()
-////                        .mapToInt(pc -> pc.getTotalPrice())
-////                        .sum();
-////                cart.setTotalPrice(totalPrice);
-////                cartRepository.save(cart);
-////
-////                responseJson.put("success", true);
-////                responseJson.put("message", "購物車更新成功");
-////            } else {
-////                responseJson.put("success", false);
-////                responseJson.put("message", "購物車中找不到該商品");
-////            }
-////        } catch (Exception e) {
-////            responseJson.put("success", false);
-////            responseJson.put("message", "更新購物車失敗: " + e.getMessage());
-////        }
-////
-////        return responseJson.toString();
-////    }
-////
-////    /**
-////     * 從購物車中刪除商品
-////     */
-////    @DeleteMapping("/delete")
-////    public String removeFromCart(@RequestBody String json) {
-////        JSONObject requestJson = new JSONObject(json);
-////        JSONObject responseJson = new JSONObject();
-////
-////        try {
-////            Integer memberId = requestJson.getInt("memberId");
-////            Integer productId = requestJson.getInt("productId");
-////
-////            Members member = membersRepository.findById(memberId)
-////                .orElseThrow(() -> new RuntimeException("Member not found"));
-////
-////            Cart cart = cartRepository.findByMembers(member);
-////            if (cart == null) {
-////                throw new RuntimeException("Cart not found for member: " + memberId);
-////            }
-////
-////            ProductCart productCart = productCartRepository.findByCartAndProductId(cart, productId);
-////            if (productCart != null) {
-////                // 刪除商品
-////                productCartRepository.delete(productCart);
-////
-////                // 更新購物車的總價
-////                int totalPrice = productCartRepository.findByCart(cart).stream()
-////                        .mapToInt(pc -> pc.getTotalPrice())
-////                        .sum();
-////                cart.setTotalPrice(totalPrice);
-////                cartRepository.save(cart);
-////
-////                responseJson.put("success", true);
-////                responseJson.put("message", "商品已從購物車中刪除");
-////            } else {
-////                responseJson.put("success", false);
-////                responseJson.put("message", "購物車中找不到該商品");
-////            }
-////        } catch (Exception e) {
-////            responseJson.put("success", false);
-////            responseJson.put("message", "刪除商品失敗: " + e.getMessage());
-////        }
-////
-////        return responseJson.toString();
-////    }
-////
-////    /**
-////     * 查詢購物車中的特定商品
-////     */
-////    @GetMapping("/item")
-////    public String getCartItem(@RequestBody String json) {
-////        JSONObject requestJson = new JSONObject(json);
-////        JSONObject responseJson = new JSONObject();
-////
-////        try {
-////            Integer memberId = requestJson.getInt("memberId");
-////            Integer productId = requestJson.getInt("productId");
-////
-////            Members member = membersRepository.findById(memberId)
-////                .orElseThrow(() -> new RuntimeException("Member not found"));
-////
-////            Cart cart = cartRepository.findByMembers(member);
-////            if (cart != null) {
-////                ProductCart productCart = productCartRepository.findByCartAndProductId(cart, productId);
-////                if (productCart != null) {
-////                    JSONObject cartJson = new JSONObject();
-////                    cartJson.put("productId", productCart.getProductId());
-////                    cartJson.put("count", productCart.getCount());
-////                    cartJson.put("price", productCart.getPrice());
-////                    cartJson.put("totalPrice", productCart.getTotalPrice());
-////
-////                    responseJson.put("success", true);
-////                    responseJson.put("cartItem", cartJson);
-////                } else {
-////                    responseJson.put("success", false);
-////                    responseJson.put("message", "購物車項目不存在");
-////                }
-////            } else {
-////            	 responseJson.put("success", false);
-////                 responseJson.put("message", "購物車不存在");
-////             }
-////         } catch (Exception e) {
-////             responseJson.put("success", false);
-////             responseJson.put("message", "查詢購物車項目失敗: " + e.getMessage());
-////         }
-////
-////         return responseJson.toString();
-////     }
-// }
+//}
+
+}
+
+

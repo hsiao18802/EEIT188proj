@@ -38,6 +38,10 @@
 
   <ProductModal ref="productModal" v-model:product="product" @rent="insertTheNameOfTheFunction">
   </ProductModal>
+
+   <!-- 購物車 Modal -->
+   <CartModal ref="cartModal"></CartModal>
+
 </template>
 
 <script setup>
@@ -48,6 +52,10 @@ import ProductCard from '@/components/product_and_emp/customer_product/ProductCa
 import Swal from 'sweetalert2';
 import axiosapi from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
+
+//hsiao
+import CartModal from '@/components/cart/CartModal.vue';
+
 
 
 //分頁 start
