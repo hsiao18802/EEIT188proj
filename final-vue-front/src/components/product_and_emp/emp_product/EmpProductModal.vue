@@ -33,9 +33,30 @@
                             <td><textarea name="description" v-model="product.description"></textarea></td>
                         </tr>
                         <tr>
-                            <td>分類編號</td>
-                            <td><input type="number" name="categoryId" v-model="product.categoryId"></td>
+                            <td>商品分類</td>
+                            <td>
+                                <select name="categoryId" v-model="product.categoryId">
+                                    <option v-for="category in categories" :key="category.categoryId" :value="category.categoryId">
+                                    {{ category.categoryId }}：{{ category.categoryName }}
+                                    </option>
+                                </select>
+                            </td>
                         </tr>
+                        <tr>
+                            <td>上架設定</td>
+                            <td  v-if="!isShowInsertButton">
+                                <select name="statusId" v-model="product.statusId">
+                                    <option v-for="status in statuslist" :key="status.statusId" :value="status.statusId">
+                                    {{ status.status }}
+                                    </option>
+                                </select>
+                            </td>
+                            <td v-else>
+                                <input type="hidden" name="statusId" v-model="product.statusId">
+                                <span>預設為上架，如果不加功能記得要隱藏</span>
+                            </td>
+                        </tr>
+
                         <tr v-show="!isShowInsertButton">
                             <td>新增員工ID</td>
                             <td><input type="number" name="addEmployeeId" v-model="product.addEmployeeId" readonly></td>
@@ -81,7 +102,6 @@
     const exampleObj = ref(null);
     onMounted(function () {
         exampleObj.value = new bootstrap.Modal(exampleModal.value, null);
-        
     });
     function showModal() {
         exampleObj.value.show();
@@ -119,6 +139,52 @@
 
         return `${year}年${month}月${day}日 ${hours}時${minutes}分`;
     }
+
+    import axiosapi from '@/plugins/axios';  // 確保你有正確配置 axios
+
+const categories = ref([]);  // 儲存後端回傳的分類資料
+
+async function fetchCategories() {
+    try {
+        const response = await axiosapi.get('/rent/category/find');
+        console.log("fetchCategories 成功 response:", response);
+
+        if (response.data) {
+            categories.value = response.data;  // 將回傳的資料賦值給 categories
+        } else {
+            console.log("fetchCategories 無有效的數據:", response);
+        }
+    } catch (error) {
+        console.log("fetchCategories 發生錯誤:", error);
+    }
+}
+
+const statuslist = ref([]);  // 儲存後端回傳的狀態列表資料
+
+async function fetchStatuses() {
+    try {
+        const response = await axiosapi.get('/rent/status/find');
+        console.log("fetchStatuses 成功 response:", response);
+
+        if (response.data) {
+            statuslist.value = response.data;  // 將回傳的資料賦值給 statuslist
+        } else {
+            console.log("fetchStatuses 無有效的數據:", response);
+        }
+    } catch (error) {
+        console.log("fetchStatuses 發生錯誤:", error);
+    }
+}
+
+// 在 onMounted 的時候調用該函數
+onMounted(() => {
+    fetchCategories();
+});
+
+onMounted(() => {
+    fetchStatuses();
+});
+
 </script>
 
 <style>

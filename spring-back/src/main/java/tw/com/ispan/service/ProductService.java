@@ -78,6 +78,7 @@ public class ProductService {
             existingProduct.setMaxAvailableQuantity(updatedProduct.getMaxAvailableQuantity());
             existingProduct.setDescription(updatedProduct.getDescription());
             existingProduct.setCategoryId(updatedProduct.getCategoryId());
+            existingProduct.setStatusId(updatedProduct.getStatusId());
             
          // 設定最後更新時間為當前時間
             existingProduct.setLastUpdateDatetime(new Date());

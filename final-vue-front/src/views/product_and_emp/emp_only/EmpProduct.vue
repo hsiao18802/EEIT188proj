@@ -37,9 +37,9 @@
                 <td v-else>{{ formatDate(product.addDatetime) }}</td>
                 <td><div class="btn-group col text-end">
                         <a class="btn btn-primary"
-                            @click="$emit('openUpdate', 'update', item.productId)">修改</a>
+                            @click="openModal('update', product.productId)">修改</a>
                         <a class="btn btn-danger"
-                                @click="emits('delete', item.productId)">刪除</a>
+                                @click="callRemove(product.productId)">刪除</a>
                     </div></td>
             </tr>
         </tbody>
@@ -72,11 +72,13 @@ const product = ref({});
 const isShowInsertButton = ref(true);
 const findName = ref("");
 const products = ref([]);
+const emits = defineEmits(["delete", "openUpdate", "openChangePic"]);
 
 function openModal(action, id) {
     if (action === 'insert') {
         isShowInsertButton.value = true;
         product.value = {};
+        product.value.statusId = 1;
     } else {
         isShowInsertButton.value = false;
         callFindById(id);
@@ -210,7 +212,9 @@ function callModify() {
         maxAvailableQuantity: product.value.maxAvailableQuantity || null,
         description: product.value.description || null,
         categoryId: product.value.categoryId || null,
+        statusId: product.value.statusId || null,
     };
+    
 
     axiosapi.put(`/rent/product/${body.productId}`, body).then(function(response) {
         if (selectedImage.value) {
