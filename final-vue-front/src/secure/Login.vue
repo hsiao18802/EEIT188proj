@@ -53,6 +53,7 @@ import { ref, onMounted, nextTick } from 'vue';  // 引入 nextTick
 import { useRouter } from 'vue-router';
 import useUserStore from '@/stores/user.js';  // 引用 Pinia 的 store
 import QRCode from 'qrcode'; // 引入 qrcode 用來生成 QR code
+import { useCartStore } from '@/stores/cartStore';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -60,9 +61,11 @@ const username = ref("");
 const password = ref("");
 const message = ref("");
 const qrCodeUrl = ref("");
+const cartStore =useCartStore();
 
-// 普通登入邏輯
-function login() {
+
+//這裡hsiao有改請YI再確認
+async function login() {
   message.value = "";
 
   if (!username.value || !password.value) {
@@ -84,17 +87,24 @@ function login() {
   userStore.setMembersId("");
   userStore.setLogin(false);
 
-  axiosapi.post("/ajax/secure/login", body).then(function (response) {
+  try {
+    const response = await axiosapi.post("/ajax/secure/login", body);
     console.log(response.data.membersId);
-    
 
     if (response.data.success) {
       // 使用 Pinia 存储登录状态和 token
       userStore.setLogin(true);
       userStore.setRealname(response.data.realname);
-      userStore.setToken(response.data.token); // 不再需要手动存储 token 到 localStorage
-      userStore.setMembersId(response.data.membersId)
+      userStore.setToken(response.data.token);
+      userStore.setMembersId(response.data.membersId);
       axiosapi.defaults.headers.authorization = `Bearer ${response.data.token}`;
+      
+      // 確保獲取最新的購物車內容
+      await cartStore.updateNewList();
+
+      // 判斷購物車內容，更新 shouldShowCartIcon 狀態
+      cartStore.shouldShowCartIcon = cartStore.cartList.length > 0;
+
       Swal.fire({
         text: response.data.message,
         icon: "success",
@@ -107,13 +117,15 @@ function login() {
         icon: "error",
       });
     }
-  }).catch(function (error) {
+  } catch (error) {
     Swal.fire({
       text: "錯誤：" + error.message,
       icon: "error",
     });
-  });
+  }
 }
+
+
 
 // Google 登錄邏輯
 function googleSignIn() {

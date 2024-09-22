@@ -81,9 +81,11 @@ import { useRouter } from 'vue-router';
 import axiosapi from '@/plugins/axios';
 import useUserStore from '@/stores/user'; // 引入 Pinia 的 store
 import Swal from 'sweetalert2';
+import { useCartStore } from '@/stores/cartStore';
 
 const userStore = useUserStore();
 const router = useRouter();
+const cartStore = useCartStore();
 
 async function logout() {
   try {
@@ -104,6 +106,9 @@ async function logout() {
       userStore.setRealname('');
       userStore.setToken('');
       userStore.setMembersId('');
+      // 清除購物車資料
+      cartStore.clearCart(); 
+
 
       // 清除 sessionStorage 中的狀態
       sessionStorage.removeItem('token');
@@ -112,6 +117,9 @@ async function logout() {
       // 清除 localStorage 中的狀態
       localStorage.removeItem('token');
       localStorage.removeItem('login');
+      localStorage.removeItem('cartList');  // 清除 cartList
+      console.log('登出後 localStorage:', localStorage); // 檢查清除結果
+
 
       // 清除 Google 的客戶端狀態
       google.accounts.id.disableAutoSelect();

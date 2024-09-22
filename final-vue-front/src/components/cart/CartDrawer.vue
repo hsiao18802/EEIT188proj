@@ -41,13 +41,18 @@
         </div>
       </div>
 
+       <!-- 清空購物車提示 -->
+       <div v-if="isCartEmpty" class="empty-cart-message">
+        購物車是空的
+      </div>
+
       <!-- 小計 -->
       <div class="cart-summary" v-if="cartList.length > 0">
         <p>小計: {{ totalPrice }} 元</p>
       </div>
 
       <!-- 按鈕 -->
-      <div class="cart-footer">
+      <div class="cart-footer" v-if="cartList.length > 0">
         <v-btn @click="viewCart">查看購物車</v-btn>
         <v-btn @click="checkout">結帳</v-btn>
         <!-- 清空購物車按鈕 -->
@@ -81,28 +86,22 @@ const rentalStore = useRentalStore();
 const showCartDrawer = computed(() => cartStore.showCartDrawer);
 // 購物車列表
 const cartList = computed(() => cartStore.cartList);
-// 計算總價
-/*
+
 const totalPrice = computed(() =>
   cartList.value.reduce((total, item) => total + item.count * item.dailyFeeOriginal, 0)
 );
-*/
 
-onMounted(() => {
-  cartStore.updateNewList(); // 初始化時就確保加載購物車數據
-  console.log('購物車內容:', cartStore.cartList.value); // 查看購物車是否有數據
-});
 
-watch(showCartDrawer, (newVal) => {
-  if (newVal && cartList.value.length === 0) {
-    // cartStore.loadCartFromLocalStorage(); // 確保打開時能正確加載數據
-  }
-});
+const isCartEmpty = computed(() => cartList.value.length === 0); // 新增計算屬性來判斷購物車是否為空
 
-// 是否顯示購物車圖示 (登入且購物車有商品)
+
+
+
+// 是否顯示購物車圖示 (購物車有商品)
 const shouldShowCartIcon = computed(() => {
-  return userStore.isLogin && cartList.value.length > 0;
+  return cartList.value.length > 0;
 });
+
 
 // 號租借時間
 const rentalStartDate = computed(() => rentalStore.rentalStartDate);
@@ -144,7 +143,7 @@ const removeFromCart = (productId) => {
 
 // 清空購物車
 const clearCart = () => {
-  cartStore.clearCart();
+ cartStore.clearCart();
 };
 
 
@@ -226,5 +225,11 @@ const clearCart = () => {
   cursor: pointer;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   z-index: 1000;
+}
+
+  .empty-cart-message {
+  color: red;
+  font-weight: bold;
+  text-align: center;
 }
 </style>

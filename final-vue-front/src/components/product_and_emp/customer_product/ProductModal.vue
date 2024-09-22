@@ -49,6 +49,9 @@ import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { useCartStore } from '@/stores/cartStore';
 import useUserStore from '@/stores/user.js';
 import { gsap } from 'gsap';
+import { useRouter } from 'vue-router';
+
+
 
 
 const exampleModal = ref(null);
@@ -57,6 +60,8 @@ const cartStore = useCartStore();
 const userStore = useUserStore();
 const count = ref(1);
 const animationBall = ref(null);
+const router = useRouter();
+
 
 onMounted(() => {
     if (exampleModal.value) {
@@ -79,6 +84,7 @@ const addCart = async () => {
     if (!userStore.isLogin) {
         // 未登入，跳轉到登入頁面
         router.push('/secure/login');
+        return;
     } else {
         try {
             // 確認傳入了正確的商品資訊

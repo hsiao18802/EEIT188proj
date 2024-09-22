@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { removeFromCartAPI as delCartAPI, addCartAPI, findNewCartListAPI, plusOneAPI, minusOneAPI } from '@/apis/cart';
+import { removeFromCartAPI as delCartAPI, addCartAPI, findNewCartListAPI, plusOneAPI, minusOneAPI, ClearCartAPI } from '@/apis/cart';
 import useUserStore from '@/stores/user.js'; // 確保路徑正確
 import Swal from 'sweetalert2';
 
@@ -177,8 +177,22 @@ export const useCartStore = defineStore('cartStore', () => {
     }
   };
 
-  const clearCart = () => {
-    cartList.value = [];
+  const clearCart = async () => {
+    try {
+      await ClearCartAPI(membersId.value); // 調用 ClearCartAPI
+      cartList.value = []; // 清空本地購物車列表
+      localStorage.removeItem('cartList'); // 清空 localStorage
+
+    } catch (error) {
+      console.error('清空購物車失敗:', error);
+      Swal.fire({
+        title: '錯誤',
+        text: "清空購物車失敗，請稍後再試。",
+        icon: "error",
+        confirmButtonText: '確定',
+        position: 'center'
+      });
+    }
   };
 
   const singleCheck = (productId, selected) => {
@@ -213,7 +227,7 @@ export const useCartStore = defineStore('cartStore', () => {
     toggleCartDrawer,
     addProduct,
     cartList,
-
+    clearCart,
 
   };
 },
