@@ -25,7 +25,12 @@
         </thead>
         <tbody>
             <tr v-for="product in products" :key="product.id">
-                <td></td>
+                <td>
+                    <img v-if="product.mainPhoto" :alt="product.productName" v-default-img="product.mainPhoto"
+                    style="width: 100px; height: 100px;" @click="showFullImage(product.mainPhoto)">
+                    <span v-else><a class="btn btn-primary"
+                        @click="openChangePic('update', product.productId)">新增圖片</a></span>
+                </td>
                 <th scope="row">{{ product.productName }}</th>
                 <td>{{ product.categoryId }}</td>
                 <td>{{ product.dailyFeeOriginal }}</td>
@@ -38,17 +43,20 @@
                 <td><div class="btn-group col text-end">
                         <a class="btn btn-primary"
                             @click="openModal('update', product.productId)">修改</a>
+                        <a class="btn btn-outline-danger"
+                            @click="callDiscontinue(product.productId)">下架</a>
                         <a class="btn btn-danger"
                                 @click="callRemove(product.productId)">刪除</a>
                     </div></td>
             </tr>
         </tbody>
     </table>
+
     <div class="row">
         <ProductCard v-for="product in products" :key="product.id" :item="product" @delete="callRemove" @open-update="openModal" @open-change-pic="openChangePic"></ProductCard>
     </div>
 
-    <ProductModal ref="productModal" v-model:product="product" :is-show-insert-button="isShowInsertButton" @insert="callCreate" @update="callModify" @imageSelected="handleImageSelected"></ProductModal>
+    <ProductModal ref="productModal" v-model:product="product" :is-show-insert-button="isShowInsertButton" @insert="callCreate" @update="callModify" @imageSelected="handleImageSelected" @clearImage="clearImage"></ProductModal>
     <EmpChangePic ref="picModal" v-model:product="product" @imageSelected="handleImageSelected" @changepic="callChangePic"></EmpChangePic>
 </template>
 
@@ -92,12 +100,47 @@ function openChangePic(action, id) {
     picModal.value.showModal();
 }
 
-function callRemove(id) {
+function callDiscontinue(id) {
     Swal.fire({
-        text: "確定刪除？",
+        title: "確定下架？",
         icon: "question",
         showCancelButton: true,
         allowOutsideClick: false,
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+            axiosapi.put(`/rent/product/${id}/discontinue`)
+                .then(function(response) {
+                    if (response.data && response.data.success) {
+                        handleSuccess(response.data.message, productModal.value);
+                    } else {
+                        handleError(new Error(response.data.message || "下架失敗，請稍後再試"));
+                    }
+                })
+                .catch(handleError);
+        }
+    });
+}
+
+function callRemove(id) {
+    Swal.fire({
+        title: "確認刪除？",
+        text: "請注意，刪除以後將無法復原資料",
+        icon: "question",
+        showCancelButton: true,
+        allowOutsideClick: false,
+        footer: '<a href="#" id="discontinueLink">或使用下架，停止販售但保留商品資料</a>',
+        didOpen: () => {
+            const discontinueLink = document.getElementById('discontinueLink');
+            discontinueLink.addEventListener('click', (event) => {
+                event.preventDefault(); // 防止預設的跳轉行為
+                callDiscontinue(id);    // 呼叫下架方法
+            });
+        }
     }).then(function(result) {
         if (result.isConfirmed) {
             Swal.fire({
@@ -113,7 +156,42 @@ function callRemove(id) {
                         handleError(new Error(response.data.message || "刪除失敗，請稍後再試"));
                     }
                 })
+                .catch(function(error) {
+                    // 檢查錯誤訊息是否包含資料表衝突相關字詞
+                    if (error.response && error.response.data && error.response.data.message) {
+                        const errorMessage = error.response.data.message;
+                        if (errorMessage.includes("REFERENCE") || errorMessage.includes("衝突發生在資料庫")) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '刪除失敗',
+                                html: '這個商品已經有客戶下單，無法刪除<br>使用下架功能，讓商品不再顯示與販售？',
+                                showCancelButton: true,
+                                allowOutsideClick: false,
+                            }).then(function(result) {
+        if (result.isConfirmed) {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+            axiosapi.put(`/rent/product/${id}/discontinue`)
+                .then(function(response) {
+                    if (response.data && response.data.success) {
+                        handleSuccess(response.data.message, productModal.value);
+                    } else {
+                        handleError(new Error(response.data.message || "下架失敗，請稍後再試"));
+                    }
+                })
                 .catch(handleError);
+        }
+    });
+                        } else {
+                            handleError(error); // 其他錯誤仍用原來的處理
+                        }
+                    } else {
+                        handleError(error); // 處理未知錯誤
+                    }
+                });
         }
     });
 }
@@ -248,6 +326,11 @@ function handleImageSelected(image) {
     selectedImage.value = image;
 }
 
+function clearImage() {
+    console.log("清除檔案");
+    selectedImage.value = null;
+}
+
 function callChangePic() {
     if (!selectedImage.value) {
         Swal.fire({ text: "請選擇一張圖片", icon: "error" });
@@ -309,6 +392,19 @@ function formatDate(utcDateString) {
         return `${year}年${month}月${day}日 ${hours}時${minutes}分`;
     }
 
+    function showFullImage(imageData) {
+    // 將二進制的圖片資料轉換成 URL
+    const blob = new Blob([new Uint8Array(imageData)], { type: 'image/jpeg' }); // 假設是 JPEG 格式
+    const imageUrl = URL.createObjectURL(blob);
+    
+    Swal.fire({
+        imageUrl: product.mainPhoto,   // 使用圖片 URL
+        imageAlt: '產品圖片',
+        imageWidth: 'auto',   // 你可以根據需要調整
+        imageHeight: 'auto',
+        showConfirmButton: false
+    });
+}
 
 onMounted(function() {
     callFind();

@@ -28,6 +28,28 @@ public class ProductService {
         Optional<Product> rentBean = productRepository.findById(id);
         return rentBean.orElse(null); // 如果找不到，返回 null
     }
+    
+    // 下架商品
+    public Product discontinueProduct(Integer productId) {
+        // 根據 productId 查詢產品
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+
+        if (optionalProduct.isPresent()) {
+            Product existingProduct = optionalProduct.get();
+
+            // 更新產品資訊
+            existingProduct.setStatusId(2);
+            
+         // 設定最後更新時間為當前時間
+            existingProduct.setLastUpdateDatetime(new Date());
+
+            // 將更新後的產品儲存至資料庫
+            return productRepository.save(existingProduct);
+        } else {
+            return null; // 找不到產品則回傳 null
+        }
+    }
+    
 
     // 刪除產品
     public boolean deleteProduct(Integer productId) {

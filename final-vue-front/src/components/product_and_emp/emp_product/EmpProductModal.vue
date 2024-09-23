@@ -4,7 +4,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Product</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="clearImage"></button>
                 </div>
                 <div class="modal-body">
                     <table>
@@ -26,8 +26,17 @@
                         </tr>
                         <tr>
                             <td>選擇圖片</td>
-                            <td><input type="file" accept="image/*" @change="onImageSelected"></td>
+                            <td><input ref="imageInput" type="file" accept="image/*" @change="onImageSelected"></td>
                         </tr> 
+                        <tr>
+                            <td>預覽圖片</td>
+                            <td v-if="selectedImage">
+                                <img :src="imagePreviewUrl" alt="預覽圖片" style="max-width: 100px; max-height: 100px;">
+                            </td>
+                            <td v-else>
+                                <!-- 沒有選擇圖片時，這裡什麼都不顯示 -->
+                            </td>
+                        </tr>
                         <tr>
                             <td>描述</td>
                             <td><textarea name="description" v-model="product.description"></textarea></td>
@@ -79,7 +88,7 @@
                     <button class="btn btn-primary" v-show="isShowInsertButton" @click="emits('insert')">新增</button>
                     <button class="btn btn-primary" v-show="!isShowInsertButton" @click="emits('update')">修改</button>
                     <!-- <button class="btn btn-primary" v-show="!isShowInsertButton" @click="emits('???')">上傳圖檔</button> -->
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="clearImage">關閉</button>
                 </div>
             </div>
         </div>
@@ -89,6 +98,9 @@
 <script setup>
     const props = defineProps(["product", "isShowInsertButton"])
     const emits = defineEmits(["update:product", "insert", "update"])
+    const selectedImage = ref(null);
+    const imagePreviewUrl = ref('');
+    const imageInput = ref(null);
     function doInput(key, event) {
         emits("update:product", {
             ...props.product,
@@ -114,6 +126,8 @@
     const file = event.target.files[0];
     if (file) {
         console.log("圖片已選擇:", file);
+        selectedImage.value = file;
+        imagePreviewUrl.value = URL.createObjectURL(file);  // 生成預覽 URL
         emits('imageSelected', file);  // 通過 emit 傳遞圖片文件給父組件
     }
 }
@@ -173,6 +187,17 @@ async function fetchStatuses() {
         }
     } catch (error) {
         console.log("fetchStatuses 發生錯誤:", error);
+    }
+}
+
+function clearImage() {
+    selectedImage.value = null;
+    imagePreviewUrl.value = '';
+    emits('clearImage');
+
+    // 清除選擇的圖片
+    if (imageInput.value) {
+        imageInput.value.value = '';  // 清空 file input 的值
     }
 }
 

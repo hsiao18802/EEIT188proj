@@ -60,6 +60,27 @@ public class ProductController {
         }
     }
     
+    // 下架商品
+    @PutMapping("/{id}/discontinue")
+    public ResponseEntity<?> discontinueProduct(@PathVariable("id") Integer productId) {
+    	Product discontinueProduct = productService.discontinueProduct(productId);
+    	
+    	if (discontinueProduct != null) {
+    		// 回傳成功訊息
+    		Map<String, Object> response = new HashMap<>();
+    		response.put("success", true);
+    		response.put("message", "產品更新成功");
+    		response.put("product", discontinueProduct);
+    		return ResponseEntity.ok(response);
+    	} else {
+    		// 回傳失敗訊息
+    		Map<String, Object> response = new HashMap<>();
+    		response.put("success", false);
+    		response.put("message", "產品更新失敗");
+    		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    	}
+    }
+    
     @PostMapping("/add")
     public ResponseEntity<Map<String, Object>> addProduct(@RequestBody Product product) {
         System.out.println("收到新增產品的請求: " + product.getProductName());
