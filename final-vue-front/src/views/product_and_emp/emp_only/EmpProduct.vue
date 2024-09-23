@@ -5,7 +5,8 @@
             <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
         </div>
         <div class="col-4">
-            <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind"></ProductSelect>
+            <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind">
+            </ProductSelect>
         </div>
     </div>
     <br>
@@ -27,9 +28,9 @@
             <tr v-for="product in products" :key="product.id">
                 <td>
                     <img v-if="product.mainPhoto" :alt="product.productName" v-default-img="product.mainPhoto"
-                    style="width: 100px; height: 100px;" @click="showFullImage(product.mainPhoto)">
+                        style="width: 100px; height: 100px;" @click="showFullImage(product.mainPhoto)">
                     <span v-else><a class="btn btn-primary"
-                        @click="openChangePic('update', product.productId)">新增圖片</a></span>
+                            @click="openChangePic('update', product.productId)">新增圖片</a></span>
                 </td>
                 <th scope="row">{{ product.productName }}</th>
                 <td>{{ product.categoryId }}</td>
@@ -40,24 +41,27 @@
                 <td v-else>{{ product.addEmployeeId }}</td>
                 <td v-if="product.lastUpdateDatetime">{{ formatDate(product.lastUpdateDatetime) }}</td>
                 <td v-else>{{ formatDate(product.addDatetime) }}</td>
-                <td><div class="btn-group col text-end">
-                        <a class="btn btn-primary"
-                            @click="openModal('update', product.productId)">修改</a>
-                        <a class="btn btn-outline-danger"
-                            @click="callDiscontinue(product.productId)">下架</a>
-                        <a class="btn btn-danger"
-                                @click="callRemove(product.productId)">刪除</a>
-                    </div></td>
+                <td>
+                    <div class="btn-group col text-end">
+                        <a class="btn btn-primary" @click="openModal('update', product.productId)">修改</a>
+                        <a class="btn btn-outline-danger" @click="callDiscontinue(product.productId)">下架</a>
+                        <a class="btn btn-danger" @click="callRemove(product.productId)">刪除</a>
+                    </div>
+                </td>
             </tr>
         </tbody>
     </table>
 
     <div class="row">
-        <ProductCard v-for="product in products" :key="product.id" :item="product" @delete="callRemove" @open-update="openModal" @open-change-pic="openChangePic"></ProductCard>
+        <ProductCard v-for="product in products" :key="product.id" :item="product" @delete="callRemove"
+            @open-update="openModal" @open-change-pic="openChangePic"></ProductCard>
     </div>
 
-    <ProductModal ref="productModal" v-model:product="product" :is-show-insert-button="isShowInsertButton" @insert="callCreate" @update="callModify" @imageSelected="handleImageSelected" @clearImage="clearImage"></ProductModal>
-    <EmpChangePic ref="picModal" v-model:product="product" @imageSelected="handleImageSelected" @changepic="callChangePic"></EmpChangePic>
+    <ProductModal ref="productModal" v-model:product="product" :is-show-insert-button="isShowInsertButton"
+        @insert="callCreate" @update="callModify" @imageSelected="handleImageSelected" @clearImage="clearImage">
+    </ProductModal>
+    <EmpChangePic ref="picModal" v-model:product="product" @imageSelected="handleImageSelected"
+        @changepic="callChangePic"></EmpChangePic>
 </template>
 
 <script setup>
@@ -106,7 +110,7 @@ function callDiscontinue(id) {
         icon: "question",
         showCancelButton: true,
         allowOutsideClick: false,
-    }).then(function(result) {
+    }).then(function (result) {
         if (result.isConfirmed) {
             Swal.fire({
                 text: "Loading......",
@@ -114,7 +118,7 @@ function callDiscontinue(id) {
                 allowOutsideClick: false,
             });
             axiosapi.put(`/rent/product/${id}/discontinue`)
-                .then(function(response) {
+                .then(function (response) {
                     if (response.data && response.data.success) {
                         handleSuccess(response.data.message, productModal.value);
                     } else {
@@ -141,7 +145,7 @@ function callRemove(id) {
                 callDiscontinue(id);    // 呼叫下架方法
             });
         }
-    }).then(function(result) {
+    }).then(function (result) {
         if (result.isConfirmed) {
             Swal.fire({
                 text: "Loading......",
@@ -149,14 +153,14 @@ function callRemove(id) {
                 allowOutsideClick: false,
             });
             axiosapi.delete(`/rent/product/${id}`)
-                .then(function(response) {
+                .then(function (response) {
                     if (response.data && response.data.success) {
                         handleSuccess(response.data.message, productModal.value);
                     } else {
                         handleError(new Error(response.data.message || "刪除失敗，請稍後再試"));
                     }
                 })
-                .catch(function(error) {
+                .catch(function (error) {
                     // 檢查錯誤訊息是否包含資料表衝突相關字詞
                     if (error.response && error.response.data && error.response.data.message) {
                         const errorMessage = error.response.data.message;
@@ -164,27 +168,27 @@ function callRemove(id) {
                             Swal.fire({
                                 icon: 'error',
                                 title: '刪除失敗',
-                                html: '這個商品已經有客戶下單，無法刪除<br>使用下架功能，讓商品不再顯示與販售？',
+                                html: '商品已經有客戶下單，無法刪除<br>使用下架功能，讓商品不再顯示與販售？',
                                 showCancelButton: true,
                                 allowOutsideClick: false,
-                            }).then(function(result) {
-        if (result.isConfirmed) {
-            Swal.fire({
-                text: "Loading......",
-                showConfirmButton: false,
-                allowOutsideClick: false,
-            });
-            axiosapi.put(`/rent/product/${id}/discontinue`)
-                .then(function(response) {
-                    if (response.data && response.data.success) {
-                        handleSuccess(response.data.message, productModal.value);
-                    } else {
-                        handleError(new Error(response.data.message || "下架失敗，請稍後再試"));
-                    }
-                })
-                .catch(handleError);
-        }
-    });
+                            }).then(function (result) {
+                                if (result.isConfirmed) {
+                                    Swal.fire({
+                                        text: "Loading......",
+                                        showConfirmButton: false,
+                                        allowOutsideClick: false,
+                                    });
+                                    axiosapi.put(`/rent/product/${id}/discontinue`)
+                                        .then(function (response) {
+                                            if (response.data && response.data.success) {
+                                                handleSuccess(response.data.message, productModal.value);
+                                            } else {
+                                                handleError(new Error(response.data.message || "下架失敗，請稍後再試"));
+                                            }
+                                        })
+                                        .catch(handleError);
+                                }
+                            });
                         } else {
                             handleError(error); // 其他錯誤仍用原來的處理
                         }
@@ -203,7 +207,7 @@ function callFindById(id) {
         allowOutsideClick: false,
     });
 
-    axiosapi.get(`/rent/product/${id}`).then(function(response) {
+    axiosapi.get(`/rent/product/${id}`).then(function (response) {
         if (response.data) {
             product.value = response.data;
         } else {
@@ -212,7 +216,7 @@ function callFindById(id) {
                 icon: "error",
             });
         }
-        setTimeout(function() {
+        setTimeout(function () {
             Swal.close();
         }, 500);
     }).catch(handleError);
@@ -225,12 +229,12 @@ function callFind(page) {
 
     let body = { start: start.value, max: max.value, dir: false, order: "id", name: findName.value };
     axiosapi.get("/rent/product/find", body)
-        .then(function(response) {
+        .then(function (response) {
             if (response.data) {
                 products.value = response.data;
                 total.value = response.data.count;
             }
-            setTimeout(function() {
+            setTimeout(function () {
                 Swal.close();
             }, 500);
         })
@@ -249,7 +253,7 @@ async function callCreate() {
     try {
         if (selectedImage.value) {
             const reader = new FileReader();
-            reader.onloadend = async function() {
+            reader.onloadend = async function () {
                 body.mainPhoto = reader.result.split(",")[1];
                 await sendCreateRequest(body);
             };
@@ -292,15 +296,15 @@ function callModify() {
         categoryId: product.value.categoryId || null,
         statusId: product.value.statusId || null,
     };
-    
 
-    axiosapi.put(`/rent/product/${body.productId}`, body).then(function(response) {
+
+    axiosapi.put(`/rent/product/${body.productId}`, body).then(function (response) {
         if (selectedImage.value) {
             const reader = new FileReader();
-            reader.onloadend = function() {
+            reader.onloadend = function () {
                 const base64String = reader.result.split(",")[1];
                 let photoBody = { mainPhoto: base64String };
-                axiosapi.put(`/rent/product/${product.value.productId}/photo`, photoBody).then(function(response) {
+                axiosapi.put(`/rent/product/${product.value.productId}/photo`, photoBody).then(function (response) {
                     if (response.data.success) {
                         handleSuccessReload(response.data.message);
                     } else {
@@ -338,9 +342,9 @@ function callChangePic() {
     }
 
     const reader = new FileReader();
-    reader.onloadend = function() {
+    reader.onloadend = function () {
         let body = { mainPhoto: reader.result.split(",")[1] };
-        axiosapi.put(`/rent/product/${product.value.productId}/photo`, body).then(function(response) {
+        axiosapi.put(`/rent/product/${product.value.productId}/photo`, body).then(function (response) {
             if (response.data.success) {
                 handleSuccessReload(response.data.message);
             } else {
@@ -360,14 +364,14 @@ function handleError(error) {
 
 // 共用的成功提示函數 (頁面刷新)
 function handleSuccessReload(message) {
-    Swal.fire({ text: message || '操作成功', icon: "success" }).then(function() {
+    Swal.fire({ text: message || '操作成功', icon: "success" }).then(function () {
         window.location.reload();
     });
 }
 
 // 共用的成功提示函數 (無頁面刷新)
 function handleSuccess(message, modalToHide = null) {
-    Swal.fire({ text: message || '操作成功', icon: "success" }).then(function() {
+    Swal.fire({ text: message || '操作成功', icon: "success" }).then(function () {
         if (modalToHide) modalToHide.hideModal();
         callFind(current.value);
     });
@@ -376,27 +380,27 @@ function handleSuccess(message, modalToHide = null) {
 
 // 定義一個函數來格式化日期並調整時區
 function formatDate(utcDateString) {
-        if (!utcDateString) return ""; // 防止空值報錯
-        const date = new Date(utcDateString);
-        // 調整時區+8
-        // date.setHours(date.getHours() + 8);
+    if (!utcDateString) return ""; // 防止空值報錯
+    const date = new Date(utcDateString);
+    // 調整時區+8
+    // date.setHours(date.getHours() + 8);
 
-        // 格式化為 yyyy-MM-dd HH:mm:ss
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-        // const seconds = String(date.getSeconds()).padStart(2, "0");
+    // 格式化為 yyyy-MM-dd HH:mm:ss
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    // const seconds = String(date.getSeconds()).padStart(2, "0");
 
-        return `${year}年${month}月${day}日 ${hours}時${minutes}分`;
-    }
+    return `${year}年${month}月${day}日 ${hours}時${minutes}分`;
+}
 
-    function showFullImage(imageData) {
+function showFullImage(imageData) {
     // 將二進制的圖片資料轉換成 URL
     const blob = new Blob([new Uint8Array(imageData)], { type: 'image/jpeg' }); // 假設是 JPEG 格式
     const imageUrl = URL.createObjectURL(blob);
-    
+
     Swal.fire({
         imageUrl: product.mainPhoto,   // 使用圖片 URL
         imageAlt: '產品圖片',
@@ -406,7 +410,7 @@ function formatDate(utcDateString) {
     });
 }
 
-onMounted(function() {
+onMounted(function () {
     callFind();
 });
 </script>
