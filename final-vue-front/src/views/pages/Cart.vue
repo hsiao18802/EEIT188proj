@@ -1,24 +1,25 @@
+
 <template>
   <div class="cart-page">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <div v-if="!isCartEmpty" class="cart-header">
-    
-        <h3>購物車確認</h3>
-      <div class="rental-dates-card">
-    <div class="rental-date rental-start">
-      <p>開始日期</p>
-      <p>{{ rentalStartDate }}</p>
+      <h3>購物車確認</h3>
+      <div class="rental-dates-card" @click="!rentalStartDate && !rentalEndDate ? showDatePicker = true : null">
+        <div class="rental-date rental-start">
+          <p>開始日期</p>
+          <p>{{ formattedRentalStartDate }}</p>
+        </div>
+        <div class="rental-date rental-end">
+          <div class="rental-date rental-gap"></div>
+          <p>結束日期</p>
+          <p>{{ formattedRentalEndDate }}</p>
+        </div>
+      </div>
+      <p class="rental-days">共 {{ rentalDays }} 天</p>
     </div>
-    <div class="rental-date rental-end">
-      <div class="rental-date rental-gap"></div> <!-- 間隔 -->
-      <p>結束日期</p>
-      <p>{{ rentalEndDate }}</p>
-    </div>
-  </div>
 
-  <p class="rental-days">共 {{ rentalDays }} 天</p>
-</div>
+
 
     <div class="cart-content">
       <div v-if="isCartEmpty" class="empty-cart-message">
@@ -37,12 +38,11 @@
             <div class="product-price">單價: ${{ product.dailyFeeOriginal }} / 每日</div>
             <div class="product-actions">
               <button class="quantity-btn delete-btn" @click="removeFromCart(product.productId)">
-                <i class="fas fa-trash"></i> <!-- 垃圾桶圖案 -->
+                <i class="fas fa-trash"></i>
               </button>
               <button class="quantity-btn" @click="minusOne(product.productId)">-</button>
               <span>{{ product.count }}</span>
               <button class="quantity-btn" @click="plusOne(product.productId)">+</button>
-              
             </div>
           </div>
         </div>
@@ -58,7 +58,7 @@
             v-model="selectedServices.delivery1"
             @change="handleServiceSelection(1)"
           />
-          大安區店 自取 ($0)
+          大安區店 上門自取 ($0)*請注意營業時間
         </label>
         <label>
           <input
@@ -96,16 +96,41 @@
     </div>
 
     <CartIcon v-if="!isCartPage" />
+
+    <!-- 日期選擇模態框 -->
+    <v-dialog v-model="showDatePicker" max-width="500px">
+      <v-card>
+        <v-card-title>選擇租借日期</v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col>
+              <v-date-picker v-model="selectedStartDate" label="開始日期"></v-date-picker>
+            </v-col>
+            <v-col>
+              <v-date-picker v-model="selectedEndDate" label="結束日期"></v-date-picker>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn text @click="showDatePicker = false">取消</v-btn>
+          <v-btn color="primary" @click="updateRentalDates">確定</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 
 
+
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref,watch } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs'; // 引入 dayjs 函式庫 算天數
+
+
+
 
 // 計算租借天數
 const rentalDays = computed(() => {
@@ -128,6 +153,40 @@ const isCartPage = computed(() => {
 const cartList = computed(() => cartStore.cartList);
 const rentalStartDate = computed(() => cartStore.rentalStartDate);
 const rentalEndDate = computed(() => cartStore.rentalEndDate);
+
+// 彈出視窗的狀態
+const showDateModal = ref(false);
+const newStartDate = ref(rentalStartDate.value);
+const newEndDate = ref(rentalEndDate.value);
+
+// 新增狀態管理日期選擇器
+const showDatePicker = ref(false);
+const selectedStartDate = ref(rentalStartDate.value);
+const selectedEndDate = ref(rentalEndDate.value);
+
+watch(rentalStartDate, (newValue) => {
+  selectedStartDate.value = newValue;
+});
+
+watch(rentalEndDate, (newValue) => {
+  selectedEndDate.value = newValue;
+});
+
+// 格式化日期
+const formattedRentalStartDate = computed(() => {
+  return rentalStartDate.value ? dayjs(rentalStartDate.value).format('YYYY-MM-DD') : '';
+});
+
+const formattedRentalEndDate = computed(() => {
+  return rentalEndDate.value ? dayjs(rentalEndDate.value).format('YYYY-MM-DD') : '';
+});
+
+// 更新日期
+const updateDates = () => {
+  cartStore.rentalStartDate = newStartDate.value;
+  cartStore.rentalEndDate = newEndDate.value;
+  showDateModal.value = false;
+};
 
 const selectedServices = ref({
   delivery1: false, // 自取
@@ -183,6 +242,16 @@ const checkout = () => {
   router.push('/checkout');
 };
 
+const updateRentalDates = () => {
+  if (!selectedStartDate.value || !selectedEndDate.value) {
+    alert("請選擇租借日期");
+    return;
+  }
+  cartStore.rentalStartDate = selectedStartDate.value;
+  cartStore.rentalEndDate = selectedEndDate.value;
+  showDatePicker.value = false; // 關閉模態框
+};
+
 </script>
 
 <style scoped>
@@ -197,13 +266,13 @@ const checkout = () => {
 }
 
 .cart-header {
+
   background-color: #f9f9f9;
-  padding: 20px;
+  padding: 10px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 600px; /* 或者使用你產品 card 的最大寬度 */
-  width: 100%; /* 讓卡片寬度自適應 */
-  margin: 20px auto;
+  max-width: 6000px; /* 或者使用你產品 card 的最大寬度 */
+  margin: 10px auto;
   text-align: center;
 }
 
@@ -216,6 +285,8 @@ const checkout = () => {
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   margin-bottom: 10px;
+  max-width: 6000px; /* 設定最大寬度 */
+  margin: 0 auto; /* 中心對齊 */
 }
 
 .rental-date {
@@ -262,6 +333,7 @@ const checkout = () => {
 
 .cart-content {
   margin-bottom: 20px;
+  
 }
 
 .product-item {
@@ -273,6 +345,8 @@ const checkout = () => {
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: #f9f9f9;
+  max-width: 6000px; /* 或者使用你產品 card 的最大寬度 */
+
 }
 
 .product-image {
@@ -341,7 +415,7 @@ const checkout = () => {
 
 .service-card,
 .summary-card {
-  border: 1px solid #ccc;
+  border: 2px solid #ccc;
   border-radius: 8px;
   padding: 16px;
   background-color: #f9f9f9;
@@ -373,3 +447,6 @@ const checkout = () => {
   text-align: center;
 }
 </style>
+
+
+

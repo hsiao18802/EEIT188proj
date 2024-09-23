@@ -29,11 +29,7 @@ export const useCartStore = defineStore('cartStore', () => {
 
 
 
-  // 計算屬性
-  // const allCount = computed(() => cartList.value.reduce((a, c) => a + c.count, 0));
-  // const allPrice = computed(() => cartList.value.reduce((a, c) => a + c.count * c.dailyFeeOriginal, 0));
-  // const selectedCount = computed(() => cartList.value.filter(item => item.selected).reduce((a, c) => a + c.count, 0));
-  // const selectedPrice = computed(() => cartList.value.filter(item => item.selected).reduce((a, c) => a + c.count * c.dailyFeeOriginal, 0));
+  
   const isAll = computed(() => cartList.value.every(item => item.selected));
 
 
@@ -225,10 +221,6 @@ export const useCartStore = defineStore('cartStore', () => {
   return {
     membersId,
     cartList,
-    // allCount,
-    // allPrice,
-    // selectedCount,
-    // selectedPrice,
     isAll,
     setMembersId,
     updateNewList,

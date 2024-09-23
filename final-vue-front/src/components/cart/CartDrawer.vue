@@ -3,11 +3,10 @@
     <div class="overlay" @click="toggleCart"></div>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-
     <div class="cart-drawer">
       <div class="cart-header">
-      <h3>My reservation</h3>
-        <p>租借日期: {{ rentalStartDate }} 到 {{ rentalEndDate }} </p>
+        <h3>My reservation</h3>
+        <p>租借日期: {{ formattedRentalStartDate }} 到 {{ formattedRentalEndDate }} </p>
         <p>共 {{ rentalDays }} 天</p>
       </div>
 
@@ -29,7 +28,7 @@
               <span>{{ product.count }}</span>
               <button class="quantity-btn" @click="plusOne(product.productId)">+</button>
               <button class="quantity-btn delete-btn" @click="removeFromCart(product.productId)">
-               <i class="fas fa-trash"></i> <!-- 垃圾桶圖案 -->
+                <i class="fas fa-trash"></i> <!-- 垃圾桶圖案 -->
               </button>
             </div>
           </div>
@@ -41,38 +40,37 @@
 
       <div>
         <h3>加價服務</h3>
-            <label>
-              <input
-                type="checkbox"
-                v-model="selectedServices.delivery1"
-                @change="handleServiceSelection(1)"
-              />
-              大安區店 自取 ($0)
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                v-model="selectedServices.delivery2"
-                :disabled="selectedServices.delivery1"
-                @change="handleServiceSelection(2)"
-              />
-              大安區店 附近 1-20公里內的送貨和取貨 ($300)
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                v-model="selectedServices.delivery3"
-                :disabled="selectedServices.delivery1"
-                @change="handleServiceSelection(3)"
-              />
-              大安區店 附近 20-40公里內的送貨和取貨 ($500)
-            </label>
-            <label>
-              <input type="checkbox" v-model="selectedServices.insurance4" />
-              安心保安心用：意外不便險 ($600)
-            </label>
-          </div>
-      
+        <label>
+          <input
+            type="checkbox"
+            v-model="selectedServices.delivery1"
+            @change="handleServiceSelection(1)"
+          />
+          大安區店 自取 ($0)
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            v-model="selectedServices.delivery2"
+            :disabled="selectedServices.delivery1"
+            @change="handleServiceSelection(2)"
+          />
+          大安區店 附近 1-20公里內的送貨和取貨 ($300)
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            v-model="selectedServices.delivery3"
+            :disabled="selectedServices.delivery1"
+            @change="handleServiceSelection(3)"
+          />
+          大安區店 附近 20-40公里內的送貨和取貨 ($500)
+        </label>
+        <label>
+          <input type="checkbox" v-model="selectedServices.insurance4" />
+          安心保安心用：意外不便險 ($600)
+        </label>
+      </div>
 
       <div class="cart-footer" v-if="cartList.length > 0">
         <span>🛒共 {{ totalItemCount }} 件商品</span>
@@ -80,11 +78,9 @@
           <p>小計: {{ totalPrice }} 元</p>
         </div>
         <div class="footer-buttons">
-          
           <v-btn @click="viewCart">查看購物車</v-btn>
           <v-btn @click="checkout">結帳</v-btn>
-          <v-btn class="clear-cart-btn"  @click="clearCart">清空購物車</v-btn>
-          
+          <v-btn class="clear-cart-btn" @click="clearCart">清空購物車</v-btn>
         </div>
       </div>
     </div>
@@ -94,6 +90,7 @@
     <span>🛒</span>
   </div>
 </template>
+
 
 <script setup>
 import { computed,ref } from 'vue';
@@ -182,6 +179,15 @@ const clearCart = () => {
   cartStore.rentalStartDate = null;
   cartStore.rentalEndDate = null;
 };
+
+
+const formattedRentalStartDate = computed(() => {
+  return rentalStartDate.value ? dayjs(rentalStartDate.value).format('YYYY-MM-DD') : '';
+});
+
+const formattedRentalEndDate = computed(() => {
+  return rentalEndDate.value ? dayjs(rentalEndDate.value).format('YYYY-MM-DD') : '';
+});
 </script>
 
 <style scoped>

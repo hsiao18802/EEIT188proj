@@ -118,6 +118,9 @@ async function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('login');
       localStorage.removeItem('cartList');  // 清除 cartList
+      localStorage.clear();              // 清除所有項目
+      console.log('登出後 localStorage:', localStorage);  // 應該顯示為空
+
       console.log('登出後 localStorage:', localStorage); // 檢查清除結果
 
 
