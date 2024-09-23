@@ -32,12 +32,12 @@
         </div>
 
         <!-- 掃碼登錄按鈕 -->
-        <div class="qr-login-container">
+        <!-- <div class="qr-login-container">
           <h4>或使用掃碼登錄</h4>
-          <button @click="generateQrCode" class="google-btn">生成 QR 掃碼登錄</button>
+          <button @click="generateQrCode" class="google-btn">生成 QR 掃碼登錄</button> -->
           <!-- 顯示 QR Code -->
-          <canvas id="qrcode" style="margin-top: 20px;"></canvas>
-        </div>
+          <!-- <canvas id="qrcode" style="margin-top: 20px;"></canvas>
+        </div> -->
       </div>
 
       <!-- 圖片部分 -->
