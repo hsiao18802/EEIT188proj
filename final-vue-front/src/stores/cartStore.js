@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { removeFromCartAPI as delCartAPI, addCartAPI, findNewCartListAPI, plusOneAPI, minusOneAPI } from '@/apis/cart';
+import { removeFromCartAPI as delCartAPI, addCartAPI, findNewCartListAPI, plusOneAPI, minusOneAPI, ClearCartAPI } from '@/apis/cart';
 import useUserStore from '@/stores/user.js'; // 確保路徑正確
 import Swal from 'sweetalert2';
 
@@ -19,12 +19,17 @@ export const useCartStore = defineStore('cartStore', () => {
     showCartDrawer.value = !showCartDrawer.value; // 切換購物車小視窗顯示狀態
   };
 
+  const rentalStartDate = ref(null);
+  const rentalEndDate = ref(null);
 
-  // 計算屬性
-  // const allCount = computed(() => cartList.value.reduce((a, c) => a + c.count, 0));
-  // const allPrice = computed(() => cartList.value.reduce((a, c) => a + c.count * c.dailyFeeOriginal, 0));
-  // const selectedCount = computed(() => cartList.value.filter(item => item.selected).reduce((a, c) => a + c.count, 0));
-  // const selectedPrice = computed(() => cartList.value.filter(item => item.selected).reduce((a, c) => a + c.count * c.dailyFeeOriginal, 0));
+  const setRentalDates = (startDate, endDate) => {
+    rentalStartDate.value = startDate;
+    rentalEndDate.value = endDate;
+  };
+
+
+
+  
   const isAll = computed(() => cartList.value.every(item => item.selected));
 
 
@@ -39,6 +44,8 @@ export const useCartStore = defineStore('cartStore', () => {
     try {
       const res = await findNewCartListAPI(membersId.value);
       console.log('API response for cart:', res.data);  //API response for cart:  [ , , ,]
+      console.log('updateNewList＿Rental Start Date:', rentalStartDate.value);
+      console.log('updateNewList＿Rental End Date:', rentalEndDate.value);
 
       cartList.value = res.data; // 更新 cartList
 
@@ -66,7 +73,15 @@ export const useCartStore = defineStore('cartStore', () => {
     console.log('Adding to cart with membersId:', currentMembersId); // 調試用
 
     try {
-      const response = await addCartAPI({ productId, count, membersId: currentMembersId });
+      const response = await addCartAPI(
+        {
+          productId, count, membersId: currentMembersId,
+          rentalStartDate: rentalStartDate.value,
+          rentalEndDate: rentalEndDate.value
+        }
+      );
+      console.log('Rental Start Date:', rentalStartDate.value);
+      console.log('Rental End Date:', rentalEndDate.value);
       console.log('API response carstore:', response);  //API response carstore:
       //{success: true, message: 'Product added to cart successfully.', data: {…}}
 
@@ -177,28 +192,35 @@ export const useCartStore = defineStore('cartStore', () => {
     }
   };
 
-  const clearCart = () => {
-    cartList.value = [];
-  };
+  const clearCart = async () => {
+    try {
+      await ClearCartAPI(membersId.value); // 調用 ClearCartAPI
+      cartList.value = []; // 清空本地購物車列表
+      localStorage.removeItem('cartList'); // 清空 localStorage
 
-  const singleCheck = (productId, selected) => {
-    const item = cartList.value.find(item => item.productId === productId);
-    if (item) {
-      item.selected = selected;
+
+    } catch (error) {
+      console.error('清空購物車失敗:', error);
+      Swal.fire({
+        title: '錯誤',
+        text: "清空購物車失敗，請稍後再試。",
+        icon: "error",
+        confirmButtonText: '確定',
+        position: 'center'
+      });
     }
   };
 
-  const allCheck = (selected) => {
-    cartList.value.forEach(item => item.selected = selected);
-  };
+
+
+  const shouldShowCartIcon = ref(true); // 控制購物車圖標的顯示
+
+
+
 
   return {
     membersId,
     cartList,
-    // allCount,
-    // allPrice,
-    // selectedCount,
-    // selectedPrice,
     isAll,
     setMembersId,
     updateNewList,
@@ -207,13 +229,15 @@ export const useCartStore = defineStore('cartStore', () => {
     plusOne,
     minusOne,
     clearCart,
-    singleCheck,
-    allCheck,
     showCartDrawer,
     toggleCartDrawer,
     addProduct,
     cartList,
-
+    clearCart,
+    rentalStartDate,
+    rentalEndDate,
+    setRentalDates,
+    shouldShowCartIcon
 
   };
 },

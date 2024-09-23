@@ -25,6 +25,8 @@ public interface CartRepository extends JpaRepository<Cart, Integer> {
 	 
 	 Set<Cart> findByMembers(Members members);
 	 
+	 
+	 
 	// 根據 membersId 刪除購物車記錄
 //	    @Transactional
 //	    void deleteByMembersId(String membersId);

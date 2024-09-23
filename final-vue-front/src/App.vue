@@ -5,7 +5,9 @@
     <component :is="currentNavbar"></component>
 
     <CartDrawer></CartDrawer>
-    <CartIcon ></CartIcon>
+
+   <!-- 根據路由判斷是否顯示購物車圖標 -->
+   <CartIcon v-if="!isCartPage" />
 
     <!-- 右側內容區 -->
     <div v-if="isEmpNavbar" class="flex-grow-1 p-3">
@@ -59,6 +61,11 @@ onMounted(() => {
 // 動態設置當前導航列
 const currentNavbar = computed(() => {
   return isEmpNavbar.value ? EmpNavbar : PublicNavbar;
+});
+
+// 檢查當前路由是否為購物車頁面
+const isCartPage = computed(() => {
+  return route.path === '/pages/Cart'; // 假設購物車的路由是 '/pages/Cart'
 });
 
 

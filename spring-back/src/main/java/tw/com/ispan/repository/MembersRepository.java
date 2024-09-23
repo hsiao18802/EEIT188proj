@@ -11,4 +11,8 @@ import tw.com.ispan.domain.Members;
 public interface MembersRepository extends JpaRepository<Members, Integer> {
 	Optional<Members> findByUsername(String username);
 	 Optional<Members> findByEmail(String email);
+	    Optional<Members> findById(Integer membersId); // 根據 ID 查詢會員
+
+	 
+
 }

@@ -2,6 +2,10 @@
 npm install v-click-outside
 npm install --save-dev @types/bootstrap
 npm install gsap
+//計算天數
+npm install dayjs 
+
+
 
 
 

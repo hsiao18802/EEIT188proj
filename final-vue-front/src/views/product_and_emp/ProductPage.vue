@@ -13,7 +13,7 @@
     <div class="col-2">
             <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
         </div>
-    <div class="col-6">
+    <div class="col-6">å
             <input type="text" placeholder="請輸入查詢條件" v-model="findName" @input="callFind">
         </div>
     <div class="col-4">
@@ -51,11 +51,41 @@
 import ProductCard from '@/components/product_and_emp/customer_product/ProductCard.vue';
 import Swal from 'sweetalert2';
 import axiosapi from '@/plugins/axios';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref ,watch} from 'vue';
 
 //hsiao
 import CartModal from '@/components/cart/CartModal.vue';
+import { useCartStore } from '@/stores/cartStore';
+const cartStore = useCartStore();
+const rentalStartDate = ref(null);
+const rentalEndDate = ref(null);
 
+// 更新日期的方法
+const updateDate = (type, event) => {
+  if (type === 'rentalStartDate') {
+    rentalStartDate.value = event.target.value;
+  } else if (type === 'rentalEndDate') {
+    rentalEndDate.value = event.target.value;
+  }
+};
+
+// 監聽日期變化，自動加入購物車
+watch([rentalStartDate, rentalEndDate], ([newStartDate, newEndDate]) => {
+  if (newStartDate && newEndDate) {
+    addToCart();
+  }
+});
+
+// 添加到購物車的方法
+const addToCart = () => {
+ 
+
+  // 將日期添加到購物車
+  cartStore.addCart({
+    rentalStartDate: rentalStartDate.value,
+    rentalEndDate: rentalEndDate.value,
+  });
+};
 
 
 //分頁 start
@@ -179,6 +209,21 @@ function callFind(page) {
 onMounted(function () {
   callFind();
 });
+
+
+
+
+
+function doInput(field, event) {
+  const value = event.target.value;
+  if (field === 'rentalStartDate') {
+    cartStore.setRentalDates(value, cartStore.rentalEndDate);
+  } else if (field === 'rentalEndDate') {
+    cartStore.setRentalDates(cartStore.rentalStartDate, value);
+  }
+}
+
+
 </script>
 
 <style></style>

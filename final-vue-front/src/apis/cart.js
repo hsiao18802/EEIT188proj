@@ -18,7 +18,12 @@ export const findNewCartListAPI = (membersId) => {
 };
 
 // 從購物車中刪除商品
-export const removeFromCartAPI = (data) => axios.delete(`${BASE_URL}/remove`, { params: data })
+export const removeFromCartAPI = (data) => axiosapi.delete(`${BASE_URL}/remove`, { params: data })
+
+export const ClearCartAPI = (membersId) => {
+  return axiosapi.delete(`${BASE_URL}/clear`, { params: { membersId } });
+};
+
 
 // API 請求方法
 export const plusOneAPI = (params) => {

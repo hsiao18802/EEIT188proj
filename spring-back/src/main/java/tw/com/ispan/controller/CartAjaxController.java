@@ -178,6 +178,12 @@ public ResponseEntity<String> removeFromCart(
     }
 }
 
+@DeleteMapping("/clear")
+public ResponseEntity<?> clearCart(@RequestParam Integer membersId) {
+	cartService.clearCart(membersId);
+    return ResponseEntity.ok("購物車已清空");
+}
+
 //清空購物車
 //@PostMapping("/clear")
 //public ResponseEntity<String> clearCart(@RequestHeader("Authorization") String token) {

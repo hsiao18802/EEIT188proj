@@ -115,6 +115,20 @@ public class CartService {
         }
     }
     
+    public void clearCart(Integer membersId) {
+        // 根據會員ID獲取會員實體
+        Members member = membersRepo.findById(membersId)
+                                          .orElseThrow(() -> new RuntimeException("找不到該會員"));
+
+        // 獲取該會員的購物車項目
+        Set<Cart> carts = cartRepo.findByMembers(member);
+        if (carts != null && !carts.isEmpty()) {
+            // 刪除該會員的所有購物車項目
+        	cartRepo.deleteAll(carts);
+        }
+    }
+}
+    
 //    public void clearCartByMembersId(String membersId) {
 //        // 根據會員 ID 清空購物車資料
 //    	cartRepo.deleteByMembersId(membersId);
@@ -158,7 +172,7 @@ public class CartService {
 //    單一職責原則違反 (SRP)： 如果 CartService 同時處理業務邏輯和 DTO 的轉換，這可能會違反單一職責原則，因為 CartService 的主要職責是處理業務邏輯，而轉換 DTO 應該是不同的職責。
 //    代碼膨脹： 隨著功能增加，轉換邏輯可能變得複雜，讓 CartService 的代碼過於冗長。
    
-}
+
 
 
 
