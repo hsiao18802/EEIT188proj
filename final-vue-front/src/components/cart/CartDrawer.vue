@@ -11,7 +11,7 @@
       </div>
 
       <div class="cart-content">
-        <div v-for="product in cartList" :key="product.productId" class="product-item">
+        <div v-for="product in cartList" :key="product.cartId" class="product-item">
           <div class="product-image">
             <img :src="product.mainPhoto" alt="product image" />
           </div>
@@ -22,6 +22,7 @@
               <br />
               租借數量: {{ product.count }}
               <br />
+              Cart ID: {{ product.cartId }} <!-- 測試cartId 的顯示 --> 
             </div>
             <div class="product-actions">
               <button class="quantity-btn" @click="minusOne(product.productId)">-</button>
@@ -249,7 +250,7 @@ const formattedRentalEndDate = computed(() => {
   padding: 16px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: white;
   display: flex; /* 使用 Flexbox 進行排列 */
   align-items: center; /* 垂直居中 */
 }
@@ -283,18 +284,21 @@ const formattedRentalEndDate = computed(() => {
 }
 
 .quantity-btn {
-  background-color: #007bff; /* 藍色背景 */
-  color: white; /* 白色文字 */
-  border: none; /* 去掉邊框 */
-  border-radius: 4px; /* 圓角 */
-  padding: 5px 10px; /* 內邊距 */
-  cursor: pointer; /* 鼠標指針 */
-  transition: background-color 0.3s; /* 漸變效果 */
+  background-color: white;
+  color: black;
+  border: 2px solid #007bff; /* 藍色外框線 */
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s; /* 加入邊框顏色的變化 */
 }
 
 .quantity-btn:hover {
-  background-color: #0056b3; /* 深藍色 hover */
+  background-color: #007bff; /* 滑鼠懸停時改變背景顏色 */
+  color: white; /* 滑鼠懸停時改變文字顏色 */
+  border-color: #0056b3; /* 滑鼠懸停時改變邊框顏色 */
 }
+
 
 .delete-btn {
   background-color: transparent; /* 透明背景 */
@@ -304,9 +308,9 @@ const formattedRentalEndDate = computed(() => {
 }
 
 .delete-btn i {
-  color: black; /* 基本顏色設為黑色 */
+  color: #007bff; 
   font-size: 1.5em; /* 調整圖標大小 */
-  filter: grayscale(100%) contrast(100%); /* 使圖標變成黑白 */
+  
 }
 
 .delete-btn:hover i {

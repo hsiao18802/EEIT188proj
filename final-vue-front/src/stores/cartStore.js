@@ -9,10 +9,8 @@ export const useCartStore = defineStore('cartStore', () => {
   // 初始化 userStore
   const userStore = useUserStore();
   const membersId = computed(() => userStore.membersId); // 使用 computed 確保 membersId 總是最新的
-
-
-
   const cartList = ref([]);
+  const cartId = ref(null);
   const showCartDrawer = ref(false);  // 控制小視窗是否顯示
   // 切換購物車顯示狀態的方法
   const toggleCartDrawer = () => {
@@ -61,15 +59,8 @@ export const useCartStore = defineStore('cartStore', () => {
 
   const addCart = async (goods) => {
     const { productId, count } = goods;
-    const currentMembersId = userStore.membersId; // 確保 userStore 已初始化
-    // console.log('Adding to cart with URL:', `${BASE_URL}/add`);
+    const currentMembersId = userStore.membersId; 
     console.log('Request payload:', { productId, count, membersId: currentMembersId });
-
-    if (!currentMembersId) {
-      console.error('未找到 membersId，無法添加到購物車');
-      return;
-    }
-
     console.log('Adding to cart with membersId:', currentMembersId); // 調試用
 
     try {
@@ -82,45 +73,65 @@ export const useCartStore = defineStore('cartStore', () => {
       );
       console.log('Rental Start Date:', rentalStartDate.value);
       console.log('Rental End Date:', rentalEndDate.value);
-      console.log('API response carstore:', response);  //API response carstore:
-      //{success: true, message: 'Product added to cart successfully.', data: {…}}
+      console.log('API response carstore:', response);  
 
-      await updateNewList();
-      // 判斷商品是否成功加入購物車
-      if (response.data && response.data.success) {
+    
+      console.log('cartId試找', response.data.cartId);
+      console.log('cartId試找', cartId.value);
 
-        showCartDrawer.value = true;
-
-        // Swal.fire({
-        //     title: '成功',
-        //     text: "商品已成功加入購物車",
-        //     icon: "success",
-        //     showConfirmButton: false,
-        //     timer: 1500, // 自動關閉時間
-        //     position: 'center' // 將位置設為中央
-        // });
-      } else {
-        Swal.fire({
-          title: '失敗',
-          text: response.data.message || "加入購物車失敗，請稍後再試。",
-          icon: "error",
-          confirmButtonText: '確定',
-          position: 'center' // 將位置設為中央
-        });
-      }
-    } catch (error) {
-      console.error('添加到購物車失敗:', error);
-
-      // 當API請求失敗時顯示錯誤提示
-      Swal.fire({
-        title: '錯誤',
-        text: "添加到購物車失敗，請稍後再試。",
-        icon: "error",
-        confirmButtonText: '確定',
-        position: 'center' // 將位置設為中央
-      });
+       // 確認 cartId 是否正確返回
+    if (response.data && response.data.cartId) {
+      cartId.value = response.data.cartId;  // 使用正確的路徑獲取 cartId
+      console.log('cartId:', cartId.value);
+    } else {
+      console.error('Cart ID not found in the response:', response);
     }
-  };
+  } catch (error) {
+    console.error('Failed to add to cart:', error);
+  }
+};
+
+
+  //     await updateNewList();
+  //     // 判斷商品是否成功加入購物車
+  //     if (response.data && response.data.success) {
+
+  //       showCartDrawer.value = true;
+
+  //       // Swal.fire({
+  //       //     title: '成功',
+  //       //     text: "商品已成功加入購物車",
+  //       //     icon: "success",
+  //       //     showConfirmButton: false,
+  //       //     timer: 1500, // 自動關閉時間
+  //       //     position: 'center' // 將位置設為中央
+  //       // });
+  //     } else {
+  //       Swal.fire({
+  //         title: '失敗',
+  //         text: response.data.message || "加入購物車失敗，請稍後再試。",
+  //         icon: "error",
+  //         confirmButtonText: '確定',
+  //         position: 'center' // 將位置設為中央
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('添加到購物車失敗:', error);
+
+  //     // 當API請求失敗時顯示錯誤提示
+  //     Swal.fire({
+  //       title: '錯誤',
+  //       text: "添加到購物車失敗，請稍後再試。",
+  //       icon: "error",
+  //       confirmButtonText: '確定',
+  //       position: 'center' // 將位置設為中央
+  //     });
+  //   }
+  // };
+
+
+
+
 
   const addProduct = (product) => {
     console.log('Adding product:', product);  // Debug output
@@ -237,7 +248,8 @@ export const useCartStore = defineStore('cartStore', () => {
     rentalStartDate,
     rentalEndDate,
     setRentalDates,
-    shouldShowCartIcon
+    shouldShowCartIcon,
+    cartId
 
   };
 },

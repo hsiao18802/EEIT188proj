@@ -98,7 +98,8 @@ const addCart = async () => {
                 membersId: membersId,
                 mainPhoto: props.product.mainPhoto,
                 startDate: props.rentalStartDate, 
-                endDate: props.rentalEndDate  
+                endDate: props.rentalEndDate ,
+                CartId:null,
 
                 
             });
