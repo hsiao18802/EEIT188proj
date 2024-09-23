@@ -19,6 +19,15 @@ export const useCartStore = defineStore('cartStore', () => {
     showCartDrawer.value = !showCartDrawer.value; // 切換購物車小視窗顯示狀態
   };
 
+  const rentalStartDate = ref(null);
+  const rentalEndDate = ref(null);
+
+  const setRentalDates = (startDate, endDate) => {
+    rentalStartDate.value = startDate;
+    rentalEndDate.value = endDate;
+  };
+
+
 
   // 計算屬性
   // const allCount = computed(() => cartList.value.reduce((a, c) => a + c.count, 0));
@@ -39,6 +48,8 @@ export const useCartStore = defineStore('cartStore', () => {
     try {
       const res = await findNewCartListAPI(membersId.value);
       console.log('API response for cart:', res.data);  //API response for cart:  [ , , ,]
+      console.log('updateNewList＿Rental Start Date:', rentalStartDate.value);
+      console.log('updateNewList＿Rental End Date:', rentalEndDate.value);
 
       cartList.value = res.data; // 更新 cartList
 
@@ -66,7 +77,15 @@ export const useCartStore = defineStore('cartStore', () => {
     console.log('Adding to cart with membersId:', currentMembersId); // 調試用
 
     try {
-      const response = await addCartAPI({ productId, count, membersId: currentMembersId });
+      const response = await addCartAPI(
+        {
+          productId, count, membersId: currentMembersId,
+          rentalStartDate: rentalStartDate.value,
+          rentalEndDate: rentalEndDate.value
+        }
+      );
+      console.log('Rental Start Date:', rentalStartDate.value);
+      console.log('Rental End Date:', rentalEndDate.value);
       console.log('API response carstore:', response);  //API response carstore:
       //{success: true, message: 'Product added to cart successfully.', data: {…}}
 
@@ -183,6 +202,7 @@ export const useCartStore = defineStore('cartStore', () => {
       cartList.value = []; // 清空本地購物車列表
       localStorage.removeItem('cartList'); // 清空 localStorage
 
+
     } catch (error) {
       console.error('清空購物車失敗:', error);
       Swal.fire({
@@ -206,6 +226,7 @@ export const useCartStore = defineStore('cartStore', () => {
     cartList.value.forEach(item => item.selected = selected);
   };
 
+
   return {
     membersId,
     cartList,
@@ -228,6 +249,9 @@ export const useCartStore = defineStore('cartStore', () => {
     addProduct,
     cartList,
     clearCart,
+    rentalStartDate,
+    rentalEndDate,
+    setRentalDates,
 
   };
 },

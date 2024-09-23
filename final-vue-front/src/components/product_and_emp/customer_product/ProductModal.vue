@@ -70,7 +70,9 @@ onMounted(() => {
 });
 
 const props = defineProps({
-    product: Object
+    product: Object,
+    rentalStartDate: String,  // 新增租用開始日期
+    rentalEndDate: String      // 新增租用結束日期
 });
 
 const doInput = (name, event) => {
@@ -94,7 +96,10 @@ const addCart = async () => {
                 dailyFeeOriginal: props.product.dailyFeeOriginal,
                 count: count.value,
                 membersId: membersId,
-                mainPhoto: props.product.mainPhoto
+                mainPhoto: props.product.mainPhoto,
+                startDate: props.rentalStartDate, 
+                endDate: props.rentalEndDate  
+
                 
             });
 
