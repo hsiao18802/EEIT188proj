@@ -239,7 +239,7 @@ const continueShopping = () => {
 
 const checkout = () => {
   // 這裡可以添加結帳邏輯，例如跳轉到結帳頁面
-  router.push('/checkout');
+  router.push('/pages/checkout');
 };
 
 const updateRentalDates = () => {
