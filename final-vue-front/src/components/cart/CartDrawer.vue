@@ -1,11 +1,14 @@
 <template>
   <div v-if="showCartDrawer">
     <div class="overlay" @click="toggleCart"></div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 
     <div class="cart-drawer">
       <div class="cart-header">
-        <h3>My reservation</h3>
-        <p>租借日期: {{ rentalStartDate }} 到 {{ rentalEndDate }}</p>
+      <h3>My reservation</h3>
+        <p>租借日期: {{ rentalStartDate }} 到 {{ rentalEndDate }} </p>
+        <p>共 {{ rentalDays }} 天</p>
       </div>
 
       <div class="cart-content">
@@ -25,7 +28,9 @@
               <button class="quantity-btn" @click="minusOne(product.productId)">-</button>
               <span>{{ product.count }}</span>
               <button class="quantity-btn" @click="plusOne(product.productId)">+</button>
-              <button class="quantity-btn delete-btn" @click="removeFromCart(product.productId)">刪除</button>
+              <button class="quantity-btn delete-btn" @click="removeFromCart(product.productId)">
+               <i class="fas fa-trash"></i> <!-- 垃圾桶圖案 -->
+              </button>
             </div>
           </div>
         </div>
@@ -35,6 +40,7 @@
       </div>
 
       <div>
+        <h3>加價服務</h3>
             <label>
               <input
                 type="checkbox"
@@ -92,13 +98,29 @@
 <script setup>
 import { computed,ref } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+import { useRouter } from 'vue-router';
+import dayjs from 'dayjs'; // 引入 dayjs 函式庫 算天數
+
+
 
 const cartStore = useCartStore();
+const router = useRouter();
 const showCartDrawer = computed(() => cartStore.showCartDrawer);
 const cartList = computed(() => cartStore.cartList);
 const rentalStartDate = computed(() => cartStore.rentalStartDate);
 const rentalEndDate = computed(() => cartStore.rentalEndDate);
 
+
+// 計算租借天數
+const rentalDays = computed(() => {
+  if (rentalStartDate.value && rentalEndDate.value) {
+    const start = new Date(rentalStartDate.value);
+    const end = new Date(rentalEndDate.value);
+    const diffTime = Math.abs(end - start);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 轉換為天數
+  }
+  return 0; // 如果日期未定義，則返回0
+});
 
 const selectedServices = ref({
   delivery1: false, // 自取
@@ -115,9 +137,10 @@ const selectedServicesPrice = computed(() => {
   if (selectedServices.value.insurance4) total += 600;
   return total;
 });
+
 // 計算總小計
 const totalPrice = computed(() =>
-  cartList.value.reduce((total, item) => total + item.count * item.dailyFeeOriginal, 0) + selectedServicesPrice.value
+  cartList.value.reduce((total, item) => total + item.count * item.dailyFeeOriginal * rentalDays.value, 0) + selectedServicesPrice.value
 );
 
 // 當選擇不同服務時，控制互斥邏輯
@@ -145,7 +168,11 @@ const toggleCart = () => {
   cartStore.toggleCartDrawer();
 };
 
-const viewCart = () => {};
+const viewCart = () => {
+  cartStore.toggleCartDrawer(); // 隱藏抽屜
+  router.push('/pages/Cart'); // 僅使用路徑進行跳轉
+};
+
 const checkout = () => {};
 const minusOne = (productId) => cartStore.minusOne(productId);
 const plusOne = (productId) => cartStore.plusOne(productId);
@@ -172,6 +199,7 @@ const clearCart = () => {
   padding: 20px;
   z-index: 999;
   overflow: hidden; /* 隱藏超出內容 */
+  
 }
 
 /* 在鼠標懸停時強調 */
@@ -206,6 +234,9 @@ const clearCart = () => {
   margin-bottom: 20px;
   overflow-y: auto;
 }
+
+
+
 
 .product-item {
   margin-bottom: 16px;
@@ -260,12 +291,23 @@ const clearCart = () => {
 }
 
 .delete-btn {
-  background-color: #dc3545; /* 紅色背景 */
+  background-color: transparent; /* 透明背景 */
+  border: none; /* 去掉邊框 */
+  cursor: pointer; /* 鼠標指針 */
+  padding: 0; /* 去掉內邊距 */
 }
 
-.delete-btn:hover {
-  background-color: #c82333; /* 深紅色 hover */
+.delete-btn i {
+  color: black; /* 基本顏色設為黑色 */
+  font-size: 1.5em; /* 調整圖標大小 */
+  filter: grayscale(100%) contrast(100%); /* 使圖標變成黑白 */
 }
+
+.delete-btn:hover i {
+  filter: grayscale(100%) contrast(200%); /* 懸停時提高對比度 */
+}
+
+
 
 .cart-footer {
   position: sticky;

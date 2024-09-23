@@ -215,16 +215,11 @@ export const useCartStore = defineStore('cartStore', () => {
     }
   };
 
-  const singleCheck = (productId, selected) => {
-    const item = cartList.value.find(item => item.productId === productId);
-    if (item) {
-      item.selected = selected;
-    }
-  };
 
-  const allCheck = (selected) => {
-    cartList.value.forEach(item => item.selected = selected);
-  };
+
+  const shouldShowCartIcon = ref(true); // 控制購物車圖標的顯示
+
+
 
 
   return {
@@ -242,8 +237,6 @@ export const useCartStore = defineStore('cartStore', () => {
     plusOne,
     minusOne,
     clearCart,
-    singleCheck,
-    allCheck,
     showCartDrawer,
     toggleCartDrawer,
     addProduct,
@@ -252,6 +245,7 @@ export const useCartStore = defineStore('cartStore', () => {
     rentalStartDate,
     rentalEndDate,
     setRentalDates,
+    shouldShowCartIcon
 
   };
 },
