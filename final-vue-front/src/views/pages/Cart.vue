@@ -27,7 +27,7 @@
       </div>
       <div v-else>
         <h4 class="rental-content-title">租借內容</h4>
-        <div v-for="product in cartList" :key="product.productId" class="product-item">
+        <div v-for="product in cartList" :key="product.cartId" class="product-item">
           <div class="product-image">
             <img :src="product.mainPhoto" alt="產品圖片" />
           </div>
@@ -41,7 +41,7 @@
                 <i class="fas fa-trash"></i>
               </button>
               <button class="quantity-btn" @click="minusOne(product.productId)">-</button>
-              <span>{{ product.count }}</span>
+              <v-chip>{{ product.count }}</v-chip>
               <button class="quantity-btn" @click="plusOne(product.productId)">+</button>
             </div>
           </div>
@@ -239,7 +239,7 @@ const continueShopping = () => {
 
 const checkout = () => {
   // 這裡可以添加結帳邏輯，例如跳轉到結帳頁面
-  router.push('/checkout');
+  router.push('/pages/checkout');
 };
 
 const updateRentalDates = () => {
@@ -267,7 +267,7 @@ const updateRentalDates = () => {
 
 .cart-header {
 
-  background-color: #f9f9f9;
+  background-color: #fff; /* 白底 */
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -280,8 +280,9 @@ const updateRentalDates = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  background-color: #fff;
+  padding: 5px;
+  background-color: #fff; /* 白底 */
+  border: 1px solid grey; /* 黑框線 */
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   margin-bottom: 10px;
@@ -296,19 +297,19 @@ const updateRentalDates = () => {
 }
 
 .rental-gap {
-  width: 20px; /* 設定間隔寬度 */
+  width: 30px; /* 設定間隔寬度 */
 }
 
 .rental-date p {
   margin: 0;
-  font-size: 14px;
-  color: #333;
+  font-size: 20px;
+  color: #0056b3
 }
 
 .rental-days {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
-  color: #333;
+  color: #0056b3
 }
 
 @media (max-width: 600px) {
@@ -342,12 +343,19 @@ const updateRentalDates = () => {
   align-items: center;
   margin-bottom: 16px;
   padding: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: #fff; /* 白底 */
+  border-top: 1px solid grey; /* 上框線 */
+  border-left: none; /* 左邊不顯示框線 */
+  border-right: none; /* 右邊不顯示框線 */
+  border-bottom: none; /* 下邊不顯示框線 */
   max-width: 6000px; /* 或者使用你產品 card 的最大寬度 */
-
 }
+
+.product-item:last-child {
+  border-bottom: 1px solid grey; /* 最後一個產品的下框線 */
+}
+
+
 
 .product-image {
   flex: 0 0 80px; /* 固定圖片寬度 */
@@ -361,6 +369,8 @@ const updateRentalDates = () => {
 .product-info {
   flex: 1; /* 產品名稱部分佔用剩餘空間 */
   margin-left: 16px;
+  font-weight: bold; /* 設定產品名稱為粗體 */
+
 }
 
 .product-details {
@@ -371,28 +381,31 @@ const updateRentalDates = () => {
 }
 
 .product-price {
-  margin-right: 16px; /* 與數量和刪除按鈕之間的距離 */
+  margin-right: 30px; /* 與數量和刪除按鈕之間的距離 */
 }
 
 .product-actions {
   display: flex;
   align-items: center;
-  gap: 10px; /* 調整按鈕之間的間距 */
+  gap: 20px; /* 調整按鈕之間的間距 */
 }
 
 .quantity-btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
+  background-color: white;
+  color: black;
+  border: 2px solid #007bff; /* 藍色外框線 */
   border-radius: 4px;
   padding: 5px 10px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, border-color 0.3s; /* 加入邊框顏色的變化 */
 }
 
 .quantity-btn:hover {
-  background-color: #0056b3;
+  background-color: #007bff; /* 滑鼠懸停時改變背景顏色 */
+  color: white; /* 滑鼠懸停時改變文字顏色 */
+  border-color: #0056b3; /* 滑鼠懸停時改變邊框顏色 */
 }
+
 
 .delete-btn {
   background-color: transparent; /* 透明背景 */
@@ -402,9 +415,14 @@ const updateRentalDates = () => {
 }
 
 .delete-btn i {
-  color: black; /* 基本顏色設為黑色 */
+  color: #007bff; 
   font-size: 1.5em; /* 調整圖標大小 */
-  filter: grayscale(100%) contrast(100%); /* 使圖標變成黑白 */
+  
+}
+
+.v-chip {
+  background-color: #1976d2; /* 你可以根據需要調整顏色 */
+  color: white;
 }
 
 .service-summary {
@@ -415,10 +433,10 @@ const updateRentalDates = () => {
 
 .service-card,
 .summary-card {
-  border: 2px solid #ccc;
+  background-color: #fff; /* 白底 */
+  border: 2px solid grey;
   border-radius: 8px;
   padding: 16px;
-  background-color: #f9f9f9;
   flex: 1; /* 使卡片等寬 */
   margin: 0 10px; /* 卡片之間的間距 */
 }
@@ -438,7 +456,13 @@ const updateRentalDates = () => {
   margin-top: 10px;
   flex-direction: column;
   width: 100%;
+  
 }
+
+.footer-buttons v-btn:hover {
+  background-color: #a8c1e0; /* 懸停時稍微變深的顏色 */
+}
+
 
 
 .empty-cart-message {

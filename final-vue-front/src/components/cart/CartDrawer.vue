@@ -170,7 +170,10 @@ const viewCart = () => {
   router.push('/pages/Cart'); // 僅使用路徑進行跳轉
 };
 
-const checkout = () => {};
+const checkout = () => {
+  cartStore.toggleCartDrawer(); // 隱藏抽屜
+  router.push('/pages/checkout');
+};
 const minusOne = (productId) => cartStore.minusOne(productId);
 const plusOne = (productId) => cartStore.plusOne(productId);
 const removeFromCart = (productId) => cartStore.delCart(productId);

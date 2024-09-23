@@ -18,6 +18,7 @@ import ForgetPassword from '@/secure/ForgetPassword.vue';
 //hsiao
 import Cart from "@/views/pages/Cart.vue";
 import Order from "@/views/pages/Order.vue";
+import checkout from '@/views/pages/checkout.vue';
 
 
 
@@ -67,6 +68,8 @@ const routes = [
 
   { path: "/pages/Cart", name: "Cart-link", component: Cart },
   { path: "/pages/Order", name: "Order-link", component: Order },
+  { path: "/pages/checkout", name: "checkout-link", component: checkout },
+
 
 
 
