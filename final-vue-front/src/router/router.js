@@ -18,6 +18,7 @@ import ForgetPassword from '@/secure/ForgetPassword.vue';
 //hsiao
 import Cart from "@/views/pages/Cart.vue";
 import Order from "@/views/pages/Order.vue";
+import checkout from '@/views/pages/checkout.vue';
 
 
 
@@ -55,6 +56,7 @@ const routes = [
 
 
 
+
   { path: "/secure/login", name: "secure-login-link", component: Login, meta: { navbar: 'PublicNavbar' } },
   { path: "/secure/register", name: "secure-register-link", component: Register, meta: { navbar: 'PublicNavbar' } },
   { path: "/secure/forget", name: "secure-forget-link", component: ForgetPassword, meta: { navbar: 'PublicNavbar' } },
@@ -65,14 +67,18 @@ const routes = [
 
   //hsiao
 
+
   { path: "/pages/Cart", name: "Cart-link", component: Cart, meta: { navbar: 'PublicNavbar' } },
   { path: "/pages/Order", name: "Order-link", component: Order, meta: { navbar: 'PublicNavbar' } },
+  { path: "/pages/checkout", name: "checkout-link", component: checkout },
+
 
 
 
 
 
   // Lu's page
+
   { path: "/productpage", name: "productpage", component: ProductPage, meta: { navbar: 'PublicNavbar', style: 'default' } },
   { path: "/employee/emphome", name: EmployeeHome, component: EmployeeHome, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/employee/empproduct", name: EmpProduct, component: EmpProduct, meta: { navbar: 'EmpNavbar', style: 'default' } },
@@ -83,6 +89,7 @@ const routes = [
 
 
   // 錯誤頁面
+
   { path: "/401", name: "Unauthorized", component: Unauthorized, meta: { navbar: 'default', style: 'default' } },
   { path: "/403", name: "Forbidden", component: Forbidden, meta: { navbar: 'default', style: 'default' } },
   { path: "/reserved", name: "reserved", component: ReservedPlaceholder, meta: { navbar: 'default', style: 'default' } },
