@@ -1,17 +1,15 @@
 package tw.com.ispan.controller;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import tw.com.ispan.service.DialogflowService;
+import tw.com.ispan.service.LineMessageService;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @CrossOrigin
 @RestController
@@ -20,6 +18,9 @@ public class ApiDialogflowController {
 
     @Autowired
     private DialogflowService dialogflowService;
+
+    @Autowired
+    private LineMessageService lineMessageService; // 新增 LineMessageService 來處理推送消息
 
     // 處理來自前端的對話請求
     @PostMapping("/dialogflow")
@@ -37,6 +38,10 @@ public class ApiDialogflowController {
 
         // 調用 Dialogflow API 並獲取回應
         String responseText = dialogflowService.getDialogflowResponse(sessionId, message);
+
+        // 透過 Line API 推送消息到指定用戶
+        String userId = "U7b2bd6649cb9eb31c62bc0d6712cc143"; // 這裡需要提供具體用戶的 LINE ID
+        lineMessageService.pushMessage(userId, responseText);
 
         // 構建回應返回給前端
         Map<String, String> response = new HashMap<>();
