@@ -9,9 +9,6 @@ export const useCartStore = defineStore('cartStore', () => {
   // 初始化 userStore
   const userStore = useUserStore();
   const membersId = computed(() => userStore.membersId); // 使用 computed 確保 membersId 總是最新的
-
-
-
   const cartList = ref([]);
   const cartId = ref(null);
   const showCartDrawer = ref(false);  // 控制小視窗是否顯示
@@ -62,15 +59,8 @@ export const useCartStore = defineStore('cartStore', () => {
 
   const addCart = async (goods) => {
     const { productId, count } = goods;
-    const currentMembersId = userStore.membersId; // 確保 userStore 已初始化
-    // console.log('Adding to cart with URL:', `${BASE_URL}/add`);
+    const currentMembersId = userStore.membersId; 
     console.log('Request payload:', { productId, count, membersId: currentMembersId });
-
-    if (!currentMembersId) {
-      console.error('未找到 membersId，無法添加到購物車');
-      return;
-    }
-
     console.log('Adding to cart with membersId:', currentMembersId); // 調試用
 
     try {
@@ -100,6 +90,7 @@ export const useCartStore = defineStore('cartStore', () => {
     console.error('Error stack trace:', error.stack);
 }
 };
+
 
   const addProduct = (product) => {
     console.log('Adding product:', product);  // Debug output
@@ -216,7 +207,8 @@ export const useCartStore = defineStore('cartStore', () => {
     rentalStartDate,
     rentalEndDate,
     setRentalDates,
-    shouldShowCartIcon
+    shouldShowCartIcon,
+    cartId
 
   };
 },
