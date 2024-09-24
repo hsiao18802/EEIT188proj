@@ -55,38 +55,38 @@ const routes = [
 
 
 
-  { path: "/secure/login", name: "secure-login-link", component: Login },
-  { path: "/secure/register", name: "secure-register-link", component: Register },
-  { path: "/secure/forget", name: "secure-forget-link", component: ForgetPassword },
-  { path: "/members/info", name: "secure-membersinfo-link", component: MembersInfo },
+  { path: "/secure/login", name: "secure-login-link", component: Login, meta: { navbar: 'PublicNavbar' } },
+  { path: "/secure/register", name: "secure-register-link", component: Register, meta: { navbar: 'PublicNavbar' } },
+  { path: "/secure/forget", name: "secure-forget-link", component: ForgetPassword, meta: { navbar: 'PublicNavbar' } },
+  { path: "/members/info", name: "secure-membersinfo-link", component: MembersInfo, meta: { navbar: 'PublicNavbar' } },
 
 
 
 
   //hsiao
 
-  { path: "/pages/Cart", name: "Cart-link", component: Cart },
-  { path: "/pages/Order", name: "Order-link", component: Order },
+  { path: "/pages/Cart", name: "Cart-link", component: Cart, meta: { navbar: 'PublicNavbar' } },
+  { path: "/pages/Order", name: "Order-link", component: Order, meta: { navbar: 'PublicNavbar' } },
 
 
 
 
 
   // Lu's page
-  { path: "/productpage", name: "productpage", component: ProductPage, meta: { navbar: 'PublicNavbar' } },
-  { path: "/employee/emphome", name: EmployeeHome, component: EmployeeHome, meta: { navbar: 'EmpNavbar' } },
-  { path: "/employee/empproduct", name: EmpProduct, component: EmpProduct, meta: { navbar: 'EmpNavbar' } },
-  { path: "/employee/empadd", name: EmpAdd, component: EmpAdd, meta: { navbar: 'EmpNavbar' } },
+  { path: "/productpage", name: "productpage", component: ProductPage, meta: { navbar: 'PublicNavbar', style: 'default' } },
+  { path: "/employee/emphome", name: EmployeeHome, component: EmployeeHome, meta: { navbar: 'EmpNavbar', style: 'default' } },
+  { path: "/employee/empproduct", name: EmpProduct, component: EmpProduct, meta: { navbar: 'EmpNavbar', style: 'default' } },
+  { path: "/employee/empadd", name: EmpAdd, component: EmpAdd, meta: { navbar: 'EmpNavbar', style: 'default' } },
 
 
 
 
 
   // 錯誤頁面
-  { path: "/401", name: "Unauthorized", component: Unauthorized, meta: { navbar: 'default' } },
-  { path: "/403", name: "Forbidden", component: Forbidden, meta: { navbar: 'default' } },
-  { path: "/reserved", name: "reserved", component: ReservedPlaceholder, meta: { navbar: 'default' } },
-  { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound, meta: { navbar: 'default' } },
+  { path: "/401", name: "Unauthorized", component: Unauthorized, meta: { navbar: 'default', style: 'default' } },
+  { path: "/403", name: "Forbidden", component: Forbidden, meta: { navbar: 'default', style: 'default' } },
+  { path: "/reserved", name: "reserved", component: ReservedPlaceholder, meta: { navbar: 'default', style: 'default' } },
+  { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound, meta: { navbar: 'default', style: 'default' } },
 
 
 
