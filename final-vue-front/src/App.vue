@@ -14,14 +14,12 @@
       <router-view></router-view>
     </div>
 
-
-
-
-
-
     <div v-else>
       <router-view></router-view>
     </div>
+
+    <!-- 聊天組件，全局顯示 -->
+    <ChatComponent />
   </div>
 </template>
 
@@ -33,11 +31,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import EmpNavbar from './views/product_and_emp/EmpNavbar.vue';
 import PublicNavbar from './views/Navbar.vue';
-//hsiao
 import CartDrawer from './components/cart/CartDrawer.vue'
 import CartIcon from './components/cart/CartIcon.vue'
-
-
+// 引入聊天組件
+import ChatComponent from './views/ChatComponent.vue';
 
 const route = useRoute();
 const userStore = useUserStore();
@@ -49,7 +46,6 @@ const isEmpNavbar = computed(() => {
 
 // 根據導航列決定佈局類別：EmpNavbar 時左右佈局，PublicNavbar 時上下佈局
 const layoutClass = computed(() => {
-
   return isEmpNavbar.value ? 'container-fluid d-flex flex-row' : 'container-xxl d-flex flex-column';
 });
 
@@ -68,14 +64,49 @@ const isCartPage = computed(() => {
   return route.path === '/pages/Cart'; // 假設購物車的路由是 '/pages/Cart'
 });
 
-
-
 </script>
 
 <style scoped>
 #app {
+  height: 100vh;
+}
 
-height: 100vh;
+.chat-container {
+  position: fixed; /* 固定位置 */
+  bottom: 20px; /* 距離頁面底部 */
+  right: 20px; /* 距離頁面右側 */
+  width: 300px; /* 固定寬度 */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* 保證在最上層顯示 */
+}
 
+.messages {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.user {
+  text-align: right;
+  color: blue;
+}
+
+.bot {
+  text-align: left;
+  color: green;
+}
+
+input {
+  width: calc(100% - 60px);
+  padding: 10px;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px;
 }
 </style>
