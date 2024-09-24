@@ -39,6 +39,7 @@ import Unauthorized from '@/views/error/Unauthorized.vue';
 import Forbidden from '@/views/error/Forbidden.vue';
 import NotFound from '@/views/error/NotFound.vue';
 import ReservedPlaceholder from '@/views/error/ReservedPlaceholder.vue';
+import ContactUs from '@/views/ContactUs.vue';
 
 
 
@@ -61,6 +62,8 @@ const routes = [
   { path: "/secure/register", name: "secure-register-link", component: Register, meta: { navbar: 'PublicNavbar' } },
   { path: "/secure/forget", name: "secure-forget-link", component: ForgetPassword, meta: { navbar: 'PublicNavbar' } },
   { path: "/members/info", name: "secure-membersinfo-link", component: MembersInfo, meta: { navbar: 'PublicNavbar' } },
+  { path: "/contact", name: "contact-link", component: ContactUs, meta: { navbar: 'PublicNavbar' } },
+
 
 
 
