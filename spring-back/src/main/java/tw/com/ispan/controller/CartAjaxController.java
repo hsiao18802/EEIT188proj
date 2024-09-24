@@ -66,11 +66,8 @@ public class CartAjaxController {
             cartDTO.getMainPhotoBase64(); // 這樣前端可以獲取 Base64 格式的圖片
 
             cartDTO.setDailyFeeOriginal(product.getDailyFeeOriginal());
-           //cartDTO.setDailyFeeOriginal(product.getDailyFeeOriginal());
-
             
             System.out.println("Product dailyFeeOriginal: " + product.getDailyFeeOriginal());
-            
 
 
             Cart cart = cartService.addToCart(cartDTO);
@@ -163,6 +160,11 @@ public ResponseEntity<?> minusOne(
                 .body("An error occurred: " + e.getMessage());
     }
 }
+
+
+
+
+
 
 
 @DeleteMapping("/remove")

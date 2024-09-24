@@ -27,7 +27,7 @@
       </div>
       <div v-else>
         <h4 class="rental-content-title">租借內容</h4>
-        <div v-for="product in cartList" :key="product.cartId" class="product-item">
+        <div v-for="product in cartStore.sortedCartList" :key="product.cartId" class="product-item">
           <div class="product-image">
             <img :src="product.mainPhoto" alt="產品圖片" />
           </div>

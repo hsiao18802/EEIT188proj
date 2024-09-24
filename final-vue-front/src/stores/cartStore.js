@@ -6,11 +6,16 @@ import Swal from 'sweetalert2';
 
 
 export const useCartStore = defineStore('cartStore', () => {
-  // 初始化 userStore
+
   const userStore = useUserStore();
   const membersId = computed(() => userStore.membersId); // 使用 computed 確保 membersId 總是最新的
   const cartList = ref([]);
   const cartId = ref(null);
+  const sortedCartList = computed(() => {
+    return [...cartList.value].sort((a, b) => {
+      return a.cartId - b.cartId; // 按升序排序
+    });
+  });
   const showCartDrawer = ref(false);  // 控制小視窗是否顯示
   // 切換購物車顯示狀態的方法
   const toggleCartDrawer = () => {
@@ -19,7 +24,7 @@ export const useCartStore = defineStore('cartStore', () => {
 
   const rentalStartDate = ref(null);
   const rentalEndDate = ref(null);
-
+  const shouldShowCartIcon = ref(true); // 控制購物車圖標的顯示
   const setRentalDates = (startDate, endDate) => {
     rentalStartDate.value = startDate;
     rentalEndDate.value = endDate;
@@ -129,38 +134,52 @@ export const useCartStore = defineStore('cartStore', () => {
 
   const plusOne = async (productId) => {
     try {
-      await plusOneAPI({ membersId: membersId.value, productId });
-      await updateNewList(); // 更新購物車列表
+        await plusOneAPI({ membersId: membersId.value, productId });
+        // 更新狀態，例如
+        const product = cartList.value.find(item => item.productId === productId);
+        if (product) {
+            product.count += 1; // 直接更新購物車中的商品數量
+        }
+        await updateNewList(); // 更新購物車列表
 
     } catch (error) {
-      console.error('增加數量失敗:', error);
-      Swal.fire({
-        title: '錯誤',
-        text: "增加數量失敗，請稍後再試。",
-        icon: "error",
-        confirmButtonText: '確定',
-        position: 'center'
-      });
+        console.error('增加數量失敗:', error);
+        Swal.fire({
+            title: '錯誤',
+            text: "增加數量失敗，請稍後再試。",
+            icon: "error",
+            confirmButtonText: '確定',
+            position: 'center'
+        });
     }
-  };
+};
 
-  const minusOne = async (productId) => {
+const minusOne = async (productId) => {
     try {
-      await minusOneAPI({ membersId: membersId.value, productId });
-      await updateNewList(); // 更新購物車列表
+        const product = cartList.value.find(item => item.productId === productId);
+        if (product && product.count > 1) {
+            await minusOneAPI({ membersId: membersId.value, productId });
+            product.count -= 1; // 直接更新購物車中的商品數量
+            await updateNewList(); // 更新購物車列表
+        } else if (product && product.count === 1) {
+            // 考慮是否要從購物車中移除該商品
+            await delCartAPI({ membersId: membersId.value, productId });
+            await updateNewList(); // 更新購物車列表
 
-
+            
+        }
     } catch (error) {
-      console.error('減少數量失敗:', error);
-      Swal.fire({
-        title: '錯誤',
-        text: "減少數量失敗，請稍後再試。",
-        icon: "error",
-        confirmButtonText: '確定',
-        position: 'center'
-      });
+        console.error('減少數量失敗:', error);
+        Swal.fire({
+            title: '錯誤',
+            text: "減少數量失敗，請稍後再試。",
+            icon: "error",
+            confirmButtonText: '確定',
+            position: 'center'
+        });
     }
-  };
+};
+
 
   const clearCart = async () => {
     try {
@@ -183,7 +202,7 @@ export const useCartStore = defineStore('cartStore', () => {
 
 
 
-  const shouldShowCartIcon = ref(true); // 控制購物車圖標的顯示
+ 
 
 
 
@@ -208,7 +227,8 @@ export const useCartStore = defineStore('cartStore', () => {
     rentalEndDate,
     setRentalDates,
     shouldShowCartIcon,
-    cartId
+    cartId,
+    sortedCartList
 
   };
 },

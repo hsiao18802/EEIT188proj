@@ -11,7 +11,7 @@
       </div>
 
       <div class="cart-content">
-        <div v-for="product in cartList" :key="product.cartId" class="product-item">
+        <div v-for="product in cartStore.sortedCartList" :key="product.cartId + product.productId + product.membersId" class="product-item">
           <div class="product-image">
             <img :src="product.mainPhoto" alt="product image" />
           </div>
