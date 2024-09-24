@@ -75,7 +75,7 @@ public class CartAjaxController {
             CartDTO responseDTO = convertCartTDTO.convertCartToDTO(cart);
 
 
-            return ResponseEntity.ok(new ApiResponse(true, "Product added to cart successfully.", cartDTO));
+            return ResponseEntity.ok(new ApiResponse(true, "Product added to cart successfully.", responseDTO));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse(false, "An error occurred: " + e.getMessage()));
