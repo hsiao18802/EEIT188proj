@@ -79,7 +79,7 @@ const routes = [
 
   // Lu's page
 
-  { path: "/productpage", name: "productpage", component: ProductPage, meta: { navbar: 'PublicNavbar', style: 'default' } },
+  { path: "/productpage", name: "productpage", component: ProductPage, meta: { navbar: 'PublicNavbar' } },
   { path: "/employee/emphome", name: EmployeeHome, component: EmployeeHome, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/employee/empproduct", name: EmpProduct, component: EmpProduct, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/employee/empadd", name: EmpAdd, component: EmpAdd, meta: { navbar: 'EmpNavbar', style: 'default' } },

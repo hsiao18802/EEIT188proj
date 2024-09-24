@@ -13,13 +13,27 @@ const app = createApp(App)
   .use(router)
   .use(pinia);
 
+// app.directive('default-img', {
+//   mounted(el, binding) {
+//     const defaultImg = '/public/NoPic256.jpg';
+//     el.onerror = () => {
+//       el.src = defaultImg;
+//     };
+//     el.src = binding.value ? 'data:image/jpeg;base64,' + binding.value : defaultImg;
+//   }
+// });
+
 app.directive('default-img', {
   mounted(el, binding) {
-    const defaultImg = '/public/NoPic256.jpg';
+    // 如果圖片 src 加載失敗時觸發 onerror，將 src 設為一個無效值
     el.onerror = () => {
-      el.src = defaultImg;
+      el.src = ''; // 設為空字符串，觸發瀏覽器的內建「圖片讀取失敗」顯示
     };
-    el.src = binding.value ? 'data:image/jpeg;base64,' + binding.value : defaultImg;
+
+    // 綁定值存在，則設置圖片 src，否則不做任何處理
+    if (binding.value) {
+      el.src = 'data:image/jpeg;base64,' + binding.value;
+    }
   }
 });
 
