@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-container">
+  <!-- <div class="chat-container">
     <div class="messages">
       <div v-for="(message, index) in messages" :key="index" :class="message.type">
         <span>{{ message.text }}</span>
@@ -7,7 +7,7 @@
     </div>
     <input v-model="userInput" @keyup.enter="sendMessage" placeholder="請輸入您的問題..." />
     <button @click="sendMessage">發送</button>
-  </div>
+  </div> -->
 </template>
 
 <script>
