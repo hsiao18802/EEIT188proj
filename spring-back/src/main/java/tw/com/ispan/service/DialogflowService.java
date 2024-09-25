@@ -34,6 +34,36 @@ public class DialogflowService {
         }
     }
 
+    
+    public boolean checkForHumanAgentIntent(String sessionId, String message) {
+        try {
+            SessionName session = SessionName.of(dialogflowConfiguration.getProjectId(), sessionId);
+            TextInput.Builder textInput = TextInput.newBuilder().setText(message).setLanguageCode("zh-TW");
+            QueryInput queryInput = QueryInput.newBuilder().setText(textInput).build();
+            DetectIntentResponse response = sessionsClient.detectIntent(session, queryInput);
+            QueryResult queryResult = response.getQueryResult();
+
+            // 檢查是否匹配人工客服的 Intent
+            String intentDisplayName = queryResult.getIntent().getDisplayName();
+            if ("SwitchToHuman".equals(intentDisplayName)) { // 將這裡替換為你在 Dialogflow 設定的 Intent 名稱
+                return true; // 轉接到人工客服
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // 新增的方法，處理不同類型的 QueryInput（例如 EventInput）
     public String getDialogflowResponse(String sessionId, QueryInput queryInput) {
         try {

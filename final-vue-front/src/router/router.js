@@ -40,6 +40,7 @@ import Forbidden from '@/views/error/Forbidden.vue';
 import NotFound from '@/views/error/NotFound.vue';
 import ReservedPlaceholder from '@/views/error/ReservedPlaceholder.vue';
 import ContactUs from '@/views/ContactUs.vue';
+import CustomerService from '@/CustomerService.vue';
 
 
 
@@ -63,6 +64,8 @@ const routes = [
   { path: "/secure/forget", name: "secure-forget-link", component: ForgetPassword, meta: { navbar: 'PublicNavbar' } },
   { path: "/members/info", name: "secure-membersinfo-link", component: MembersInfo, meta: { navbar: 'PublicNavbar' } },
   { path: "/contact", name: "contact-link", component: ContactUs, meta: { navbar: 'PublicNavbar' } },
+  { path: "/customerservice", name: "customerservice-link", component: CustomerService, meta: { navbar: 'EmpNavbar', style: 'default' } },
+
 
 
 
