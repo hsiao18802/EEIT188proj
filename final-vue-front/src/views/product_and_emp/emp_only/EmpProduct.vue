@@ -3,6 +3,7 @@
     <div class="row">
         <div class="col-2">
             <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
+            <button type="button" class="btn btn-primary" @click="openCategory">分類管理</button>
         </div>
         <div class="col-4">
             <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind">
@@ -30,7 +31,7 @@
                     <img v-if="product.mainPhoto" :alt="product.productName" v-default-img="product.mainPhoto"
                         style="width: 100px; height: 100px;" @click="showFullImage(product.mainPhoto)">
                     <span v-else><a class="btn btn-primary"
-                            @click="openChangePic('update', product.productId)">新增圖片</a></span>
+                            @click="openModal('changepic', product.productId)">新增圖片</a></span>
                 </td>
                 <th scope="row">{{ product.productName }}</th>
                 <td>{{ product.categoryId }}</td>
@@ -54,14 +55,15 @@
 
     <div class="row">
         <ProductCard v-for="product in products" :key="product.id" :item="product" @delete="callRemove"
-            @open-update="openModal" @open-change-pic="openChangePic"></ProductCard>
+            @open-update="openModal"></ProductCard>
     </div>
 
-    <ProductModal ref="productModal" v-model:product="product" :is-show-insert-button="isShowInsertButton"
-        @insert="callCreate" @update="callModify" @imageSelected="handleImageSelected" @clearImage="clearImage">
+    <ProductModal ref="productModal" v-model:product="product"
+        :is-show-insert="isShowInsert" :is-show-changepic="isShowChangepic" :is-show-update="isShowUpdate"
+        @insert="callCreate" @update="callModify" @changepic="callChangePic" @imageSelected="handleImageSelected" @clearImage="clearImage">
     </ProductModal>
-    <EmpChangePic ref="picModal" v-model:product="product" @imageSelected="handleImageSelected"
-        @changepic="callChangePic"></EmpChangePic>
+    <CategoryModal ref="categoryModal" v-model:category="category">
+    </CategoryModal>
 </template>
 
 <script setup>
@@ -71,7 +73,7 @@ import axiosapi from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
 
 import ProductModal from '@/components/product_and_emp/emp_product/EmpProductModal.vue';
-import EmpChangePic from '@/components/product_and_emp/emp_product/EmpChangePic.vue';
+import CategoryModal from '@/components/product_and_emp/emp_product/CategoryModal.vue';
 
 const start = ref(0);
 const max = ref(3);
@@ -79,29 +81,65 @@ const current = ref(1);
 const total = ref(0);
 const lastPageRows = ref(0);
 const productModal = ref(null);
+const categoryModal = ref(null);
 const picModal = ref(null);
 const product = ref({});
-const isShowInsertButton = ref(true);
+const category = ref({});
+const isShowInsert = ref(true);
+const isShowUpdate = ref(true);
+const isShowChangepic = ref(true);
 const findName = ref("");
 const products = ref([]);
-const emits = defineEmits(["delete", "openUpdate", "openChangePic"]);
+const categories = ref([]);
+const emits = defineEmits(["delete", "openUpdate"]);
 
 function openModal(action, id) {
     if (action === 'insert') {
-        isShowInsertButton.value = true;
+        isShowInsert.value = true;
+        isShowUpdate.value = false;
+        isShowChangepic.value = false;
         product.value = {};
         product.value.statusId = 1;
     } else {
-        isShowInsertButton.value = false;
+        isShowInsert.value = false;
+        if (action === 'changepic'){
+            console.log("changepic = true");
+            isShowUpdate.value = false;
+            isShowChangepic.value = true;
+        } else{
+            console.log("changepic = false");
+            isShowUpdate.value = true;
+            isShowChangepic.value = false;
+        }
         callFindById(id);
     }
     productModal.value.showModal();
 }
 
-function openChangePic(action, id) {
-    product.value = {};
-    callFindById(id);
-    picModal.value.showModal();
+function openCategory(){
+    callFindCategory();
+    // categoryModal.value.showModal();
+        if (categoryData.value) {
+        modalComponent.value.showModal();  // 確保 modal 打開時 categoryData 已經有資料
+    } else {
+        console.error('No category data available');
+    }
+}
+
+function callFindCategory() {
+    console.log("cfc，啟動");
+    axiosapi.get('/rent/category/find')
+        .then(response => {
+            console.log("findCategories 成功 response:", response);
+            if (response.data) {
+                categories.value = response.data;
+            } else {
+                console.log("findCategories 無有效的數據:", response);
+            }
+        })
+        .catch(error => {
+            console.log("findCategories 發生錯誤:", error);
+        });
 }
 
 function callDiscontinue(id) {
@@ -168,7 +206,7 @@ function callRemove(id) {
                             Swal.fire({
                                 icon: 'error',
                                 title: '刪除失敗',
-                                html: '商品已經有客戶下單，無法刪除<br>使用下架功能，讓商品不再顯示與販售？',
+                                html: '商品已有客戶下單，無法刪除<br>使用下架功能，讓商品不再顯示與販售？',
                                 showCancelButton: true,
                                 allowOutsideClick: false,
                             }).then(function (result) {
@@ -286,7 +324,7 @@ function callModify() {
         showConfirmButton: false,
         allowOutsideClick: false,
     });
-
+console.log(product.value.statusId);
     let body = {
         productId: product.value.productId,
         productName: product.value.productName || null,
@@ -299,6 +337,8 @@ function callModify() {
 
 
     axiosapi.put(`/rent/product/${body.productId}`, body).then(function (response) {
+console.log(product.value.statusId);
+        
         if (selectedImage.value) {
             const reader = new FileReader();
             reader.onloadend = function () {
