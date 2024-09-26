@@ -1,4 +1,7 @@
 spring:
+
+
+
   application:
     name: labboot-hibernate
   datasource:
@@ -51,3 +54,11 @@ line:
 
 dialogflow:
   project-id: demo1-ufum  # 請替換為你的 Dialogflow 專案 ID
+  
+  
+  
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true

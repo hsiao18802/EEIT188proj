@@ -20,6 +20,8 @@
 
     <!-- 聊天組件，全局顯示 -->
     <ChatComponent />
+      <!-- 全局頁腳 -->
+      <Footer />
   </div>
 </template>
 
@@ -33,8 +35,10 @@ import EmpNavbar from './views/product_and_emp/EmpNavbar.vue';
 import PublicNavbar from './views/Navbar.vue';
 import CartDrawer from './components/cart/CartDrawer.vue'
 import CartIcon from './components/cart/CartIcon.vue'
+import Footer from './components/Footer/Footer.vue';
 // 引入聊天組件
 import ChatComponent from './views/ChatComponent.vue';
+
 
 const route = useRoute();
 const userStore = useUserStore();
