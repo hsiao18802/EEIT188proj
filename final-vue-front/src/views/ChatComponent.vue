@@ -23,7 +23,7 @@
           <button @click="sendMessage">發送</button>
         </div>      </div>
     </div>
-  </div> -->
+  </div> 
 </template>
 
 <script>

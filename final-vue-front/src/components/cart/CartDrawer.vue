@@ -68,10 +68,7 @@
           />
           大安區店 附近 20-40公里內的送貨和取貨 ($500)
         </label>
-        <label>
-          <input type="checkbox" v-model="selectedServices.insurance4" />
-          安心保安心用：意外不便險 ($600)
-        </label>
+        
       </div>
 
       <div class="cart-footer" v-if="cartList.length > 0">
@@ -130,7 +127,6 @@ const selectedServices = ref({
   delivery1: false, // 自取
   delivery2: false, // 1-20 公里
   delivery3: false, // 20-40 公里
-  insurance4: false, // 意外不便險
 });
 
 // 計算選擇服務的總價格
@@ -147,15 +143,20 @@ const totalPrice = computed(() =>
   cartList.value.reduce((total, item) => total + item.count * item.dailyFeeOriginal * rentalDays.value, 0) + selectedServicesPrice.value
 );
 
-// 當選擇不同服務時，控制互斥邏輯
 const handleServiceSelection = (selectedOption) => {
   if (selectedOption === 1) {
-    // 如果選擇了自取，禁用 1-20 和 20-40 公里選項
     selectedServices.value.delivery2 = false;
     selectedServices.value.delivery3 = false;
+    cartStore.shippingMethod = '自取($0)大安區店'; // 更新為自取
   } else {
-    // 如果選擇了 1-20 或 20-40 公里，禁用自取選項
     selectedServices.value.delivery1 = false;
+    if (selectedOption === 2) {
+      selectedServices.value.delivery3 = false;
+      cartStore.shippingMethod = '1-20公里內的送貨和取貨 ($300) 大安區店'; // 更新為1-20公里送貨
+    } else if (selectedOption === 3) {
+      selectedServices.value.delivery2 = false;
+      cartStore.shippingMethod = '20-40公里內的送貨和取貨 ($500) 大安區店'; // 更新為20-40公里送貨
+    }
   }
 };
 
@@ -174,6 +175,11 @@ const toggleCart = () => {
 
 
 const checkout = async()=>{
+
+  // 確保運送方式被設置
+  if (!cartStore.shippingMethod) {
+        cartStore.setShippingMethod("未選擇運送方式(設定:大安店自取)");
+    }
 
   // orderProducts 內容
   const orderProducts = cartList.value.map(product => {
@@ -196,9 +202,7 @@ const checkout = async()=>{
   rentalDays: rentalDays.value,
   totalPrice: totalPrice.value,
   shippingFee: selectedServicesPrice.value,
-  shippingMethod: selectedServices.value.delivery1 ? "自取" :
-    selectedServices.value.delivery2 ? "1-20公里送貨" :
-    selectedServices.value.delivery3 ? "20-40公里送貨" : null,
+  shippingMethod: cartStore.shippingMethod,
   orderProducts: orderProducts,
   payMethod: null,
 });
