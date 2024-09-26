@@ -5,21 +5,35 @@ import { createOrderAPI, getOrdersByMemberIdAPI, getOrderByIdAPI, getAllOrdersAP
 export const useOrderStore = defineStore('order', () => {
     const orders = ref([]); // 儲存訂單列表
     const currentOrder = ref(null); // 儲存當前正在創建或查看的訂單
+    const orderData = ref(null); // 暫存訂單資料
 
-    // 創建新訂單
-    const createOrder = async (orderData) => {
-        try {
-            const response = await createOrderAPI(orderData);
-            currentOrder.value = response.data; // 保存創建成功的訂單
-            return response.data;
-        } catch (error) {
-            console.error("創建訂單失敗:", error);
-            throw error;
+    // 設置訂單資料，這個方法用於結帳前保存訂單資料
+    function setOrderData(data) {
+        orderData.value = data;
+        console.log("設置的訂單資料:", orderData.value); // 確認設置的資料
+
+    }
+
+
+   // 創建新訂單
+   const createOrder = async (newOrderData) => {
+    try {
+        if (!orderData.value) {
+            throw new Error("沒有可用的訂單資料");
         }
-    };
+          // 確保 orderData 包含地址信息
+        const response = await createOrderAPI(newOrderData); // 使用暫存的訂單資料創建訂單
+        currentOrder.value = response.data; // 保存創建成功的訂單
+        return response.data;
+    } catch (error) {
+        console.error("創建訂單失敗:", error);
+        throw error;
+    }
+};
+
 
     // 根據會員 ID 獲取訂單
-    const fetchOrdersByMember = async (memberId) => {
+    const getOrdersByMember = async (memberId) => {
         try {
             const response = await getOrdersByMemberAPI(memberId);
             orders.value = response.data;
@@ -36,8 +50,10 @@ export const useOrderStore = defineStore('order', () => {
     return {
         orders,
         currentOrder,
-        createOrder,
-        fetchOrdersByMember,
+        getOrdersByMember,
         clearCurrentOrder,
+        orderData, // 暫存的訂單資料
+        setOrderData, // 設置暫存訂單資料
+        createOrder, // 創建最終訂單
     };
 });
