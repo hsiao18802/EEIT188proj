@@ -56,26 +56,33 @@ export default {
   },
   mounted() {
     this.loadCustomerRequests(); // 加載所有客服請求
+    this.connectWebSocket(); // 在一開始就建立 WebSocket 連接
   },
   methods: {
     loadCustomerRequests() {
-  this.customerRequests = []; // 先清空數據
-  axiosapi.get('api/customer-support-requests')
-    .then(response => {
-      this.customerRequests = response.data;
-    })
-    .catch(error => {
-      console.error("無法加載客服請求列表:", error);
-    });
-
-
+      axiosapi.get('api/customer-support-requests')
+        .then(response => {
+          this.customerRequests = response.data;
+        })
+        .catch(error => {
+          console.error("無法加載客服請求列表:", error);
+        });
     },
+    // 當選中某個客服請求時
     selectRequest(request) {
       this.selectedRequest = request;
-      this.messages = []; // 清空當前的消息列表
+      this.messages = [];
       this.loadChatHistory(request.membersId);
-      this.sessionId = request.sessionId || this.generateSessionId(); // 為每個會員建立會話 ID
-      this.connectWebSocket(request.membersId); // 重新連接並訂閱新頻道
+      this.sessionId = request.sessionId || this.generateSessionId();
+
+      // 每次選中客服請求時檢查該會員是否有未解決的客服請求
+      this.checkExistingSupportRequest(request.membersId).then(exists => {
+        if (exists) {
+          console.log("已經有未解決的客服請求，不需要創建新的。");
+        } else {
+          console.log("沒有未解決的客服請求，可以創建新的請求。");
+        }
+      });
     },
     loadChatHistory(membersId) {
       axiosapi.post('api/chat-history', { membersId })
@@ -84,19 +91,19 @@ export default {
             sender: record.sender === 'user' ? 'user' : 'support',
             text: record.text,
           }));
-          this.scrollToBottom(); // 加载历史消息后滚动到底部
+          this.scrollToBottom(); // 加載歷史消息後滾動到底部
         })
         .catch(error => {
           console.error("加載聊天歷史記錄時發生錯誤:", error);
         });
     },
-    connectWebSocket(membersId) {
-      // 断开之前的连接
+    connectWebSocket() {
+      // 斷開之前的連接
       if (this.stompClient) {
         this.stompClient.deactivate();
       }
 
-      // 连接新的 WebSocket
+      // 連接新的 WebSocket
       const socket = new SockJS('http://localhost:8080/ws');
       this.stompClient = new Client({
         webSocketFactory: () => socket,
@@ -106,28 +113,9 @@ export default {
         onConnect: () => {
           console.log("已連接 WebSocket");
 
-          // 訂閱客戶的消息頻道
-          this.stompClient.subscribe('/topic/customer/' + membersId, message => {
-            const receivedMessage = JSON.parse(message.body);
-            if (receivedMessage.text && receivedMessage.text.trim() !== '') {
-              this.messages.push({
-                sender: 'user',
-                text: receivedMessage.text,
-              });
-              this.scrollToBottom(); // 每次收到新消息时滚动到底部
-            }
-          });
-
-          // 訂閱客服的消息頻道
-          this.stompClient.subscribe('/topic/support/' + membersId, message => {
-            const receivedMessage = JSON.parse(message.body);
-            if (receivedMessage.text && receivedMessage.text.trim() !== '') {
-              this.messages.push({
-                sender: 'support',
-                text: receivedMessage.text,
-              });
-              this.scrollToBottom(); // 每次收到新消息时滚动到底部
-            }
+          // 訂閱所有客戶的消息頻道
+          this.customerRequests.forEach(request => {
+            this.subscribeToCustomer(request.membersId);
           });
         },
         onStompError: (frame) => {
@@ -135,6 +123,34 @@ export default {
         }
       });
       this.stompClient.activate();
+    },
+    // 訂閱指定會員的消息頻道
+    subscribeToCustomer(membersId) {
+      if (this.stompClient) {
+        // 訂閱客戶的消息頻道
+        this.stompClient.subscribe('/topic/customer/' + membersId, message => {
+          const receivedMessage = JSON.parse(message.body);
+          if (receivedMessage.text && receivedMessage.text.trim() !== '') {
+            this.messages.push({
+              sender: 'user',
+              text: receivedMessage.text,
+            });
+            this.scrollToBottom(); // 每次收到新消息時滾動到底部
+          }
+        });
+
+        // 訂閱客服的消息頻道
+        this.stompClient.subscribe('/topic/support/' + membersId, message => {
+          const receivedMessage = JSON.parse(message.body);
+          if (receivedMessage.text && receivedMessage.text.trim() !== '') {
+            this.messages.push({
+              sender: 'support',
+              text: receivedMessage.text,
+            });
+            this.scrollToBottom(); // 每次收到新消息時滾動到底部
+          }
+        });
+      }
     },
     // 生成會話 ID
     generateSessionId() {
@@ -152,7 +168,7 @@ export default {
         // 儲存消息到資料庫
         axiosapi.post('/api/send-support-message', message)
           .then(() => {
-            this.messages.push(message); // 立即将消息添加到消息列表中显示
+            this.messages.push(message); // 立即將消息添加到消息列表中顯示
 
             // 通過 WebSocket 發送消息到客戶的頻道
             this.stompClient.publish({
@@ -160,7 +176,7 @@ export default {
               body: JSON.stringify(message)
             });
 
-            this.scrollToBottom(); // 发送消息后滚动到底部
+            this.scrollToBottom(); // 發送消息後滾動到底部
 
             // 清空輸入框
             this.userInput = '';
@@ -171,17 +187,39 @@ export default {
       }
     },
     scrollToBottom() {
-      // 将消息窗口滚动到底部
+      // 將消息窗口滾動到底部
       this.$nextTick(() => {
         const chatWindow = this.$refs.chatWindow;
         if (chatWindow) {
           chatWindow.scrollTop = chatWindow.scrollHeight;
         }
       });
+    },
+    // 檢查是否已經存在未解決的客服請求
+    checkExistingSupportRequest(membersId) {
+      return axiosapi.post('/api/check-support-request', { membersId })
+        .then(response => {
+          return response.data.exists; // 返回是否存在
+        })
+        .catch(error => {
+          console.error("檢查客服請求時發生錯誤:", error);
+          return false;
+        });
+    }
+  },
+  watch: {
+    // 當 customerRequests 改變時，重新訂閱
+    customerRequests(newRequests) {
+      if (this.stompClient && this.stompClient.connected) {
+        newRequests.forEach(request => {
+          this.subscribeToCustomer(request.membersId);
+        });
+      }
     }
   }
 };
 </script>
+
 
 <style scoped>
 .customer-support {

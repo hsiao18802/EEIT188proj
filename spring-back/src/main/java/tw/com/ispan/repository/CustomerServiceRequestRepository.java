@@ -14,5 +14,5 @@ public interface CustomerServiceRequestRepository extends JpaRepository<Customer
 //	List<CustomerServiceRequest> findByMember_MembersId(Integer membersId);
 //	List<CustomerServiceRequest> findByStatus(String status); // 查詢特定狀態的客服請求
 	 Optional<CustomerServiceRequest> findByMemberAndStatus(Members member, String status);
-	 
+	 Optional<CustomerServiceRequest> findTopByMemberAndStatusOrderByCreatedAtDesc(Members member, String status);
 }

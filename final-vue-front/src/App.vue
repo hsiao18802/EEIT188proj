@@ -6,8 +6,8 @@
 
     <CartDrawer></CartDrawer>
 
-   <!-- 根據路由判斷是否顯示購物車圖標 -->
-   <CartIcon v-if="!isCartPage" />
+  <!-- 根據路由判斷是否顯示購物車圖標 -->
+  <CartIcon v-if="!isCartPage" />
 
     <!-- 右側內容區 -->
     <div v-if="isEmpNavbar" class="flex-grow-1 p-3">

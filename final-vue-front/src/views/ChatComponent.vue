@@ -23,23 +23,24 @@
           <button @click="sendMessage">發送</button>
         </div>      </div>
     </div>
-  </div> -->
+  </div> 
 </template>
 
 <script>
 import axiosapi from '@/plugins/axios';
 import { v4 as uuidv4 } from 'uuid'; // 使用 uuid 生成唯一的 sessionId
 import useUserStore from '@/stores/user.js'; // 引入 Pinia 的 store
-
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 export default {
   data() {
     return {
       messages: [], // 聊天記錄
       userInput: '', // 用戶輸入的消息
-      
       sessionId: uuidv4(), // 使用 UUID 生成唯一的 sessionId
       chatVisible: false, // 控制聊天窗口的顯示/隱藏，默認隱藏
-      isHumanAgentMode: false // 是否進入人工客服模式
+      isHumanAgentMode: false, // 是否進入人工客服模式
+      stompClient: null // Stomp 客戶端
     };
   },
   computed: {
@@ -59,7 +60,7 @@ export default {
     }
 
     this.loadChatHistory();
-    // this.triggerWelcomeEvent();
+    this.connectWebSocket(); // 建立 WebSocket 連接
   },
   methods: {
     // 加載歷史聊天紀錄
@@ -81,94 +82,120 @@ export default {
           console.error("加載聊天紀錄時發生錯誤：", error);
         });
     },
-    // 發送歡迎消息
-    // triggerWelcomeEvent() {
-    //   axiosapi.post('/api/welcome', { sessionId: this.sessionId })
-    //     .then(response => {
-    //       const botResponse = response.data.responseText;
-    //       this.messages.push({ sender: 'bot', text: botResponse });
-    //     })
-    //     .catch(error => {
-    //       console.error("Error:", error);
-    //       this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
-    //     });
-    // },
     // 發送消息
     sendMessage() {
+      if (this.userInput.trim() !== '') {
+        // 先將用戶輸入的消息加入到消息列表中顯示
+        this.messages.push({ sender: 'user', text: this.userInput });
 
-  if (this.userInput.trim() !== '') {
-    // 先將用戶輸入的消息加入到消息列表中顯示
-    this.messages.push({ sender: 'user', text: this.userInput });
+        if (this.isHumanAgentMode) {
+          // 發送消息到客服人員
+          this.sendMessageToAgent(this.userInput);
+        } else {
+          // 普通模式下，通過 Dialogflow 處理
+          const requestBody = {
+            sessionId: this.sessionId || '',
+            queryInput: {
+              text: {
+                text: this.userInput,
+                languageCode: 'zh-TW'
+              }
+            },
+            membersId: this.membersId // 傳遞會員 ID
+          };
 
-    if (this.isHumanAgentMode) {
-      // 發送消息到客服人員
-      console.log("進入人工客服模式，發送消息到客服人員。");
-      this.sendMessageToAgent(this.userInput);
-    } else {
-      // 普通模式下，通過 Dialogflow 處理
-      const requestBody = {
-        sessionId: this.sessionId || '',
-        queryInput: {
-          text: {
-            text: this.userInput,
-            languageCode: 'zh-TW'
-          }
-        },
-        membersId: this.membersId // 傳遞會員 ID
-      };
+          axiosapi.post('/api/dialogflow', requestBody)
+            .then(response => {
+              const botResponse = response.data.responseText;
+              const isHumanAgent = response.data.isHumanAgent;
 
-      axiosapi.post('/api/dialogflow', requestBody)
-        .then(response => {
-          console.log("後端回應：", response.data); // 打印後端回應
-          const botResponse = response.data.responseText;
-          const isHumanAgent = response.data.isHumanAgent;
+              // 如果有回應內容，才顯示機器人回應
+              if (botResponse && botResponse.trim() !== '') {
+                this.messages.push({ sender: 'bot', text: botResponse });
+              } else {
+                console.log("無法識別的輸入，沒有回應內容。");
+              }
 
-          // 如果有回應內容，才顯示機器人回應
-          if (botResponse && botResponse.trim() !== '') {
-            this.messages.push({ sender: 'bot', text: botResponse });
-          } else {
-            // 如果沒有回應，則在控制台提示，前端不做任何顯示
-            console.log("無法識別的輸入，沒有回應內容。");
-          }
+              // 如果需要轉人工客服，設置標記並提示用戶
+              if (isHumanAgent) {
+                this.isHumanAgentMode = true;
+                this.messages.push({ sender: 'bot', text: '您已進入人工客服模式，稍候將有客服人員與您聯繫。' });
+              }
+            })
+            .catch(error => {
+              console.error("Error:", error);
+              this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
+            });
+        }
 
-          // 如果需要轉人工客服，設置標記並提示用戶
-          if (isHumanAgent) {
-            this.isHumanAgentMode = true;
-            this.messages.push({ sender: 'bot', text: '您已進入人工客服模式，稍候將有客服人員與您聯繫。' });
-          }
-        })
-        .catch(error => {
-          console.error("Error:", error);
-       
-          if (error.response && error.response.data) {
-            console.error("Error Response Data:", error.response.data);
-          }
-          this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
-        });
-    }
-
-    // 清空輸入框
-    this.userInput = '';
-  }
-
-
+        // 清空輸入框
+        this.userInput = '';
+      }
     },
     // 發送消息給人工客服
     sendMessageToAgent(message) {
-      // 只在消息內容不為空時發送
       if (message.trim() !== '') {
-        axiosapi.post('/api/customer-support', {
+        const msgObj = {
           membersId: this.membersId,
           issueDescription: message, // 傳遞訊息內容
           sessionId: this.sessionId
-        })
-        .then(response => {
-          console.log('消息已發送到客服人員：', response.data);
-        })
-        .catch(error => {
-          console.error("無法發送消息到客服人員：", error);
-        });
+        };
+
+        // 通過 WebSocket 發送消息給客服
+        if (this.stompClient && this.stompClient.connected) {
+          this.stompClient.publish({
+            destination: '/app/sendMessage/customer/' + this.membersId,
+            body: JSON.stringify(msgObj)
+          });
+        }
+
+        // 儲存消息到資料庫
+        axiosapi.post('/api/customer-support', msgObj)
+          .then(response => {
+            console.log('消息已發送到客服人員：', response.data);
+          })
+          .catch(error => {
+            console.error("無法發送消息到客服人員：", error);
+          });
       }
+    },
+    // 建立 WebSocket 連接
+    connectWebSocket() {
+      const socket = new SockJS('http://localhost:8080/ws');
+      this.stompClient = new Client({
+        webSocketFactory: () => socket,
+        debug: function (str) {
+          console.log(str); // 查看連接狀態
+        },
+        onConnect: () => {
+          console.log("會員端已連接 WebSocket");
+
+          // 訂閱客服消息
+          this.stompClient.subscribe('/topic/support/' + this.membersId, message => {
+            const receivedMessage = JSON.parse(message.body);
+            if (receivedMessage.text && receivedMessage.text.trim() !== '') {
+              this.messages.push({
+                sender: 'bot',
+                text: receivedMessage.text,
+              });
+              this.scrollToBottom(); // 每次收到新消息時滾動到底部
+            }
+          });
+        },
+        onStompError: (frame) => {
+          console.error('STOMP Error:', frame);
+        }
+      });
+      this.stompClient.activate();
+    },
+    // 滾動到最新消息
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const chatWindow = this.$refs.chatWindow;
+        if (chatWindow) {
+          chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+      });
     },
     // 切換聊天窗口顯示狀態
     toggleChat() {
@@ -177,6 +204,7 @@ export default {
   }
 }
 </script>
+
 
 <style scoped>
 /* 整體容器 */
