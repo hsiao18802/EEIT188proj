@@ -59,7 +59,7 @@ export default {
     }
 
     this.loadChatHistory();
-    this.triggerWelcomeEvent();
+    // this.triggerWelcomeEvent();
   },
   methods: {
     // 加載歷史聊天紀錄
@@ -82,79 +82,91 @@ export default {
         });
     },
     // 發送歡迎消息
-    triggerWelcomeEvent() {
-      axiosapi.post('/api/welcome', { sessionId: this.sessionId })
+    // triggerWelcomeEvent() {
+    //   axiosapi.post('/api/welcome', { sessionId: this.sessionId })
+    //     .then(response => {
+    //       const botResponse = response.data.responseText;
+    //       this.messages.push({ sender: 'bot', text: botResponse });
+    //     })
+    //     .catch(error => {
+    //       console.error("Error:", error);
+    //       this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
+    //     });
+    // },
+    // 發送消息
+    sendMessage() {
+  if (this.userInput.trim() !== '') {
+    // 先將用戶輸入的消息加入到消息列表中顯示
+    this.messages.push({ sender: 'user', text: this.userInput });
+
+    if (this.isHumanAgentMode) {
+      // 發送消息到客服人員
+      console.log("進入人工客服模式，發送消息到客服人員。");
+      this.sendMessageToAgent(this.userInput);
+    } else {
+      // 普通模式下，通過 Dialogflow 處理
+      const requestBody = {
+        sessionId: this.sessionId || '',
+        queryInput: {
+          text: {
+            text: this.userInput,
+            languageCode: 'zh-TW'
+          }
+        },
+        membersId: this.membersId // 傳遞會員 ID
+      };
+
+      axiosapi.post('/api/dialogflow', requestBody)
         .then(response => {
+          console.log("後端回應：", response.data); // 打印後端回應
           const botResponse = response.data.responseText;
-          this.messages.push({ sender: 'bot', text: botResponse });
+          const isHumanAgent = response.data.isHumanAgent;
+
+          // 如果有回應內容，才顯示機器人回應
+          if (botResponse && botResponse.trim() !== '') {
+            this.messages.push({ sender: 'bot', text: botResponse });
+          } else {
+            // 如果沒有回應，則在控制台提示，前端不做任何顯示
+            console.log("無法識別的輸入，沒有回應內容。");
+          }
+
+          // 如果需要轉人工客服，設置標記並提示用戶
+          if (isHumanAgent) {
+            this.isHumanAgentMode = true;
+            this.messages.push({ sender: 'bot', text: '您已進入人工客服模式，稍候將有客服人員與您聯繫。' });
+          }
         })
         .catch(error => {
           console.error("Error:", error);
+          if (error.response && error.response.data) {
+            console.error("Error Response Data:", error.response.data);
+          }
           this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
         });
-    },
-    // 發送消息
-    sendMessage() {
-      if (this.userInput.trim() !== '') {
-        // 先將用戶輸入的消息加入到消息列表中顯示
-        this.messages.push({ sender: 'user', text: this.userInput });
+    }
 
-        if (this.isHumanAgentMode) {
-          // 發送消息到客服人員
-          console.log("進入人工客服模式，發送消息到客服人員。");
-          this.sendMessageToAgent(this.userInput);
-        } else {
-          // 普通模式下，通過 Dialogflow 處理
-          const requestBody = {
-            sessionId: this.sessionId || '',
-            queryInput: {
-              text: {
-                text: this.userInput,
-                languageCode: 'zh-TW'
-              }
-            },
-            membersId: this.membersId // 傳遞會員 ID
-          };
+    // 清空輸入框
+    this.userInput = '';
+  }
 
-          axiosapi.post('/api/dialogflow', requestBody)
-            .then(response => {
-              console.log("後端回應：", response.data); // 打印後端回應
-              const botResponse = response.data.responseText;
-              const isHumanAgent = response.data.isHumanAgent;
-              this.messages.push({ sender: 'bot', text: botResponse });
 
-              // 如果需要轉人工客服，設置標記並提示用戶
-              if (isHumanAgent) {
-                this.isHumanAgentMode = true;
-                this.messages.push({ sender: 'bot', text: '您已進入人工客服模式，稍候將有客服人員與您聯繫。' });
-              }
-            })
-            .catch(error => {
-              console.error("Error:", error);
-              if (error.response && error.response.data) {
-                console.error("Error Response Data:", error.response.data);
-              }
-              this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
-            });
-        }
-
-        // 清空輸入框
-        this.userInput = '';
-      }
     },
     // 發送消息給人工客服
     sendMessageToAgent(message) {
-      axiosapi.post('/api/customer-support', {
-        membersId: this.membersId,
-        message: message,
-        sessionId: this.sessionId
-      })
+      // 只在消息內容不為空時發送
+      if (message.trim() !== '') {
+        axiosapi.post('/api/customer-support', {
+          membersId: this.membersId,
+          issueDescription: message, // 傳遞訊息內容
+          sessionId: this.sessionId
+        })
         .then(response => {
           console.log('消息已發送到客服人員：', response.data);
         })
         .catch(error => {
           console.error("無法發送消息到客服人員：", error);
         });
+      }
     },
     // 切換聊天窗口顯示狀態
     toggleChat() {

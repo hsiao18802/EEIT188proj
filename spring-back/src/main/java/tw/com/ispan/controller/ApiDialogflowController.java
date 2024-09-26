@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +45,10 @@ public class ApiDialogflowController {
 
     @Autowired
     private CustomerServiceRequestRepository customerServiceRequestRepository; // 客戶服務請求的 repository
+    
+    
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
 
     // 處理來自前端的對話請求
     @PostMapping("/dialogflow")
@@ -139,84 +144,142 @@ public class ApiDialogflowController {
     @PostMapping("/customer-support")
     public ResponseEntity<Map<String, Object>> handleCustomerSupportRequest(@RequestBody Map<String, Object> requestBody) {
         Integer membersId = (Integer) requestBody.get("membersId");
-        String issueDescription = (String) requestBody.get("issueDescription"); // 前端傳遞的問題描述
+        String issueDescription = (String) requestBody.get("issueDescription");
 
-        // 檢查會員 ID 是否存在
         if (membersId == null) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Member ID must not be null.");
             return ResponseEntity.badRequest().body(errorResponse);
         }
 
-        // 查找會員信息
         Optional<Members> optionalMember = membersRepository.findById(membersId);
 
         if (optionalMember.isPresent()) {
             Members member = optionalMember.get();
 
-            // 新建一個 CustomerServiceRequest 實體並儲存到資料庫
-            CustomerServiceRequest customerServiceRequest = new CustomerServiceRequest();
-            customerServiceRequest.setMember(member);
-            customerServiceRequest.setIssueDescription(issueDescription != null ? issueDescription : "User requested for human agent support.");
-            customerServiceRequest.setStatus("Pending"); // 初始狀態設置為等待處理
-            customerServiceRequest.setCreatedAt(new Date());
+            // 檢查是否已經有 Pending 狀態的客服請求
+            Optional<CustomerServiceRequest> existingRequest = customerServiceRequestRepository.findByMemberAndStatus(member, "Pending");
+            if (existingRequest.isPresent()) {
+                // 如果有待處理的請求，返回提示消息
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "已存在待處理的客服請求。");
+                return ResponseEntity.ok(response);
+            } else {
+                // 創建新的客服請求
+                CustomerServiceRequest customerServiceRequest = new CustomerServiceRequest();
+                customerServiceRequest.setMember(member);
+                customerServiceRequest.setIssueDescription(issueDescription != null ? issueDescription : "User requested for human agent support.");
+                customerServiceRequest.setStatus("Pending");
+                customerServiceRequest.setCreatedAt(new Date());
 
-            customerServiceRequestRepository.save(customerServiceRequest);
+                customerServiceRequestRepository.save(customerServiceRequest);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "客服請求已創建。");
-            return ResponseEntity.ok(response);
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "客服請求已創建。");
+                return ResponseEntity.ok(response);
+            }
         } else {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "會員未找到");
             return ResponseEntity.status(400).body(errorResponse);
         }
     }
+
+    
+ // 處理客服發送給會員的消息
+    @PostMapping("/send-support-message")
+    public ResponseEntity<?> handleSupportMessage(@RequestBody Map<String, Object> requestBody) {
+        try {
+            // 檢查請求中的所有必須屬性
+            Integer membersId = (Integer) requestBody.get("membersId");
+            String messageText = (String) requestBody.get("text");
+            String sessionId = (String) requestBody.get("sessionId");
+
+            if (membersId == null || messageText == null || sessionId == null || messageText.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("所有字段均為必填且不能為空");
+            }
+
+            // 查找會員信息
+            Optional<Members> optionalMember = membersRepository.findById(membersId);
+            if (!optionalMember.isPresent()) {
+                return ResponseEntity.badRequest().body("會員 ID 不存在");
+            }
+
+            Members member = optionalMember.get();
+
+            // 建立聊天紀錄
+            ChatRecord chatRecord = new ChatRecord();
+            chatRecord.setSessionId(sessionId);
+            chatRecord.setMember(member);
+            chatRecord.setSender("support"); // 設置發送者為客服
+            chatRecord.setMessage(messageText);
+            chatRecord.setTimestamp(new Date());
+            
+            // 儲存到資料庫
+            chatRecordRepository.save(chatRecord);
+
+            // 通過 WebSocket 將訊息發送到會員端
+            messagingTemplate.convertAndSend("/topic/customer/" + membersId, chatRecord);
+
+            return ResponseEntity.ok("消息儲存並發送成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("儲存消息失敗：" + e.getMessage());
+        }
+    }
+
+    
+    
+    
+    
     
     @GetMapping("/customer-support-requests")
     public ResponseEntity<List<Map<String, Object>>> getCustomerSupportRequests() {
         List<Map<String, Object>> responseList = new ArrayList<>();
 
-        // 查詢狀態為 Pending 的客服請求
-        List<CustomerServiceRequest> customerRequests = customerServiceRequestRepository.findByStatus("Pending");
-
-        for (CustomerServiceRequest request : customerRequests) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", request.getId());
-            response.put("membersId", request.getMember().getMembersId());
-            response.put("issueDescription", request.getIssueDescription());
-            response.put("status", request.getStatus());
-            responseList.add(response);
+        // 查詢所有會員的唯一 Pending 狀態的客服請求
+        List<Members> allMembers = membersRepository.findAll(); // 獲取所有會員
+        for (Members member : allMembers) {
+            Optional<CustomerServiceRequest> optionalRequest = customerServiceRequestRepository.findByMemberAndStatus(member, "Pending");
+            if (optionalRequest.isPresent()) {
+                CustomerServiceRequest request = optionalRequest.get();
+                Map<String, Object> response = new HashMap<>();
+                response.put("id", request.getId());
+                response.put("membersId", request.getMember().getMembersId());
+                response.put("issueDescription", request.getIssueDescription());
+                response.put("status", request.getStatus());
+                responseList.add(response);
+            }
         }
 
         return ResponseEntity.ok(responseList);
     }
-    
+
     
     
 
     // 處理歡迎事件
-    @PostMapping("/welcome")
-    public ResponseEntity<Map<String, Object>> triggerWelcomeEvent(@RequestBody Map<String, Object> requestBody) {
-        String sessionId = (String) requestBody.get("sessionId");
-        if (sessionId == null || sessionId.isEmpty()) {
-            sessionId = UUID.randomUUID().toString();
-        }
-
-        EventInput eventInput = EventInput.newBuilder()
-                .setName("Welcome")
-                .setLanguageCode("zh-TW")
-                .build();
-        QueryInput queryInput = QueryInput.newBuilder()
-                .setEvent(eventInput)
-                .build();
-
-        String responseText = dialogflowService.getDialogflowResponse(sessionId, queryInput);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("sessionId", sessionId);
-        response.put("responseText", responseText);
-
-        return ResponseEntity.ok(response);
-    }
+//    @PostMapping("/welcome")
+//    public ResponseEntity<Map<String, Object>> triggerWelcomeEvent(@RequestBody Map<String, Object> requestBody) {
+//        String sessionId = (String) requestBody.get("sessionId");
+//        if (sessionId == null || sessionId.isEmpty()) {
+//            sessionId = UUID.randomUUID().toString();
+//        }
+//
+//        EventInput eventInput = EventInput.newBuilder()
+//                .setName("Welcome")
+//                .setLanguageCode("zh-TW")
+//                .build();
+//        QueryInput queryInput = QueryInput.newBuilder()
+//                .setEvent(eventInput)
+//                .build();
+//
+//        String responseText = dialogflowService.getDialogflowResponse(sessionId, queryInput);
+//
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("sessionId", sessionId);
+//        response.put("responseText", responseText);
+//
+//        return ResponseEntity.ok(response);
+//    }
 }

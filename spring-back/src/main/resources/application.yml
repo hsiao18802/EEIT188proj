@@ -37,7 +37,7 @@ spring:
   cloud:
     gcp:
       credentials:
-        location: file:C:/finalexam/spring-back/src/main/resources/gcp/demo1-ufum-6b8b1556c965.json  # 確保文件路徑正確
+        location: file:C:/final-exam/spring-back/src/main/resources/gcp/demo1-ufum-6b8b1556c965.json  # 確保文件路徑正確
 redis:
     host: localhost
     port: 6379
