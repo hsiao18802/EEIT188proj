@@ -96,11 +96,10 @@ public class OrderService {
             order.setRentalDays(0); // 如果日期未定義，則返回0
         }
         
+     // 4. 保存訂單
+        Order savedOrder = orderRepository.save(order);
         
-
-
-
-     // 處理訂單產品資訊
+        // 5. 處理訂單產品資訊
         if (orderDTO.getOrderProducts() != null) {
             List<OrderProduct> orderProducts = orderDTO.getOrderProducts().stream()
                 .map(productDTO -> {
@@ -114,26 +113,20 @@ public class OrderService {
                     
                     // 設置 Product
                     orderProduct.setProduct(product); 
-
                     // 設置與訂單的關聯
-                    orderProduct.setOrder(order); 
+                    orderProduct.setOrder(savedOrder); // 使用已保存的訂單物件
 
-                    // **不需要顯式設置 `productName` 和 `price`，這些可以在 `DTO` 中處理**
                     return orderProduct;
                 })
                 .collect(Collectors.toList());
             
-            // 設置訂單產品列表
-            order.setOrderProduct(orderProducts); 
+            // 6. 更新訂單產品關聯
+            savedOrder.setOrderProduct(orderProducts); // 將所有的 orderProduct 設置到訂單中
         }
+
+        savedOrder.setOrderDate(LocalDateTime.now()); // 只設置當前日期，不包含時間
         
-        order.setOrderDate(LocalDateTime.now()); // 只設置當前日期，不包含時間
-
-
-        // 保存訂單
-        Order savedOrder = orderRepository.save(order);
-
-        // 返回轉換後的 DTO
+        // 7. 返回轉換後的 DTO
         return orderConverter.toDTO(savedOrder);
     }
 
@@ -148,6 +141,9 @@ public class OrderService {
         Order updatedOrder = orderRepository.save(order);
         return orderConverter.toDTO(updatedOrder);
     }
+    
+    
+    
 
     // 刪除訂單
     @Transactional

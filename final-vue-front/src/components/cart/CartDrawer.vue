@@ -96,6 +96,7 @@
 <script setup>
 import { computed,ref } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+import { useOrderStore } from '@/stores/orderStore';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs'; // 引入 dayjs 函式庫 算天數
 
@@ -107,6 +108,8 @@ const showCartDrawer = computed(() => cartStore.showCartDrawer);
 const cartList = computed(() => cartStore.cartList);
 const rentalStartDate = computed(() => cartStore.rentalStartDate);
 const rentalEndDate = computed(() => cartStore.rentalEndDate);
+
+const orderStore =  useOrderStore();
 
 
 // 計算租借天數
@@ -166,15 +169,55 @@ const toggleCart = () => {
   cartStore.toggleCartDrawer();
 };
 
+const checkout = async()=>{
+   const orderData = {
+    membersId: cartStore.membersId,
+    rentalStartDate: cartStore.rentalStartDate, // 租借開始日期
+    rentalEndDate: cartStore.rentalEndDate,     // 租借結束日期
+    rentalDays: rentalDays.value,              // 租借天數
+    totalPrice: totalPrice.value,              // 計算出的總價
+    shippingFee: selectedServicesPrice.value,  // 選擇服務的費用
+    shippingMethod: selectedServices.value.delivery1
+      ? "自取"
+      : selectedServices.value.delivery2
+      ? "1-20公里送貨"
+      : selectedServices.value.delivery3
+      ? "20-40公里送貨"
+      : null, // 選擇的運送方式
+    orderProducts: cartList.value.map(product => ({
+      productId: product.productId,
+      dailyFeeOriginal: product.dailyFeeOriginal,
+      count: product.count,
+    })), // 將購物車中的商品轉換為訂單產品資料
+    payMethod: null, // 如果有付款方式，可以在此設定
+  };
+  console.log("訂單資料:", orderData);
+
+  try {
+    const newOrder = await orderStore.createOrder(orderData); // 創建訂單
+
+  cartStore.toggleCartDrawer(); // 隱藏抽屜
+  cartStore.clearCart(); // 清空購物車
+  router.push('/pages/checkout');
+    console.log("訂單創建成功:", newOrder);
+    // 導向訂單成功頁面或顯示成功訊息
+  } catch (error) {
+    console.error("結帳失敗:", error);
+  }
+
+};
+
+
+
+
+
+
 const viewCart = () => {
   cartStore.toggleCartDrawer(); // 隱藏抽屜
   router.push('/pages/Cart'); // 僅使用路徑進行跳轉
 };
 
-const checkout = () => {
-  cartStore.toggleCartDrawer(); // 隱藏抽屜
-  router.push('/pages/checkout');
-};
+
 const minusOne = (productId) => cartStore.minusOne(productId);
 const plusOne = (productId) => cartStore.plusOne(productId);
 const removeFromCart = (productId) => cartStore.delCart(productId);

@@ -43,9 +43,7 @@ const cartStore = useCartStore();
 const userStore = useUserStore();
 const router = useRouter();
 
-// 動畫元素
-const animationBall = ref(null); 
-const exampleObj = ref(null); // 用於隱藏動畫後的效果
+
 
 // 添加商品到購物車
 const addCart = async () => {

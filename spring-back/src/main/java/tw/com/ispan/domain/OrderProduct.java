@@ -21,9 +21,11 @@ public class OrderProduct {
     @Column(name = "order_product_id")
     private Integer orderProductId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
-    private Order order;   //要 id
+    
+    
+    @ManyToOne
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order; //要 id
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
