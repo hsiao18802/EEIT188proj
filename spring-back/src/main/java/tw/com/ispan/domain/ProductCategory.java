@@ -16,8 +16,12 @@ public class ProductCategory {
     @Id
     @Column(name = "category_id")
     private Integer categoryId;
+    
 
     @Column(name = "category_name")
     private String categoryName;
+    
+    @Column(name = "display_sequence")
+    private Integer displaySequence;
     
 }

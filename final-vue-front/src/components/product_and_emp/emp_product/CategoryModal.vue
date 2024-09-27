@@ -1,6 +1,5 @@
 <template>
-    <div ref="exampleModal" class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
+    <div ref="exampleModal" class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -17,10 +16,15 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>{{ category.categoryId }}</td>
+                            <tr v-for="category in categories" :key="category.categoryId">
+                                <td>{{ category.displaySequence }}</td>
                                 <th scope="row">{{ category.categoryName }}</th>
-                                <td><span>這裡放按鈕</span></td>
+                                <td>
+                                    <div class="btn-group col text-end">
+                                        <a class="btn btn-primary" @click="emits('catUpdate', category.categoryId)">修改</a>
+                                        <a class="btn btn-danger" @click="emits('catDelete', category.categoryId)">刪除</a>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -32,12 +36,13 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
-import Swal from 'sweetalert2';
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import Swal from 'sweetalert2';
 import axiosapi from '@/plugins/axios';  // 確保你有正確配置 axios
 
 // // Props and emits
-const props = defineProps(["category"]);
+const props = defineProps(["categories"]);
+const emits = defineEmits(['update:categories, catDelete, catUpdate']);
 
 // // Modal handling
 const exampleModal = ref(null);
@@ -51,6 +56,7 @@ function showModal() {
 function hideModal() {
     exampleObj.value.hide();
 }
+
 defineExpose({
     showModal,
     hideModal
