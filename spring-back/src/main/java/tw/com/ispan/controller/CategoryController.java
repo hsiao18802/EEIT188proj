@@ -2,6 +2,7 @@ package tw.com.ispan.controller;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale.Category;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import tw.com.ispan.domain.Product;
 import tw.com.ispan.domain.ProductCategory;
 import tw.com.ispan.service.CategoryService;
 
@@ -33,5 +35,37 @@ public class CategoryController {
     public ResponseEntity<List<ProductCategory>> getAllCategories() {
         List<ProductCategory> categories = categoryService.findAllCategories();
         return ResponseEntity.ok(categories);
+    }
+    
+    // 刪除
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> deleteProductCategory(@PathVariable Integer id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // 呼叫 Service 刪除並重新排列順序
+            String result = categoryService.deleteCategoryAndRearrangeSequence(id);
+            
+            // 構建成功的回應
+            response.put("success", true);
+            response.put("message", result);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            // 構建失敗的回應
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+    
+    // 修改
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateCategory(@PathVariable Integer id, @RequestBody Map<String, String> updateData) {
+        try {
+            String newCategoryName = updateData.get("categoryName");
+            String result = categoryService.updateCategoryName(id, newCategoryName);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 }

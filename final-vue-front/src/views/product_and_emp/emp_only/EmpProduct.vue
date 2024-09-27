@@ -3,6 +3,7 @@
     <div class="row">
         <div class="col-2">
             <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
+            <button type="button" class="btn btn-primary" @click="openCategory">分類管理</button>
         </div>
         <div class="col-4">
             <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind">
@@ -30,7 +31,7 @@
                     <img v-if="product.mainPhoto" :alt="product.productName" v-default-img="product.mainPhoto"
                         style="width: 100px; height: 100px;" @click="showFullImage(product.mainPhoto)">
                     <span v-else><a class="btn btn-primary"
-                            @click="openChangePic('update', product.productId)">新增圖片</a></span>
+                            @click="openModal('changepic', product.productId)">新增圖片</a></span>
                 </td>
                 <th scope="row">{{ product.productName }}</th>
                 <td>{{ product.categoryId }}</td>
@@ -54,14 +55,15 @@
 
     <div class="row">
         <ProductCard v-for="product in products" :key="product.id" :item="product" @delete="callRemove"
-            @open-update="openModal" @open-change-pic="openChangePic"></ProductCard>
+            @open-update="openModal"></ProductCard>
     </div>
 
-    <ProductModal ref="productModal" v-model:product="product" :is-show-insert-button="isShowInsertButton"
-        @insert="callCreate" @update="callModify" @imageSelected="handleImageSelected" @clearImage="clearImage">
+    <ProductModal ref="productModal" v-model:product="product"
+        :is-show-insert="isShowInsert" :is-show-changepic="isShowChangepic" :is-show-update="isShowUpdate"
+        @insert="callCreate" @update="callModify" @changepic="callChangePic" @imageSelected="handleImageSelected" @clearImage="clearImage">
     </ProductModal>
-    <EmpChangePic ref="picModal" v-model:product="product" @imageSelected="handleImageSelected"
-        @changepic="callChangePic"></EmpChangePic>
+    <CategoryModal ref="categoryModal" :categories="categories" @catDelete="callCatRemove" @catUpdate="callCatModify"></CategoryModal>
+
 </template>
 
 <script setup>
@@ -71,7 +73,7 @@ import axiosapi from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
 
 import ProductModal from '@/components/product_and_emp/emp_product/EmpProductModal.vue';
-import EmpChangePic from '@/components/product_and_emp/emp_product/EmpChangePic.vue';
+import CategoryModal from '@/components/product_and_emp/emp_product/CategoryModal.vue';
 
 const start = ref(0);
 const max = ref(3);
@@ -79,30 +81,80 @@ const current = ref(1);
 const total = ref(0);
 const lastPageRows = ref(0);
 const productModal = ref(null);
+const categoryModal = ref(null);
 const picModal = ref(null);
 const product = ref({});
-const isShowInsertButton = ref(true);
+const category = ref({});
+const isShowInsert = ref(true);
+const isShowUpdate = ref(true);
+const isShowChangepic = ref(true);
 const findName = ref("");
 const products = ref([]);
-const emits = defineEmits(["delete", "openUpdate", "openChangePic"]);
+const categories = ref([]);
+const emits = defineEmits(["delete", "openUpdate"]);
 
 function openModal(action, id) {
     if (action === 'insert') {
-        isShowInsertButton.value = true;
+        isShowInsert.value = true;
+        isShowUpdate.value = false;
+        isShowChangepic.value = false;
         product.value = {};
         product.value.statusId = 1;
     } else {
-        isShowInsertButton.value = false;
+        isShowInsert.value = false;
+        if (action === 'changepic'){
+            console.log("changepic = true");
+            isShowUpdate.value = false;
+            isShowChangepic.value = true;
+        } else{
+            console.log("changepic = false");
+            isShowUpdate.value = true;
+            isShowChangepic.value = false;
+        }
         callFindById(id);
     }
     productModal.value.showModal();
 }
 
-function openChangePic(action, id) {
-    product.value = {};
-    callFindById(id);
-    picModal.value.showModal();
+async function openCategory() {
+    await callFindCategory(); // 等待資料加載完成
+    console.log("(1)category : " + JSON.stringify(categories.value)); // 資料加載完成後再檢查
+    if (categories.value && categories.value.length > 0) {
+        categoryModal.value.showModal();  // 確保 modal 打開時 category 已經有資料
+    } else {
+        console.error('No category data available');
+    }
 }
+
+async function callFindCategory() {
+    const response = await axiosapi.get('/rent/category/find');
+    if (response.data) {
+        categories.value = response.data; // 確保資料被賦值到 category
+        console.log("成功獲取資料:", categories.value);
+    }
+console.log("(2)categories : " + JSON.stringify(categories.value));
+}
+
+function reloadCategories() {
+    console.log("重刷 啟動");
+    axiosapi.get('/rent/category/find')  
+        .then(response => {
+            console.log("API 回應：", response.data);  // 打印回應資料
+
+            // 假設返回的是一個分類的陣列，直接更新 categories
+            if (Array.isArray(response.data)) {
+                categories.value = response.data;
+                console.log("更新後的 categories：", categories.value);
+            } else {
+                console.error("API 回應格式不正確");
+            }
+        })
+        .catch(error => {
+            console.error("載入分類資料失敗", error);
+        });
+}
+
+
 
 function callDiscontinue(id) {
     Swal.fire({
@@ -168,7 +220,7 @@ function callRemove(id) {
                             Swal.fire({
                                 icon: 'error',
                                 title: '刪除失敗',
-                                html: '商品已經有客戶下單，無法刪除<br>使用下架功能，讓商品不再顯示與販售？',
+                                html: '商品已有客戶下單，無法刪除<br>使用下架功能，讓商品不再顯示與販售？',
                                 showCancelButton: true,
                                 allowOutsideClick: false,
                             }).then(function (result) {
@@ -188,6 +240,53 @@ function callRemove(id) {
                                         })
                                         .catch(handleError);
                                 }
+                            });
+                        } else {
+                            handleError(error); // 其他錯誤仍用原來的處理
+                        }
+                    } else {
+                        handleError(error); // 處理未知錯誤
+                    }
+                });
+        }
+    });
+}
+
+function callCatRemove(id) {
+    console.log("Category ID to remove:", id); // 檢查 id 是否為有效數字
+    Swal.fire({
+        title: "確認刪除？",
+        text: "請注意，刪除以後將無法復原資料",
+        icon: "question",
+        showCancelButton: true,
+        allowOutsideClick: false,
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+            axiosapi.delete(`/rent/category/${id}`)
+                .then(function (response) {
+                    if (response.data && response.data.success) {
+                        handleSuccess(response.data.message, productModal.value);
+                    } else {
+                        handleError(new Error(response.data.message || "刪除失敗，請稍後再試"));
+                    }
+                })
+                .catch(function (error) {
+                    // 檢查錯誤訊息是否包含資料表衝突相關字詞
+                    if (error.response && error.response.data && error.response.data.message) {
+                        const errorMessage = error.response.data.message;
+                        if (errorMessage.includes("REFERENCE") || errorMessage.includes("衝突發生在資料庫")) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '刪除失敗',
+                                html: '此分類已有商品，無法刪除',
+                                showConfirmButton: false,
+                                showCancelButton: true,
+                                allowOutsideClick: false,
                             });
                         } else {
                             handleError(error); // 其他錯誤仍用原來的處理
@@ -286,7 +385,7 @@ function callModify() {
         showConfirmButton: false,
         allowOutsideClick: false,
     });
-
+console.log(product.value.statusId);
     let body = {
         productId: product.value.productId,
         productName: product.value.productName || null,
@@ -299,6 +398,8 @@ function callModify() {
 
 
     axiosapi.put(`/rent/product/${body.productId}`, body).then(function (response) {
+console.log(product.value.statusId);
+        
         if (selectedImage.value) {
             const reader = new FileReader();
             reader.onloadend = function () {
@@ -321,6 +422,30 @@ function callModify() {
                 handleError(new Error(response.data.message));
             }
         }
+    }).catch(handleError);
+}
+
+function callCatModify() {
+    console.log("修改 啟動");
+    Swal.fire({
+        text: "Loading......",
+        showConfirmButton: false,
+        allowOutsideClick: false,
+    });
+    let body = {
+        categoryId: category.value.categoryId,
+        categoryName: category.value.categoryName,
+    };
+
+    axiosapi.put(`/rent/category/${body.categoryId}`, body).then(function (response) {
+console.log(product.value.statusId);
+
+        if (response.data.success) {
+            handleSuccess(response.data.message, categoryModal.value);
+        } else {
+            handleError(new Error(response.data.message));
+        }
+
     }).catch(handleError);
 }
 
@@ -373,6 +498,7 @@ function handleSuccessReload(message) {
 function handleSuccess(message, modalToHide = null) {
     Swal.fire({ text: message || '操作成功', icon: "success" }).then(function () {
         if (modalToHide) modalToHide.hideModal();
+        reloadCategories(); // 呼叫重新載入方法
         callFind(current.value);
     });
 }

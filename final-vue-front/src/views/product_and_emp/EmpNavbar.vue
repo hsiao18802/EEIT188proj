@@ -44,7 +44,7 @@
           </div>
         </li> -->
     
-        <!-- 錯誤訊息 -->
+        <!-- 錯誤訊息（測試用） -->
         <!-- <li class="mb-1">
           <button
             class="btn btn-toggle text-white d-inline-flex align-items-center rounded border-0"
@@ -52,7 +52,7 @@
             data-bs-target="#error-collapse"
             aria-expanded="false"
           >
-            錯誤訊息（之後會刪掉）
+            錯誤訊息（測試用）
           </button>
           <div class="collapse" id="error-collapse">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
