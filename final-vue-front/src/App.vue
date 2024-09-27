@@ -21,7 +21,7 @@
     <!-- 聊天組件，全局顯示 -->
     <ChatComponent />
       <!-- 全局頁腳 -->
-     
+     <!-- <Footer></Footer> -->
   </div>
 </template>
 

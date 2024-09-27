@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
+import lombok.ToString.Exclude; // 加入這個
 
 @ToString
 @NoArgsConstructor
@@ -32,64 +32,51 @@ import lombok.ToString;
 @Table(name = "members")
 public class Members {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "members_id")
+    private Integer membersId;
 
- //   @OneToMany(mappedBy = "members")
-//    @JsonIgnore
-//    private Set<Cart> cart;
-    //（例如：某個會員想要查看他加入購物車的所有商品）
-    //這樣可以讓你從 Members 實例中直接調用 members.getCart() 查詢到該會員的所有購物車記錄。
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="members_id")
-	private Integer membersId;
+    @Column(name = "members_username")
+    private String username;
 
-	@Column(name="members_username")
-	private String username;
-	
-	@Column(name="members_password")
-	private byte[] password;
-	
-	@Column(name = "realname")
-	private String realName;
-	
-	@Column(name="email", unique = true)
-	private String email;
-	
-	@Column(name="phone")
-	private String phone;
-	
-	@Column(name="address")
-	private String address;
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss EEEE")
-	@Column(name="registration_date")
-	private Date registrationDate;
-	
-	@PrePersist
-	protected void onCreate() {
-	    registrationDate = new Date();
-	}
+    @Column(name = "members_password")
+    private byte[] password;
 
+    @Column(name = "realname")
+    private String realName;
 
-	@Column(name="member_photo")
-	private byte[] memberPhoto;
-	
-	
-	
-	
+    @Column(name = "email", unique = true)
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "address")
+    private String address;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss EEEE")
+    @Column(name = "registration_date")
+    private Date registrationDate;
+
+    @PrePersist
+    protected void onCreate() {
+        registrationDate = new Date();
+    }
+
+    @Column(name = "member_photo")
+    private byte[] memberPhoto;
 
     // 聊天記錄
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonIgnore
+    @ToString.Exclude // 排除這個屬性
     private Set<ChatRecord> chatRecords;
 
     // 客服請求
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonIgnore
+    @ToString.Exclude // 排除這個屬性
     private Set<CustomerServiceRequest> customerServiceRequests;
-
-	}
-
-
+}
