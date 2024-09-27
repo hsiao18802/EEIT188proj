@@ -62,7 +62,7 @@ public class WebSocketChatController {
         if (chatRecord.getMessage() == null || chatRecord.getMessage().trim().isEmpty()) {
             return; // 如果訊息為空或只有空白，則不執行任何操作
         }
-
+        System.out.println("消息已發送到: /topic/customer/" + chatRecord.getMember().getMembersId());
         messagingTemplate.convertAndSend("/topic/customer/" + chatRecord.getMember().getMembersId(), chatRecord);
     }
 
@@ -72,7 +72,7 @@ public class WebSocketChatController {
         if (chatRecord.getMessage() == null || chatRecord.getMessage().trim().isEmpty()) {
             return; // 如果訊息為空或只有空白，則不執行任何操作
         }
-
+        System.out.println("消息已發送到: /topic/support/" + chatRecord.getMember().getMembersId());
         messagingTemplate.convertAndSend("/topic/support/" + chatRecord.getMember().getMembersId(), chatRecord);
     }
 }

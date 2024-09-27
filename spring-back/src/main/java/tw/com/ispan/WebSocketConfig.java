@@ -15,6 +15,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic"); // 設置訂閱的目標地址前綴
+        
         config.setApplicationDestinationPrefixes("/app"); // 設置應用程序發送消息的路徑前綴
     }
 

@@ -6,7 +6,7 @@
     </div>
     <!-- 聊天窗口 -->
     <div v-if="chatVisible" class="chat-container">
-      <div class="chat-window">
+      <div class="chat-window" ref="chatWindow">
         <div class="header">
           <span class="header-title">趣露營chatbot</span>
           <span class="close-btn" @click="toggleChat">×</span>
@@ -21,9 +21,10 @@
         <div class="input-container">
           <input v-model="userInput" @keyup.enter="sendMessage" placeholder="請輸入您的問題..." />
           <button @click="sendMessage">發送</button>
-        </div>      </div>
+        </div>
+      </div>
     </div>
-  </div> 
+  </div>
 </template>
 
 <script>
@@ -32,6 +33,7 @@ import { v4 as uuidv4 } from 'uuid'; // 使用 uuid 生成唯一的 sessionId
 import useUserStore from '@/stores/user.js'; // 引入 Pinia 的 store
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+
 export default {
   data() {
     return {
@@ -77,6 +79,7 @@ export default {
             sender: record.sender === 'user' ? 'user' : 'bot',
             text: record.text
           }));
+          this.scrollToBottom(); // 加載歷史消息後滾動到底部
         })
         .catch(error => {
           console.error("加載聊天紀錄時發生錯誤：", error);
@@ -121,10 +124,13 @@ export default {
                 this.isHumanAgentMode = true;
                 this.messages.push({ sender: 'bot', text: '您已進入人工客服模式，稍候將有客服人員與您聯繫。' });
               }
+
+              this.scrollToBottom(); // 滾動到最新消息
             })
             .catch(error => {
               console.error("Error:", error);
               this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
+              this.scrollToBottom(); // 滾動到最新消息
             });
         }
 
@@ -172,11 +178,12 @@ export default {
 
           // 訂閱客服消息
           this.stompClient.subscribe('/topic/support/' + this.membersId, message => {
+            console.log('收到新消息: ', message.body); // 確保消息被接收
             const receivedMessage = JSON.parse(message.body);
             if (receivedMessage.text && receivedMessage.text.trim() !== '') {
               this.messages.push({
-                sender: 'bot',
-                text: receivedMessage.text,
+                sender: 'support',
+                text: receivedMessage.message,
               });
               this.scrollToBottom(); // 每次收到新消息時滾動到底部
             }
@@ -204,7 +211,6 @@ export default {
   }
 }
 </script>
-
 
 <style scoped>
 /* 整體容器 */

@@ -46,7 +46,8 @@ export default {
       messages: [], // 當前聊天記錄
       userInput: '', // 客服輸入的消息
       stompClient: null, // Stomp 客戶端
-      sessionId: null // 追蹤會話 ID
+      sessionId: null, // 追蹤會話 ID
+      subscribedMembers: [] // 存儲已經訂閱的會員 ID
     };
   },
   computed: {
@@ -56,18 +57,26 @@ export default {
   },
   mounted() {
     this.loadCustomerRequests(); // 加載所有客服請求
-    this.connectWebSocket(); // 在一開始就建立 WebSocket 連接
+    this.connectWebSocket(); // 建立 WebSocket 連接
   },
   methods: {
+    // 加載所有客服請求
     loadCustomerRequests() {
       axiosapi.get('api/customer-support-requests')
         .then(response => {
           this.customerRequests = response.data;
+          // 在 WebSocket 連接成功後訂閱所有客戶的消息
+          if (this.stompClient && this.stompClient.connected) {
+            this.customerRequests.forEach(request => {
+              this.subscribeToCustomer(request.membersId);
+            });
+          }
         })
         .catch(error => {
           console.error("無法加載客服請求列表:", error);
         });
     },
+
     // 當選中某個客服請求時
     selectRequest(request) {
       this.selectedRequest = request;
@@ -84,6 +93,8 @@ export default {
         }
       });
     },
+
+    // 加載歷史聊天紀錄
     loadChatHistory(membersId) {
       axiosapi.post('api/chat-history', { membersId })
         .then(response => {
@@ -97,65 +108,97 @@ export default {
           console.error("加載聊天歷史記錄時發生錯誤:", error);
         });
     },
+
+    // 建立 WebSocket 連接
     connectWebSocket() {
-      // 斷開之前的連接
+      // 確保 WebSocket 斷開前先進行清理
       if (this.stompClient) {
-        this.stompClient.deactivate();
+        this.stompClient.deactivate(); // 斷開之前的連接
       }
 
-      // 連接新的 WebSocket
-      const socket = new SockJS('http://localhost:8080/ws');
+      // 建立新的 WebSocket 連接
+      const socket = new SockJS('http://localhost:8080/ws'); // WebSocket 路徑與後端一致
       this.stompClient = new Client({
         webSocketFactory: () => socket,
-        debug: function (str) {
-          console.log(str);
+        debug: (str) => {
+          console.log('WebSocket Debug: ', str); // 監控 WebSocket 的狀態
         },
+        heartbeatIncoming: 4000, // 設置心跳機制
+        heartbeatOutgoing: 4000,
+        reconnectDelay: 5000, // 設置自動重連時間
         onConnect: () => {
-          console.log("已連接 WebSocket");
+          console.log("WebSocket 連接成功");
 
-          // 訂閱所有客戶的消息頻道
+          // 連接成功後，訂閱所有已存在的客戶請求
           this.customerRequests.forEach(request => {
             this.subscribeToCustomer(request.membersId);
           });
         },
+        onDisconnect: () => {
+          console.log("WebSocket 已斷開，將自動重連...");
+          this.handleReconnect(); // 處理自動重連
+        },
         onStompError: (frame) => {
           console.error('STOMP Error:', frame);
+          this.handleReconnect(); // STOMP 錯誤時進行重連
         }
       });
+
+      // 激活 WebSocket 連接
       this.stompClient.activate();
     },
+
+    // 處理 WebSocket 重新連接
+    handleReconnect() {
+      if (this.reconnectAttempts < 5) { // 限制重連次數
+        this.reconnectAttempts += 1;
+        console.log(`WebSocket 嘗試重新連接 (${this.reconnectAttempts})...`);
+        setTimeout(() => {
+          this.connectWebSocket();
+        }, 5000); // 每 5 秒嘗試重連一次
+      } else {
+        console.error("WebSocket 無法重新連接，達到最大重試次數");
+      }
+    },
+
     // 訂閱指定會員的消息頻道
     subscribeToCustomer(membersId) {
       if (this.stompClient) {
+        // 檢查是否已經訂閱過
+        if (this.isSubscribed(membersId)) {
+          return; // 如果已經訂閱，則不進行重複訂閱
+        }
+
         // 訂閱客戶的消息頻道
         this.stompClient.subscribe('/topic/customer/' + membersId, message => {
+          console.log('收到新消息: ', message.body); // 確保消息被接收
           const receivedMessage = JSON.parse(message.body);
           if (receivedMessage.text && receivedMessage.text.trim() !== '') {
             this.messages.push({
               sender: 'user',
-              text: receivedMessage.text,
+              text: receivedMessage.message,
             });
             this.scrollToBottom(); // 每次收到新消息時滾動到底部
           }
         });
 
-        // 訂閱客服的消息頻道
-        this.stompClient.subscribe('/topic/support/' + membersId, message => {
-          const receivedMessage = JSON.parse(message.body);
-          if (receivedMessage.text && receivedMessage.text.trim() !== '') {
-            this.messages.push({
-              sender: 'support',
-              text: receivedMessage.text,
-            });
-            this.scrollToBottom(); // 每次收到新消息時滾動到底部
-          }
-        });
+
+        // 標記已訂閱
+        this.subscribedMembers.push(membersId);
       }
     },
+
+    // 檢查是否已經訂閱
+    isSubscribed(membersId) {
+      return this.subscribedMembers.includes(membersId);
+    },
+
     // 生成會話 ID
     generateSessionId() {
       return 'session_' + Math.random().toString(36).substr(2, 9);
     },
+
+    // 發送消息
     sendMessage() {
       if (this.userInput.trim() !== '' && this.selectedRequest) {
         const message = {
@@ -168,6 +211,7 @@ export default {
         // 儲存消息到資料庫
         axiosapi.post('/api/send-support-message', message)
           .then(() => {
+            // 即時顯示消息
             this.messages.push(message); // 立即將消息添加到消息列表中顯示
 
             // 通過 WebSocket 發送消息到客戶的頻道
@@ -183,11 +227,17 @@ export default {
           })
           .catch(error => {
             console.error("儲存訊息到資料庫失敗：", error);
+            // 顯示錯誤提示
+            this.messages.push({
+              sender: 'system',
+              text: '發送消息失敗，請重試'
+            });
           });
       }
     },
+
+    // 滾動到最新消息
     scrollToBottom() {
-      // 將消息窗口滾動到底部
       this.$nextTick(() => {
         const chatWindow = this.$refs.chatWindow;
         if (chatWindow) {
@@ -195,6 +245,7 @@ export default {
         }
       });
     },
+
     // 檢查是否已經存在未解決的客服請求
     checkExistingSupportRequest(membersId) {
       return axiosapi.post('/api/check-support-request', { membersId })
@@ -207,19 +258,21 @@ export default {
         });
     }
   },
+
   watch: {
-    // 當 customerRequests 改變時，重新訂閱
+    // 當 customerRequests 改變時，重新檢查並訂閱新的客戶
     customerRequests(newRequests) {
       if (this.stompClient && this.stompClient.connected) {
         newRequests.forEach(request => {
-          this.subscribeToCustomer(request.membersId);
+          if (!this.isSubscribed(request.membersId)) {
+            this.subscribeToCustomer(request.membersId);
+          }
         });
       }
     }
   }
 };
 </script>
-
 
 <style scoped>
 .customer-support {
