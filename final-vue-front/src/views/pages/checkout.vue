@@ -73,7 +73,7 @@
       <button type="button" @click="showTerms">了解更多</button>
     </div>
 
-    <button type="submit" class="checkout-button" :disabled="!termsAccepted">繼續付款</button>
+    <button @click="submitOrder" type="submit" class="checkout-button" :disabled="!termsAccepted">繼續付款</button>
 
   </div>
 
