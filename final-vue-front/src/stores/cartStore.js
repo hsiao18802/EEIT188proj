@@ -37,6 +37,14 @@ export const useCartStore = defineStore('cartStore', () => {
     userStore.setMembersId(id); // 這裡調用 userStore 的方法來設置 membersId
   };
 
+  // 新增 shippingMethod 狀態
+  const shippingMethod = ref(null); // 定義運輸方式的狀態
+
+  // 設置運輸方式的方法
+  const setShippingMethod = (method) => {
+    shippingMethod.value = method;
+  };
+
 
   const updateNewList = async () => {
     try {
@@ -201,7 +209,6 @@ const selectedServices = ref({
   delivery1: false, // 自取
   delivery2: false, // 1-20 公里
   delivery3: false, // 20-40 公里
-  insurance4: false, // 意外不便險
 });
 
 // 計算加價服務的總價
@@ -209,7 +216,6 @@ const selectedServicesPrice = computed(() => {
   let total = 0;
   if (selectedServices.value.delivery2) total += 300;
   if (selectedServices.value.delivery3) total += 500;
-  if (selectedServices.value.insurance4) total += 600;
   return total;
 });
 
@@ -253,6 +259,8 @@ const handleServiceSelection = (selectedOption) => {
     selectedServices,
     selectedServicesPrice,
     handleServiceSelection,
+    shippingMethod,
+    setShippingMethod,
 
   };
 },

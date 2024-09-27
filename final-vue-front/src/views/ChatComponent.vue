@@ -41,7 +41,7 @@ export default {
       userInput: '', // 用戶輸入的消息
       sessionId: uuidv4(), // 使用 UUID 生成唯一的 sessionId
       chatVisible: false, // 控制聊天窗口的顯示/隱藏，默認隱藏
-      isHumanAgentMode: false, // 是否進入人工客服模式
+     
       stompClient: null // Stomp 客戶端
     };
   },
@@ -107,23 +107,15 @@ export default {
             membersId: this.membersId // 傳遞會員 ID
           };
 
+
           axiosapi.post('/api/dialogflow', requestBody)
             .then(response => {
               const botResponse = response.data.responseText;
               const isHumanAgent = response.data.isHumanAgent;
 
-              // 如果有回應內容，才顯示機器人回應
-              if (botResponse && botResponse.trim() !== '') {
-                this.messages.push({ sender: 'bot', text: botResponse });
-              } else {
-                console.log("無法識別的輸入，沒有回應內容。");
-              }
 
-              // 如果需要轉人工客服，設置標記並提示用戶
-              if (isHumanAgent) {
-                this.isHumanAgentMode = true;
-                this.messages.push({ sender: 'bot', text: '您已進入人工客服模式，稍候將有客服人員與您聯繫。' });
-              }
+
+      
 
               this.scrollToBottom(); // 滾動到最新消息
             })
@@ -133,6 +125,7 @@ export default {
               this.scrollToBottom(); // 滾動到最新消息
             });
         }
+
 
         // 清空輸入框
         this.userInput = '';

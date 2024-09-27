@@ -29,7 +29,8 @@
         <h4 class="rental-content-title">租借內容</h4>
         <div v-for="product in cartStore.sortedCartList" :key="product.cartId" class="product-item">
           <div class="product-image">
-            <img :src="product.mainPhoto" alt="產品圖片" />
+            <img :src="`data:image/jpeg;base64,${product.mainPhoto}`" alt="product image" />
+
           </div>
           <div class="product-info">
             <div class="product-title">{{ product.productName }}</div>
@@ -78,10 +79,7 @@
           />
           大安區店 附近 20-40公里內的送貨和取貨 ($500)
         </label>
-        <label>
-          <input type="checkbox" v-model="selectedServices.insurance4" />
-          安心保安心用：意外不便險 ($600)
-        </label>
+        
       </div>
 
       <div class="summary-card">
@@ -124,12 +122,15 @@
 
 
 <script setup>
-import { computed, ref,watch } from 'vue';
+import { computed, ref,watch,onMounted  } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+import { useOrderStore } from '@/stores/orderStore';
+
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs'; // 引入 dayjs 函式庫 算天數
 
 
+const orderStore =  useOrderStore();
 
 
 // 計算租借天數
@@ -192,8 +193,46 @@ const selectedServices = ref({
   delivery1: false, // 自取
   delivery2: false, // 1-20 公里
   delivery3: false, // 20-40 公里
-  insurance4: false, // 意外不便險
 });
+
+onMounted(() => {
+  console.log("Initial shipping method:", cartStore.shippingMethod); // Debugging
+  if (cartStore.shippingMethod) {
+    switch (cartStore.shippingMethod) {
+      case '自取($0)大安區店':
+        selectedServices.value.delivery1 = true;
+        break;
+      case '1-20公里內的送貨和取貨 ($300) 大安區店':
+        selectedServices.value.delivery2 = true;
+        break;
+      case '20-40公里內的送貨和取貨 ($500) 大安區店':
+        selectedServices.value.delivery3 = true;
+        break;
+      default:
+        console.warn("Unrecognized shipping method:", cartStore.shippingMethod); // Debugging
+    }
+  }
+});
+
+
+const handleServiceSelection = (selectedOption) => {
+  if (selectedOption === 1) {
+    selectedServices.value.delivery2 = false;
+    selectedServices.value.delivery3 = false;
+    cartStore.shippingMethod = '自取($0)大安區店'; // 更新為自取
+  } else if (selectedOption === 2) {
+    selectedServices.value.delivery1 = false;
+    selectedServices.value.delivery3 = false;
+    cartStore.shippingMethod = '1-20公里內的送貨和取貨 ($300) 大安區店'; // 更新為1-20公里送貨
+  } else if (selectedOption === 3) {
+    selectedServices.value.delivery1 = false;
+    selectedServices.value.delivery2 = false;
+    cartStore.shippingMethod = '20-40公里內的送貨和取貨 ($500) 大安區店'; // 更新為20-40公里送貨
+  }
+};
+
+
+
 
 // 計算選擇服務的總價格
 const selectedServicesPrice = computed(() => {
@@ -215,14 +254,8 @@ const totalItemCount = computed(() =>
 
 const isCartEmpty = computed(() => cartList.value.length === 0);
 
-const handleServiceSelection = (selectedOption) => {
-  if (selectedOption === 1) {
-    selectedServices.value.delivery2 = false;
-    selectedServices.value.delivery3 = false;
-  } else {
-    selectedServices.value.delivery1 = false;
-  }
-};
+
+
 
 const minusOne = (productId) => cartStore.minusOne(productId);
 const plusOne = (productId) => cartStore.plusOne(productId);
@@ -237,10 +270,61 @@ const continueShopping = () => {
   router.push('/productpage'); // 返回主頁或產品列表頁面
 };
 
-const checkout = () => {
-  // 這裡可以添加結帳邏輯，例如跳轉到結帳頁面
-  router.push('/pages/checkout');
+const checkout = async()=>{
+
+// 確保運送方式被設置
+if (!cartStore.shippingMethod) {
+      cartStore.setShippingMethod("未選擇運送方式(設定:大安店自取)");
+  }
+
+// orderProducts 內容
+const orderProducts = cartList.value.map(product => {
+      const subtotal = product.dailyFeeOriginal * product.count; // 計算小計
+      return {
+          productId: product.productId,
+          dailyFeeOriginal: product.dailyFeeOriginal,
+          count: product.count,
+          productName:  product.productName,
+          subtotal: subtotal, // 加入小計
+          orderProductId: null, // 如果需要，待後端生成
+          mainPhoto: product.mainPhoto // 加入圖片資料
+
+          
+      };
+  });
+
+orderStore.setOrderData({
+membersId: cartStore.membersId,
+rentalStartDate: cartStore.rentalStartDate,
+rentalEndDate: cartStore.rentalEndDate,
+rentalDays: rentalDays.value,
+totalPrice: totalPrice.value,
+shippingFee: selectedServicesPrice.value,
+shippingMethod: cartStore.shippingMethod,
+orderProducts: orderProducts,
+payMethod: null,
+});
+
+console.log("暫存的訂單資料:", JSON.stringify(orderStore.orderData));
+
+
+await router.push('/pages/checkout');
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 const updateRentalDates = () => {
   if (!selectedStartDate.value || !selectedEndDate.value) {

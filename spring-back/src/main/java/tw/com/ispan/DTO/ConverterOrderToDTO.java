@@ -57,6 +57,8 @@ public class ConverterOrderToDTO {
                 productDTO.setProductId(product.getProduct() != null ? product.getProduct().getProductId() : null); // 獲取產品 ID
                 productDTO.setProductName(product.getProduct().getProductName()); // 獲取產品名稱
                 productDTO.setPrice(product.getProduct().getDailyFeeOriginal()); // 獲取產品價格
+                productDTO.setMainPhoto(product.getProduct().getMainPhoto()); // 獲取產品價格
+
 
                 
                 return productDTO; // 返回轉換後的 DTO

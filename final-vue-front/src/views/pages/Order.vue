@@ -1,127 +1,92 @@
 <template>
-  <v-container>
-    <v-card>
-      <v-card-title>
-        <h2>訂單歷史</h2>
-      </v-card-title>
-      <v-data-table
-        :headers="headers"
-        :items="orders"
-        item-key="order_id"
-        class="elevation-1"
-      >
-        <template v-slot:item.order_creation_date="{ item }">
-          {{ formatDate(item.order_creation_date) }}
-        </template>
-        <template v-slot:item.total_price_amount="{ item }">
-          {{ formatCurrency(item.total_price_amount) }}
-        </template>
-        <template v-slot:item.shipping_fee="{ item }">
-          {{ formatCurrency(item.shipping_fee) }}
-        </template>
-        <template v-slot:item.status="{ item }">
-          <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
-        </template>
-        <template v-slot:no-data>
-          <v-alert type="info" icon="mdi-information">
-            沒有訂單資料
-          </v-alert>
-        </template>
-      </v-data-table>
-    </v-card>
-    
-    <!-- Show CartDrawer only when drawerVisible is true -->
-    <CartDrawer/>
-    
+   <div>
+    <el-tabs v-model="activeTab" @tab-click="fetchOrders">
+      <el-tab-pane label="所有訂單" name="ALL"></el-tab-pane>
+      <el-tab-pane label="待付款" name="PENDING"></el-tab-pane>
+      <el-tab-pane label="已付款" name="PAID"></el-tab-pane>
+      <el-tab-pane label="運送中" name="SHIPPED"></el-tab-pane>
+      <el-tab-pane label="已送達" name="DELIVERED"></el-tab-pane>
+      <el-tab-pane label="交易完成" name="DONE"></el-tab-pane>
+      <el-tab-pane label="不成立" name="CANCELLED"></el-tab-pane>
+      <el-tab-pane label="退貨/退款" name="RETURNED"></el-tab-pane>
+    </el-tabs>
 
-  </v-container>
+    <order-list :orders="filteredOrders" @viewOrder="viewOrder" @deleteOrder="deleteOrder" />
+  </div>
+
+    <!-- 產品詳情對話框 -->
+    <el-dialog :visible.sync="isProductDialogVisible" title="產品詳情">
+      <order-product-details :order="currentOrder" />
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isProductDialogVisible = false">關閉</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 送貨資訊對話框 -->
+    <el-dialog :visible.sync="isShippingDialogVisible" title="送貨資訊">
+      <order-shipping-info :order="currentOrder" />
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isShippingDialogVisible = false">關閉</el-button>
+      </span>
+    </el-dialog>
+
+
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useOrderStore } from '@/stores/orderStore';
+import OrderList from '@/components/orders/OrderList.vue';
+import OrderProductDetails from '@/components/orders/OrderProductDetails.vue';
+import OrderShippingInfo from '@/components/orders/OrderShippingInfo.vue';
 
-// Sample cart list data
+// 使用 orderStore
+const orderStore = useOrderStore();
+
+// 狀態管理
+const activeTab = ref('PENDING'); // 默認顯示待付款
+const isProductDialogVisible = ref(false);
+const isShippingDialogVisible = ref(false);
+const currentOrder = ref(null);
 
 
-import { ref } from 'vue';
-import CartDrawer from '@/components/cart/CartDrawer.vue';
-
-const drawerVisible = ref(false);
-
-const toggleDrawer = () => {
-  drawerVisible.value = !drawerVisible.value;
+// 獲取所有訂單
+const fetchOrders = async () => {
+  await orderStore.getAllOrders();
 };
 
-const hideDrawer = () => {
-  drawerVisible.value = false;
-};
+// 初始化訂單
+onMounted(fetchOrders);
 
-// Sample cart list data
-const cartList = ref([
-  { productId: 1, productName: '產品 A', count: 1, dailyFeeOriginal: 100 },
-  { productId: 2, productName: '產品 B', count: 2, dailyFeeOriginal: 150 }
-]);
-
-const headers = [
-  { text: '訂單 ID', value: 'order_id' },
-  { text: '會員 ID', value: 'members_id' },
-  { text: '創建日期', value: 'order_creation_date' },
-  { text: '總金額', value: 'total_price_amount' },
-  { text: '租借狀態', value: 'rent_retrun_status' },
-  { text: '付款方式', value: 'pay_method' },
-  { text: '備註', value: 'remarks' },
-  { text: '訂單狀態', value: 'status' },
-  { text: '運輸費用', value: 'shipping_fee' },
-  { text: '運輸方式', value: 'shipping_method' },
-];
-
-const orders = ref([
-  {
-    order_id: 1,
-    members_id: 1,
-    order_creation_date: '2024-09-10 12:00:00',
-    total_price_amount: 600,
-    rent_retrun_status: '未歸還',
-    pay_method: '信用卡',
-    remarks: '第一次租借',
-    status: '處理中',
-    shipping_fee: 100,
-    shipping_method: '標準運輸',
-  },
-  {
-    order_id: 2,
-    members_id: 2,
-    order_creation_date: '2024-09-12 14:30:00',
-    total_price_amount: 700,
-    rent_retrun_status: '已歸還',
-    pay_method: '現金',
-    remarks: '急件',
-    status: '已完成',
-    shipping_fee: 150,
-    shipping_method: '快遞',
-  },
-  {
-    order_id: 3,
-    members_id: 3,
-    order_creation_date: '2024-09-15 09:45:00',
-    total_price_amount: 800,
-    rent_retrun_status: '未歸還',
-    pay_method: '信用卡',
-    remarks: '特殊要求',
-    status: '處理中',
-    shipping_fee: 200,
-    shipping_method: '標準運輸',
+// 計算過濾的訂單
+const filteredOrders = computed(() => {
+  if (activeTab.value === 'ALL') {
+    return orderStore.orders; // 返回所有訂單
   }
-]);
+  return orderStore.orders.filter(order => order.orderStatus === activeTab.value);
+});
 
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString();
+// 查看訂單詳情
+const viewOrder = (order) => {
+  currentOrder.value = order;
+  isProductDialogVisible.value = true;
 };
 
-const formatCurrency = (amount) => {
-  return `$${amount.toFixed(2)}`;
+// 刪除訂單
+const deleteOrder = async (orderId) => {
+  await orderStore.deleteOrder(orderId);
+  await fetchOrders(); // 刪除後重新獲取訂單
 };
 
-const getStatusColor = (status) => {
-  return status === '已完成' ? 'green' : 'orange';
+// 更新訂單狀態
+const updateOrderStatus = async (orderId, status) => {
+  await orderStore.updateOrderStatus(orderId, status);
+  await fetchOrders(); // 更新後重新獲取訂單
 };
 </script>
+
+<style scoped>
+.dialog-footer {
+  text-align: right;
+}
+</style>

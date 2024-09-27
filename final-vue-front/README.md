@@ -6,7 +6,7 @@ npm install gsap
 npm install dayjs 
 //購物車ICON
 npm install @mdi/font
-
+npm install element-plus
 
 
 

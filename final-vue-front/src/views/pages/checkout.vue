@@ -1,61 +1,87 @@
 <template>
-    <div class="checkout-container">
-      <div class="address-section">
-        <h2>填寫地址資訊</h2>
-        <form @submit.prevent="submitOrder">
-          <div class="form-group">
-            <label for="address">地址</label>
-            <input v-model="address" id="address" placeholder="輸入地址" required />
-          </div>
-          <div class="form-group">
-            <label for="phone">手機</label>
-            <input v-model="phone" id="phone" placeholder="輸入手機號碼" required />
-          </div>
-          <div class="form-group">
-            <label for="contact">聯絡電話</label>
-            <input v-model="contact" id="contact" placeholder="輸入聯絡電話" required />
-          </div>
-          <button type="submit" class="submit-button">確定訂單</button>
-        </form>
-      </div>
-  
-   
-      <div class="order-info-section" v-if="orderData">
-        <div>我的預約</div>
-        <header class="order-header">
-            <p>租借日期: {{ orderData.rentalStartDate }} - {{ orderData.rentalEndDate }}</p>
-            <p>租借天數: {{ orderData.rentalDays }}</p>
+  <div class="checkout-container">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-        </header>
-  
-        <div class="order-details">
+    <div class="address-section">
+      <h2>填寫聯絡資訊</h2>
+      <form @submit.prevent="submitOrder">
+        <div v-if="shippingMethod !== '自取($0)大安區店'" class="form-group">
+          <label for="address">收貨地址</label>
+          <input v-model="address" id="address" placeholder="輸入地址" required />
+        </div>
+        <div class="form-group">
+          <label for="name">姓名</label>
+          <input v-model="name" id="name" placeholder="輸入聯絡人姓名" required />
+        </div>
+        <div class="form-group">
+          <label for="contact">聯絡電話</label>
+          <input v-model="contact" id="contact" placeholder="輸入聯絡電話" required />
+        </div>
+        <div class="form-group">
+          <label for="remarks">備註</label>
+          <input v-model="remarks" id="remarks" placeholder="輸入方便交貨時間等資訊" />
+        </div>
+      </form>
+    </div>
 
-          <ul>
-            <li v-for="(product, index) in orderData.orderProducts" :key="index">
-                 <!-- 從 cartStore.cartList 匹配圖片 -->
-    <img
-      :src="getProductImage(product.productId)"
-      class="product-image"
-    />
+    <div class="order-info-section" v-if="orderData">
+      <header class="order-header">
+        <p>
+          <span class="rental-date">{{ orderData.rentalStartDate }}</span>
+          <i class="fas fa-arrow-right arrow-icon"></i>
+          <span class="rental-date">{{ orderData.rentalEndDate }}</span>
+        </p>
+      </header>
+
+      <div class="order-details">
+        <ul>
+          <li 
+            v-for="(product, index) in orderData.orderProducts" 
+            :key="index" 
+            style="display: flex; justify-content: space-between; align-items: center;"
+          >
+            <div style="display: flex; align-items: center;">
+              <img 
+                :src="`data:image/jpeg;base64,${product.mainPhoto}`" 
+                alt="product image" 
+                style="width: 50px; height: auto; margin-right: 10px;" 
+              />
               {{ product.count }} x {{ product.productName }}
-            </li>
-          </ul>
-          <p>運送方式: {{ orderData.shippingMethod }}</p>
-        </div>
-  
-        <footer class="order-footer">
+            </div>
+            <span>${{ product.dailyFeeOriginal }}</span>
+          </li>
+        </ul>
+        <p>運送方式: {{ orderData.shippingMethod }}</p>
+      </div>
+
+      <footer class="order-footer">
         <div>
-          <p :style="{ textDecoration: hasAppliedCoupon ? 'line-through' : 'none' }">總共價格: {{ originalPrice }} 元</p>
+          <p :style="{ textDecoration: hasAppliedCoupon ? 'line-through' : 'none' }">總計: {{ originalPrice }} 元</p>
           <p v-if="hasAppliedCoupon">折扣金額: {{ discountValue }} 元</p>
-          <p v-if="hasAppliedCoupon">折扣後價格: {{ finalPrice }} 元</p>
-          <button v-if="!hasAppliedCoupon" @click="showCouponPrompt">輸入優惠碼</button>
+          <p v-if="hasAppliedCoupon">折扣後優惠價: {{ finalPrice }} 元</p>
+          <div class="coupon-container" v-if="!hasAppliedCoupon">
+            <button class="coupon-button" @click="showCouponPrompt">
+              <i class="fas fa-tag"></i> 輸入優惠碼
+            </button>
         </div>
+      </div>
       </footer>
 
-      <div v-if="discountMessage">{{ discountMessage }}</div>
+      <div class="agreement-section">
+      <input type="checkbox" id="terms-checkbox" v-model="termsAccepted" />
+      <label for="terms-checkbox">我接受上述條款與條件</label>
+      <button type="button" @click="showTerms">了解更多</button>
     </div>
+
+    <button type="submit" class="checkout-button" :disabled="!termsAccepted">繼續付款</button>
+
   </div>
-  </template>
+
+
+    </div>
+
+    
+</template>
   
   <script setup>
   import { computed, ref } from 'vue';
@@ -71,8 +97,16 @@
   const router = useRouter();
   const orderStore = useOrderStore();
   const address = ref("");
-  const phone = ref(""); // 新增手機號碼響應式變數
+  const name = ref(""); // 新增手機號碼響應式變數
   const contact = ref(""); // 新增聯絡電話響應式變數
+  const termsAccepted = ref(false); // 新增變數以追蹤是否接受條款
+  const remarks = ref("");
+
+
+  // 取得運送方式的計算屬性
+const shippingMethod = computed(() => {
+  return orderData.value.shippingMethod; // 假設 shippingMethod 在 orderData 中
+});
   
   // 確保從 orderStore 取得暫存的訂單資料
   const orderData = computed(() => orderStore.orderData);
@@ -162,6 +196,16 @@ const getProductImage = (productId) => {
 };
 
 
+// 顯示租借規則視窗
+const showTerms = async () => {
+  await Swal.fire({
+    title: '租借規則',
+    text: '搞破壞會罰錢',
+    icon: 'info',
+    confirmButtonText: '了解'
+  });
+};
+
 
 
 
@@ -170,9 +214,10 @@ const getProductImage = (productId) => {
     try {
       const newOrderData = { 
         ...orderData.value, 
-        shippingAddress: address.value,
-        phone: phone.value,
-        contact: contact.value 
+        shippingAddress: shippingMethod.value !== '自取($0)大安區店' ? address.value : "",        shippingName: name.value,
+        shippingPhoneNum: contact.value ,
+        remarks: remarks.value // 傳送備註
+
       };
   
       const newOrder = await orderStore.createOrder(newOrderData);
@@ -198,14 +243,42 @@ const getProductImage = (productId) => {
   </script>
   
   <style scoped>
+
+
   .checkout-container {
     display: flex;
     justify-content: space-between;
     padding: 20px;
-    border: 1px solid #ccc;
+    border: 1px solid white;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative; /* 確保按鈕相對於這個容器定位 */
+    padding-bottom: 60px; /* 留出空間給固定按鈕 */
+    margin-top: 60px;
   }
+
+  .coupon-container {
+  margin-top: 10px;
+}
+
+.coupon-button {
+  background-color: white; /* 綠色背景 */
+  color: grey ; /* 白色文字 */
+  border:  1px solid  #A9A9A9; /* 無邊框 */
+  padding: 10px 20px; /* 內邊距 */
+  text-align: center; /* 文字居中 */
+  text-decoration: none; /* 無底線 */
+  display: inline-flex; /* 使按鈕與圖示在同一行 */
+  align-items: center; /* 垂直置中 */
+  border-radius: 5px; /* 邊角圓滑 */
+  transition: background-color 0.3s; /* 漸變效果 */
+}
+
+
+
+.coupon-button i {
+  margin-right: 8px; /* 圖示與文字之間的間距 */
+}
   
   .address-section {
     flex: 1;
@@ -213,20 +286,54 @@ const getProductImage = (productId) => {
   }
   
   .order-info-section {
-    flex: 1;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-  }
-  
-  .order-header {
-    background-color: #004d00;
-    color: white;
-    padding: 10px;
-    text-align: center;
-    border-radius: 8px 8px 0 0;
-  }
+  padding: 20px;
+  border: 1px solid #e0e0e0; /* 增加邊框 */
+  border-radius: 8px; /* 增加圓角 */
+  background-color: white; /* 背景顏色 */
+  margin: 20px 0; /* 增加外邊距 */
+  display: flex; /* 使用 Flexbox */
+  flex-direction: column; /* 垂直方向排列 */
+  align-items: center; /* 水平方向居中 */
+}
+
+.order-header {
+  display: flex; /* 使用 Flexbox */
+  align-items: center; /* 垂直居中 */
+  justify-content: space-between; /* 兩側對齊 */
+  background-color: #218838; /* 背景顏色 */
+  padding: 15px 20px; /* 增加內邊距，上下15px，左右20px */
+  border-radius: 10px 10px 0 0; /* 只有上邊圓角 */
+  margin: 0; /* 確保沒有上邊距 */
+  width: 100%; /* 確保寬度為100% */
+}
+
+
+
+
+.order-header::after {
+  content: '';
+  display: block;
+  height: 1px; /* 邊框高度 */
+  background-color: #e0e0e0; /* 邊框顏色 */
+  margin-top: -1px; /* 確保邊框在上方 */
+}
+
+
+
+
+.rental-date {
+  color: white; /* 設置文字顏色為白色 */
+  margin:  10px; /* 增加左右邊距 */
+  font-size: 18px; /* 字體大小 */
+}
+
+.arrow-icon {
+  font-size: 18px; /* 字體大小 */
+  color: white; /* 箭頭顏色 */
+  margin: 0 10px; /* 增加邊距 */
+}
+
+
   
   .order-details {
     margin: 20px 0;
@@ -235,7 +342,7 @@ const getProductImage = (productId) => {
   .order-footer {
     text-align: center;
     padding: 10px;
-    background-color: #e9ecef;
+    background-color: white;
     border-radius: 0 0 8px 8px;
   }
   
@@ -255,17 +362,51 @@ const getProductImage = (productId) => {
     border-radius: 4px;
   }
   
-  .submit-button {
-    padding: 10px 15px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .submit-button:hover {
-    background-color: #218838;
-  }
+  .agreement-section {
+    position: fixed; /* 固定在畫面底部 */
+    bottom: 200px; /* 距離底部 60px（留出空間給付款按鈕） */
+    left: 63%; /* 居中 */
+    transform: translateX(-50%); /* 確保水平居中 */
+    background-color: rgba(255, 255, 255, 0.9); /* 背景顏色 */
+    padding: 10px; /* 內邊距 */
+    border-radius: 8px; /* 圓角邊框 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+    text-align: center; /* 文字置中 */
+    width: 90%; /* 寬度 90%（可根據需求調整） */
+    max-width: 400px; /* 最大寬度 */
+}
+
+.checkout-button {
+    position: fixed; /* 固定在畫面底部 */
+    bottom: 200Px; /* 距離底部 px */
+    left: 50%; /* 居中 */
+    transform: translateX(-50%); /* 確保水平居中 */
+    padding: 10px 20px; /* 按鈕內邊距 */
+    border: none; /* 無邊框 */
+    border-radius: 5px; /* 圓角 */
+    background-color: #007BFF; /* 按鈕顏色 */
+    color: white; /* 字體顏色 */
+    cursor: pointer; /* 游標變為手形 */
+}
+
+.checkout-button:disabled {
+    background-color: #A9A9A9; /* 禁用狀態的顏色 */
+    cursor: not-allowed; /* 游標變為禁止 */
+}
+
+
+.form-group {
+  margin-bottom: 15px; /* 增加間距 */
+}
+
+.agreement-section {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.agreement-section button {
+  margin-left: 10px;
+}
   </style>
   

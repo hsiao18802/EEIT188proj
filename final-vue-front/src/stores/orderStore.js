@@ -11,8 +11,27 @@ export const useOrderStore = defineStore('order', () => {
     function setOrderData(data) {
         orderData.value = data;
         console.log("設置的訂單資料:", orderData.value); // 確認設置的資料
-
     }
+
+    // 獲取所有訂單
+  const getAllOrders = async () => {
+    try {
+      const response = await getAllOrdersAPI();
+      orders.value = response.data;
+    } catch (error) {
+      console.error('獲取所有訂單失敗:', error);
+    }
+  };
+
+  // 根據訂單 ID 獲取單一訂單
+  const getOrderById = async (orderId) => {
+    try {
+      const response = await getOrderByIdAPI(orderId);
+      currentOrder.value = response.data;
+    } catch (error) {
+      console.error('獲取訂單失敗:', error);
+    }
+  };
 
 
    // 創建新訂單
@@ -47,6 +66,31 @@ export const useOrderStore = defineStore('order', () => {
         currentOrder.value = null;
     };
 
+    // 刪除訂單
+  const deleteOrder = async (orderId) => {
+    try {
+      await deleteOrderAPI(orderId);
+      orders.value = orders.value.filter(order => order.orderId !== orderId);
+      console.log('訂單已刪除');
+    } catch (error) {
+      console.error('刪除訂單失敗:', error);
+    }
+  };
+
+
+
+    // 更新訂單狀態
+  const updateOrderStatus = async (orderId, status) => {
+    try {
+      await updateOrderStatusAPI(orderId, status);
+      console.log('訂單狀態已更新');
+    } catch (error) {
+      console.error('更新訂單狀態失敗:', error);
+    }
+  };
+
+
+
     return {
         orders,
         currentOrder,
@@ -55,5 +99,9 @@ export const useOrderStore = defineStore('order', () => {
         orderData, // 暫存的訂單資料
         setOrderData, // 設置暫存訂單資料
         createOrder, // 創建最終訂單
+        getAllOrders,
+        updateOrderStatus,
+        deleteOrder,
+        getOrderById
     };
 });

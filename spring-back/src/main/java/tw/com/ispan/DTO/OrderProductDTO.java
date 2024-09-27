@@ -15,6 +15,7 @@ public class OrderProductDTO {
     private String productName;      // 產品名稱
     private Integer price;           // 產品價格 //dailyFeeOriginal
     private Integer orderId;
+    private byte[] mainPhoto;
     
     
     @Override
@@ -25,6 +26,7 @@ public class OrderProductDTO {
                 ", productId=" + productId +
                 ", count=" + count +
                 ", subtotal=" + subtotal +
+                 ", mainPhoto=" + mainPhoto +
                 '}';
     }
 
