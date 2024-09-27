@@ -13,7 +13,8 @@
       <div class="cart-content">
         <div v-for="product in cartStore.sortedCartList" :key="product.cartId + product.productId + product.membersId" class="product-item">
           <div class="product-image">
-            <img :src="product.mainPhoto" alt="product image" />
+            <img :src="`data:image/jpeg;base64,${product.mainPhoto}`" alt="product image" />
+            <!-- <img :src="product.mainPhoto" alt="product image" /> -->
           </div>
           <div class="product-info">
             <div class="product-title">{{ product.productName }}</div>
@@ -94,19 +95,24 @@
 
 
 <script setup>
-import { computed,ref } from 'vue';
+import { computed,ref  } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+import { useOrderStore } from '@/stores/orderStore';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs'; // 引入 dayjs 函式庫 算天數
 
 
 
 const cartStore = useCartStore();
-const router = useRouter();
-const showCartDrawer = computed(() => cartStore.showCartDrawer);
 const cartList = computed(() => cartStore.cartList);
+const router = useRouter();
+const orderStore =  useOrderStore();
+const showCartDrawer = computed(() => cartStore.showCartDrawer);
 const rentalStartDate = computed(() => cartStore.rentalStartDate);
 const rentalEndDate = computed(() => cartStore.rentalEndDate);
+
+
+
 
 
 // 計算租借天數
@@ -166,15 +172,52 @@ const toggleCart = () => {
   cartStore.toggleCartDrawer();
 };
 
+
+const checkout = async()=>{
+
+  // orderProducts 內容
+  const orderProducts = cartList.value.map(product => {
+        const subtotal = product.dailyFeeOriginal * product.count; // 計算小計
+        return {
+            productId: product.productId,
+            dailyFeeOriginal: product.dailyFeeOriginal,
+            count: product.count,
+            productName:  product.productName,
+            subtotal: subtotal, // 加入小計
+            orderProductId: null // 如果需要，待後端生成
+            
+        };
+    });
+
+  orderStore.setOrderData({
+  membersId: cartStore.membersId,
+  rentalStartDate: cartStore.rentalStartDate,
+  rentalEndDate: cartStore.rentalEndDate,
+  rentalDays: rentalDays.value,
+  totalPrice: totalPrice.value,
+  shippingFee: selectedServicesPrice.value,
+  shippingMethod: selectedServices.value.delivery1 ? "自取" :
+    selectedServices.value.delivery2 ? "1-20公里送貨" :
+    selectedServices.value.delivery3 ? "20-40公里送貨" : null,
+  orderProducts: orderProducts,
+  payMethod: null,
+});
+
+console.log("暫存的訂單資料:", JSON.stringify(orderStore.orderData));
+  cartStore.toggleCartDrawer(); // 隱藏抽屜
+
+  await router.push('/pages/checkout');
+
+
+};
+
+
 const viewCart = () => {
   cartStore.toggleCartDrawer(); // 隱藏抽屜
   router.push('/pages/Cart'); // 僅使用路徑進行跳轉
 };
 
-const checkout = () => {
-  cartStore.toggleCartDrawer(); // 隱藏抽屜
-  router.push('/pages/checkout');
-};
+
 const minusOne = (productId) => cartStore.minusOne(productId);
 const plusOne = (productId) => cartStore.plusOne(productId);
 const removeFromCart = (productId) => cartStore.delCart(productId);

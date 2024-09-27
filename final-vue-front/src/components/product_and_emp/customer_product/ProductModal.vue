@@ -7,7 +7,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <img class="card-img-top" :alt="product.productName" v-default-img="product.mainPhoto" ref="productImage">
+                    <!-- <img class="card-img-top" :alt="product.productName" v-default-img="product.mainPhoto" ref="productImage"> -->
+                    <img :src="`data:image/jpeg;base64,${product.mainPhoto}`" :alt="product.productName" style="max-width: 400px;">
                     <div class="animation-container">
                         <div class="animation-ball" ref="animationBall"></div>
                     </div>

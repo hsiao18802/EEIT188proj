@@ -1,55 +1,64 @@
-package tw.com.ispan.controller;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import com.linecorp.bot.model.event.MessageEvent;
-import com.linecorp.bot.model.event.message.TextMessageContent;
-import com.linecorp.bot.model.message.TextMessage;
-import com.linecorp.bot.spring.boot.annotation.EventMapping;
-import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
-import tw.com.ispan.service.DialogflowService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-@CrossOrigin
-@LineMessageHandler
-@RestController
-public class LineBotController {
-
-    private static final Logger logger = LoggerFactory.getLogger(LineBotController.class);
-
-    @Autowired
-    private DialogflowService dialogflowService;
-
-    // 處理來自 LINE Bot 的文字消息
-    @EventMapping
-    public TextMessage handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
-        try {
-            // 取得用戶的文字消息
-            String userMessage = event.getMessage().getText();
-            // 使用 LINE User ID 作為 sessionId
-            String sessionId = event.getSource().getUserId();
-
-            // 調用 Dialogflow API 獲取回應
-            String responseText = dialogflowService.getDialogflowResponse(sessionId, userMessage);
-
-            // 返回 Dialogflow 的回應給用戶
-            return new TextMessage(responseText);
-
-        } catch (Exception e) {
-            // 捕獲所有異常，記錄日誌
-            logger.error("Error processing message event", e);
-
-            // 返回一個靜態的錯誤消息作為 LINE 的回應，並確保返回 200 狀態碼
-            return new TextMessage("抱歉，目前無法處理您的請求。");
-        }
-    }
-
-    // 確保返回 200 狀態碼，即使是處理其他未映射的 HTTP POST 請求
-    @PostMapping("/webhook")
-    public ResponseEntity<String> handleWebhook() {
-        logger.info("Webhook endpoint hit");
-        return ResponseEntity.ok("Webhook received successfully!");
-    }
-}
+//package tw.com.ispan.controller;
+//
+//import com.linecorp.bot.client.LineMessagingClient;
+//import com.linecorp.bot.model.ReplyMessage;
+//import com.linecorp.bot.model.event.MessageEvent;
+//import com.linecorp.bot.model.event.message.TextMessageContent;
+//import com.linecorp.bot.model.message.TextMessage;
+//import com.linecorp.bot.spring.boot.annotation.EventMapping;
+//import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.web.bind.annotation.RestController;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+//import java.util.concurrent.ExecutionException;
+//
+//import tw.com.ispan.service.DialogflowService;
+//
+//@LineMessageHandler
+//@RestController
+//public class LineBotController {
+//
+//    private static final Logger logger = LoggerFactory.getLogger(LineBotController.class);
+//
+//    @Autowired
+//    private LineMessagingClient lineMessagingClient;
+//
+//    @Autowired
+//    private DialogflowService dialogflowService;
+//
+//    @EventMapping
+//    public void handleTextMessageEvent(MessageEvent<TextMessageContent> event) {
+//        String replyToken = event.getReplyToken(); // 獲取 replyToken
+//        String userMessage = event.getMessage().getText();
+//        String userId = event.getSource().getUserId();
+//
+//        try {
+//            // 調用 Dialogflow API 獲取回應
+//            String responseText = dialogflowService.getDialogflowResponse(userId, userMessage);
+//
+//            // 在這裡加上 System.out.println 來調試
+//            System.out.println("Dialogflow Response: " + responseText);
+//            System.out.println("Reply Token: " + replyToken);
+//            System.out.println("Response Text: " + responseText);
+//
+//            // 檢查並處理 Dialogflow 回應，如果是 JSON 格式，進行相應解析
+//            if (responseText != null && responseText.startsWith("{")) {
+//                responseText = "這是來自 Dialogflow 的回應，請檢查格式"; // 示例固定回應
+//            }
+//
+//            // 發送回應訊息
+//            TextMessage textMessage = new TextMessage(responseText);
+//            ReplyMessage replyMessage = new ReplyMessage(replyToken, textMessage);
+//
+//            // 使用同步方式發送訊息
+//            lineMessagingClient.replyMessage(replyMessage).get();
+//        } catch (InterruptedException | ExecutionException e) {
+//            logger.error("Error sending reply message to LINE", e);
+//        } catch (Exception e) {
+//            logger.error("Unexpected error occurred", e);
+//        }
+//    }
+//
+//
+//}
