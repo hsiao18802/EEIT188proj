@@ -63,7 +63,7 @@
                 <RouterLink class="dropdown-item" to="/members/info">會員資料</RouterLink>
               </li>
               <li>
-                <RouterLink class="dropdown-item" to="/member/memberorder">會員訂單</RouterLink>
+                <RouterLink class="dropdown-item" to="/members/memberOrder">會員訂單</RouterLink>
               </li>
 
             </ul>

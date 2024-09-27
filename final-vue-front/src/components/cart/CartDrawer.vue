@@ -190,7 +190,9 @@ const checkout = async()=>{
             count: product.count,
             productName:  product.productName,
             subtotal: subtotal, // 加入小計
-            orderProductId: null // 如果需要，待後端生成
+            orderProductId: null ,// 如果需要，待後端生成
+            mainPhoto: product.mainPhoto // 加入圖片資料
+
             
         };
     });
@@ -208,10 +210,10 @@ const checkout = async()=>{
 });
 
 console.log("暫存的訂單資料:", JSON.stringify(orderStore.orderData));
-  cartStore.toggleCartDrawer(); // 隱藏抽屜
+ 
 
   await router.push('/pages/checkout');
-
+  cartStore.toggleCartDrawer(); // 隱藏抽屜
 
 };
 

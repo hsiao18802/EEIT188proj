@@ -124,10 +124,13 @@
 <script setup>
 import { computed, ref,watch,onMounted  } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
+import { useOrderStore } from '@/stores/orderStore';
+
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs'; // 引入 dayjs 函式庫 算天數
 
 
+const orderStore =  useOrderStore();
 
 
 // 計算租借天數
@@ -267,10 +270,61 @@ const continueShopping = () => {
   router.push('/productpage'); // 返回主頁或產品列表頁面
 };
 
-const checkout = () => {
-  // 這裡可以添加結帳邏輯，例如跳轉到結帳頁面
-  router.push('/pages/checkout');
+const checkout = async()=>{
+
+// 確保運送方式被設置
+if (!cartStore.shippingMethod) {
+      cartStore.setShippingMethod("未選擇運送方式(設定:大安店自取)");
+  }
+
+// orderProducts 內容
+const orderProducts = cartList.value.map(product => {
+      const subtotal = product.dailyFeeOriginal * product.count; // 計算小計
+      return {
+          productId: product.productId,
+          dailyFeeOriginal: product.dailyFeeOriginal,
+          count: product.count,
+          productName:  product.productName,
+          subtotal: subtotal, // 加入小計
+          orderProductId: null, // 如果需要，待後端生成
+          mainPhoto: product.mainPhoto // 加入圖片資料
+
+          
+      };
+  });
+
+orderStore.setOrderData({
+membersId: cartStore.membersId,
+rentalStartDate: cartStore.rentalStartDate,
+rentalEndDate: cartStore.rentalEndDate,
+rentalDays: rentalDays.value,
+totalPrice: totalPrice.value,
+shippingFee: selectedServicesPrice.value,
+shippingMethod: cartStore.shippingMethod,
+orderProducts: orderProducts,
+payMethod: null,
+});
+
+console.log("暫存的訂單資料:", JSON.stringify(orderStore.orderData));
+
+
+await router.push('/pages/checkout');
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 const updateRentalDates = () => {
   if (!selectedStartDate.value || !selectedEndDate.value) {

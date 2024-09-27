@@ -19,6 +19,7 @@ import ForgetPassword from '@/secure/ForgetPassword.vue';
 import Cart from "@/views/pages/Cart.vue";
 import Order from "@/views/pages/Order.vue";
 import checkout from '@/views/pages/checkout.vue';
+import memberOrder from '@/members/memberOrder.vue'
 
 
 
@@ -77,6 +78,7 @@ const routes = [
   { path: "/pages/Cart", name: "Cart-link", component: Cart, meta: { navbar: 'PublicNavbar' } },
   { path: "/pages/Order", name: "Order-link", component: Order, meta: { navbar: 'PublicNavbar' } },
   { path: "/pages/checkout", name: "checkout-link", component: checkout },
+  { path: "/members/memberOrder", name: "memberOrderlink", component: memberOrder },
 
 
 
