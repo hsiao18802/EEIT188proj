@@ -59,13 +59,18 @@ public class CategoryController {
     
     // 修改
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCategory(@PathVariable Integer id, @RequestBody Map<String, String> updateData) {
-        try {
+    public ResponseEntity<Map<String, Object>> updateCategory(@PathVariable Integer id, @RequestBody Map<String, String> updateData) {
+    	Map<String, Object> response = new HashMap<>();
+    	try {
             String newCategoryName = updateData.get("categoryName");
             String result = categoryService.updateCategoryName(id, newCategoryName);
-            return ResponseEntity.ok(result);
+            response.put("success", true);
+            response.put("message", result);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(500).body(e.getMessage());
+        	response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 }

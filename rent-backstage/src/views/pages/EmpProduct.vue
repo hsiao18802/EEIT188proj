@@ -67,13 +67,13 @@
 </template>
 
 <script setup>
-import ProductCard from '@/components/product_and_emp/emp_product/EmpProductCard.vue';
+import ProductCard from '@/components/product/EmpProductCard.vue';
 import Swal from 'sweetalert2';
 import axiosapi from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
 
-import ProductModal from '@/components/product_and_emp/emp_product/EmpProductModal.vue';
-import CategoryModal from '@/components/product_and_emp/emp_product/CategoryModal.vue';
+import ProductModal from '@/components/product/EmpProductModal.vue';
+import CategoryModal from '@/components/product/CategoryModal.vue';
 
 const start = ref(0);
 const max = ref(3);
@@ -270,7 +270,7 @@ function callCatRemove(id) {
             axiosapi.delete(`/rent/category/${id}`)
                 .then(function (response) {
                     if (response.data && response.data.success) {
-                        handleSuccess(response.data.message, productModal.value);
+                        handleSuccess(response.data.message);
                     } else {
                         handleError(new Error(response.data.message || "刪除失敗，請稍後再試"));
                     }
@@ -425,23 +425,26 @@ console.log(product.value.statusId);
     }).catch(handleError);
 }
 
-function callCatModify() {
+function callCatModify(updatedCategory) {
     console.log("修改 啟動");
+    console.log("接收到的更新內容: ", updatedCategory);
+    console.log("category.value.categoryId: ", updatedCategory.categoryId);
+console.log("category.value.categoryName: ", updatedCategory.categoryName);
     Swal.fire({
         text: "Loading......",
         showConfirmButton: false,
         allowOutsideClick: false,
     });
     let body = {
-        categoryId: category.value.categoryId,
-        categoryName: category.value.categoryName,
+        categoryId: updatedCategory.categoryId,
+        categoryName: updatedCategory.categoryName,
     };
 
     axiosapi.put(`/rent/category/${body.categoryId}`, body).then(function (response) {
 console.log(product.value.statusId);
 
         if (response.data.success) {
-            handleSuccess(response.data.message, categoryModal.value);
+            handleSuccess(response.data.message, productModal.value);
         } else {
             handleError(new Error(response.data.message));
         }

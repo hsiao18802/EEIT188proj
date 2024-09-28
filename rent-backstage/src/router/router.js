@@ -20,9 +20,9 @@ import CustomerService from '@/CustomerService.vue';
 
 // Lu's page
 
-import EmployeeHome from '@/views/product_and_emp/EmpHome.vue';
-import EmpProduct from '@/views/product_and_emp/emp_only/EmpProduct.vue';
-import EmpAdd from '@/views/product_and_emp/emp_only/EmpAdd.vue';
+import EmployeeHome from '@/views/pages/EmpHome.vue';
+import EmpProduct from '@/views/pages/EmpProduct.vue';
+import EmpAdd from '@/views/pages/EmpAdd.vue';
 import Login from '../secure/Login.vue';
 
 
@@ -44,7 +44,7 @@ import NotFound from '@/views/error/NotFound.vue';
 
 
 const routes = [
- 
+
 
 
   { path: "/customerservice", name: "customerservice-link", component: CustomerService, meta: { navbar: 'EmpNavbar', style: 'default' } },

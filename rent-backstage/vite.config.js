@@ -15,5 +15,8 @@ export default defineConfig({
   },
   define: {
     global: 'window', // 將 global 定義為 window
+  },
+  server: {
+    port: 3000 // 這裡可以改成你想要的 Port 號
   }
 });
