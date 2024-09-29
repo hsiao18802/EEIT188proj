@@ -26,7 +26,10 @@
                     <li class="nav-item">
                         <RouterLink class="nav-link active" aria-current="page" to="/pages/Order">訂單詳情</RouterLink>
                     </li>
-
+                    
+                    <li class="nav-item">
+                        <RouterLink class="nav-link active" aria-current="page" to="/support/memberchat">客服</RouterLink>
+                    </li>
 
 
                     <li class="nav-item dropdown">

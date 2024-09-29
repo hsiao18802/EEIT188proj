@@ -31,8 +31,6 @@
 import axiosapi from '@/plugins/axios';
 import { v4 as uuidv4 } from 'uuid'; // 使用 uuid 生成唯一的 sessionId
 import useUserStore from '@/stores/user.js'; // 引入 Pinia 的 store
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 
 export default {
   data() {
@@ -61,30 +59,14 @@ export default {
       localStorage.setItem('sessionId', this.sessionId);
     }
 
-    this.loadChatHistory();
-    this.connectWebSocket(); // 建立 WebSocket 連接
+   
   },
   methods: {
     // 加載歷史聊天紀錄
-    loadChatHistory() {
-      if (!this.membersId) {
-        console.error('會員 ID 未找到，無法加載聊天紀錄。');
-        return;
-      }
 
-      axiosapi.post('/api/chat-history', { membersId: this.membersId })
-        .then(response => {
-          const chatHistory = response.data;
-          this.messages = chatHistory.map(record => ({
-            sender: record.sender === 'user' ? 'user' : 'bot',
-            text: record.text
-          }));
-          this.scrollToBottom(); // 加載歷史消息後滾動到底部
-        })
-        .catch(error => {
-          console.error("加載聊天紀錄時發生錯誤：", error);
-        });
-    },
+
+  
+   
     // 發送消息
     sendMessage() {
       if (this.userInput.trim() !== '') {
@@ -165,36 +147,7 @@ export default {
           });
       }
     },
-    // 建立 WebSocket 連接
-    connectWebSocket() {
-      const socket = new SockJS('http://localhost:8080/ws');
-      this.stompClient = new Client({
-        webSocketFactory: () => socket,
-        debug: function (str) {
-          console.log(str); // 查看連接狀態
-        },
-        onConnect: () => {
-          console.log("會員端已連接 WebSocket");
-
-          // 訂閱客服消息
-          this.stompClient.subscribe('/topic/support/' + this.membersId, message => {
-            console.log('收到新消息: ', message.body); // 確保消息被接收
-            const receivedMessage = JSON.parse(message.body);
-            if (receivedMessage.text && receivedMessage.text.trim() !== '') {
-              this.messages.push({
-                sender: 'support',
-                text: receivedMessage.message,
-              });
-              this.scrollToBottom(); // 每次收到新消息時滾動到底部
-            }
-          });
-        },
-        onStompError: (frame) => {
-          console.error('STOMP Error:', frame);
-        }
-      });
-      this.stompClient.activate();
-    },
+    
     // 滾動到最新消息
     scrollToBottom() {
       this.$nextTick(() => {

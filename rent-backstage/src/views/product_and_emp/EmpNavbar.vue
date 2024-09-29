@@ -17,7 +17,7 @@
         <RouterLink to="/plceholder/forphoto/remembertodelete" class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">員工管理</RouterLink>
       </li>
       <li class="mb-1">
-        <RouterLink to="/customerservice" class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">客服頁面</RouterLink>
+        <RouterLink to="/customersupport" class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">客服頁面</RouterLink>
       </li>
     </ul>
 

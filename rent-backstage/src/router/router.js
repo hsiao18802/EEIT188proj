@@ -12,7 +12,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 
 import Home from '../views/Home.vue';
-import CustomerService from '@/CustomerService.vue';
+import CustomerSupport from '../views/CustomerSupport.vue';
 
 
 
@@ -47,7 +47,7 @@ const routes = [
  
 
 
-  { path: "/customerservice", name: "customerservice-link", component: CustomerService, meta: { navbar: 'EmpNavbar', style: 'default' } },
+  { path: "/customersupport", name: "customersupport-link", component: CustomerSupport, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/emp/login", name: "emplogin-link", component: Login },
   { path: "/", name: "home-link", component: Home },
 

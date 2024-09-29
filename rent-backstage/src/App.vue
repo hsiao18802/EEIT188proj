@@ -30,6 +30,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import EmpNavbar from './views/product_and_emp/EmpNavbar.vue';
 
 
+
 const route = useRoute();
 
 // 檢查當前的導航列是否為 EmpNavbar
