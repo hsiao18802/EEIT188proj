@@ -27,9 +27,9 @@
     <div class="order-info-section" v-if="orderData">
       <header class="order-header">
         <p>
-          <span class="rental-date">{{ orderData.rentalStartDate }}</span>
+          <span class="rental-date">{{ formatDate(orderData.rentalStartDate) }}</span>
           <i class="fas fa-arrow-right arrow-icon"></i>
-          <span class="rental-date">{{ orderData.rentalEndDate }}</span>
+          <span class="rental-date">{{ formatDate(orderData.rentalEndDate) }}</span>
         </p>
       </header>
 
@@ -48,7 +48,7 @@
               />
               {{ product.count }} x {{ product.productName }}
             </div>
-            <span>${{ product.dailyFeeOriginal }}</span>
+            <span>{{ formatPrice(product.dailyFeeOriginal) }}</span>
           </li>
         </ul>
         <p>運送方式: {{ orderData.shippingMethod }}</p>
@@ -56,15 +56,17 @@
 
       <footer class="order-footer">
         <div>
-          <p :style="{ textDecoration: hasAppliedCoupon ? 'line-through' : 'none' }">總計: {{ originalPrice }} 元</p>
-          <p v-if="hasAppliedCoupon">折扣金額: {{ discountValue }} 元</p>
-          <p v-if="hasAppliedCoupon">折扣後優惠價: {{ finalPrice }} 元</p>
+          <p :style="{ textDecoration: hasAppliedCoupon ? 'line-through' : 'none' }">
+            總計: {{ formatPrice(originalPrice) }} <!-- 使用 formatPrice 格式化總計 -->
+          </p>
+          <p v-if="hasAppliedCoupon">折扣金額: {{ formatPrice(discountValue) }} 元</p> <!-- 使用 formatPrice 格式化折扣金額 -->
+          <p v-if="hasAppliedCoupon">折扣後優惠價: {{ formatPrice(finalPrice) }} 元</p> <!-- 使用 formatPrice 格式化最終價格 -->
           <div class="coupon-container" v-if="!hasAppliedCoupon">
             <button class="coupon-button" @click="showCouponPrompt">
               <i class="fas fa-tag"></i> 輸入優惠碼
             </button>
+          </div>
         </div>
-      </div>
       </footer>
 
       <div class="agreement-section">
@@ -81,10 +83,12 @@
     </div>
 
     
+
+    
 </template>
   
   <script setup>
-  import { computed, ref } from 'vue';
+  import { computed, ref , onMounted } from 'vue';
   import { useCartStore } from '@/stores/cartStore';
   import { useOrderStore } from '@/stores/orderStore';
   import { useRouter } from 'vue-router';
@@ -101,6 +105,19 @@
   const contact = ref(""); // 新增聯絡電話響應式變數
   const termsAccepted = ref(false); // 新增變數以追蹤是否接受條款
   const remarks = ref("");
+
+
+
+
+  const formatPrice = (price) => {
+  return new Intl.NumberFormat('zh-TW', {
+    style: 'currency',
+    currency: 'TWD',
+    minimumFractionDigits: 0, // 不顯示小數點
+    maximumFractionDigits: 0, // 不顯示小數點
+  }).format(price);
+};
+
 
 
   // 取得運送方式的計算屬性
@@ -214,7 +231,8 @@ const showTerms = async () => {
     try {
       const newOrderData = { 
         ...orderData.value, 
-        shippingAddress: shippingMethod.value !== '自取($0)大安區店' ? address.value : "",        shippingName: name.value,
+        shippingAddress: shippingMethod.value !== '自取($0)大安區店' ? address.value : "",       
+         shippingName: name.value,
         shippingPhoneNum: contact.value ,
         remarks: remarks.value // 傳送備註
 
@@ -222,6 +240,8 @@ const showTerms = async () => {
   
       const newOrder = await orderStore.createOrder(newOrderData);
       console.log("訂單創建成功:", newOrder);
+       // router.push('/'); // 跳轉到Payment
+    
   
       // 更新本地 orderStore 的 orderProducts
       const updatedOrderProducts = newOrder.orderProducts.map((product, index) => ({
@@ -235,11 +255,30 @@ const showTerms = async () => {
       });
       
       cartStore.clearCart();
+
       router.push('/'); // 跳轉到訂單成功頁面
     } catch (error) {
       console.error("訂單創建失敗:", error);
+      await Swal.fire({
+            title: '提交失敗',
+            text: '抱歉，您的訂單未能提交。請重試。',
+            icon: 'error',
+            confirmButtonText: '確定'
+        });
     }
   };
+
+  // 日期格式化函數
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份從0開始，所以加1
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+
+
   </script>
   
   <style scoped>

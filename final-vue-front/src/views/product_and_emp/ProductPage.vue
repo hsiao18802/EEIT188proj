@@ -62,24 +62,23 @@ const rentalEndDate = ref(null);
 
 // 更新日期的方法
 const updateDate = (type, event) => {
+  const value = event.target.value;
   if (type === 'rentalStartDate') {
-    rentalStartDate.value = event.target.value;
+    rentalStartDate.value = value;
   } else if (type === 'rentalEndDate') {
-    rentalEndDate.value = event.target.value;
+    rentalEndDate.value = value;
+  }
+  // 自動加入購物車
+  if (rentalStartDate.value && rentalEndDate.value) {
+    addToCart();
   }
 };
 
-// 監聽日期變化，自動加入購物車
-watch([rentalStartDate, rentalEndDate], ([newStartDate, newEndDate]) => {
-  if (newStartDate && newEndDate) {
-    addToCart();
-  }
-});
+
 
 // 添加到購物車的方法
 const addToCart = () => {
  
-
   // 將日期添加到購物車
   cartStore.addCart({
     rentalStartDate: rentalStartDate.value,

@@ -14,16 +14,13 @@
         <div v-for="product in cartStore.sortedCartList" :key="product.cartId + product.productId + product.membersId" class="product-item">
           <div class="product-image">
             <img :src="`data:image/jpeg;base64,${product.mainPhoto}`" alt="product image" />
-            <!-- <img :src="product.mainPhoto" alt="product image" /> -->
           </div>
           <div class="product-info">
             <div class="product-title">{{ product.productName }}</div>
             <div class="product-details">
-              單價: ${{ product.dailyFeeOriginal }} / 每日
+              單價: {{ formatPrice(product.dailyFeeOriginal) }} / 每日
               <br />
               租借數量: {{ product.count }}
-              <br />
-              Cart ID: {{ product.cartId }} <!-- 測試cartId 的顯示 --> 
             </div>
             <div class="product-actions">
               <button class="quantity-btn" @click="minusOne(product.productId)">-</button>
@@ -74,7 +71,7 @@
       <div class="cart-footer" v-if="cartList.length > 0">
         <span>🛒共 {{ totalItemCount }} 件商品</span>
         <div class="cart-summary">
-          <p>小計: {{ totalPrice }} 元</p>
+          <p>小計: {{ formatPrice(totalPrice) }} 元</p>
         </div>
         <div class="footer-buttons">
           <v-btn @click="viewCart">查看購物車</v-btn>
@@ -91,12 +88,14 @@
 </template>
 
 
+
 <script setup>
 import { computed,ref  } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import { useOrderStore } from '@/stores/orderStore';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs'; // 引入 dayjs 函式庫 算天數
+import Swal from 'sweetalert2'
 
 
 
@@ -107,6 +106,7 @@ const orderStore =  useOrderStore();
 const showCartDrawer = computed(() => cartStore.showCartDrawer);
 const rentalStartDate = computed(() => cartStore.rentalStartDate);
 const rentalEndDate = computed(() => cartStore.rentalEndDate);
+
 
 
 
@@ -143,6 +143,10 @@ const totalPrice = computed(() =>
   cartList.value.reduce((total, item) => total + item.count * item.dailyFeeOriginal * rentalDays.value, 0) + selectedServicesPrice.value
 );
 
+
+
+
+
 const handleServiceSelection = (selectedOption) => {
   if (selectedOption === 1) {
     selectedServices.value.delivery2 = false;
@@ -160,6 +164,14 @@ const handleServiceSelection = (selectedOption) => {
   }
 };
 
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('zh-TW', {
+    style: 'currency',
+    currency: 'TWD',
+    minimumFractionDigits: 0, // 不顯示小數點
+    maximumFractionDigits: 0, // 不顯示小數點
+  }).format(price);
+};
 
 
 const totalItemCount = computed(() =>
@@ -176,20 +188,38 @@ const toggleCart = () => {
 
 const checkout = async()=>{
 
-  // 確保運送方式被設置
-  if (!cartStore.shippingMethod) {
-        cartStore.setShippingMethod("未選擇運送方式(設定:大安店自取)");
-    }
+  // 檢查是否已經選擇日期
+  if (!cartStore.rentalStartDate || !cartStore.rentalEndDate) {
+    Swal.fire({
+      icon: 'warning',
+      title: '日期未選擇',
+      text: '請選擇租借的開始日期和結束日期',
+      confirmButtonText: '確定'
+    });
+    return; // 阻止繼續進行 checkout
+  }
+
+  // 檢查是否已經選擇加價服務
+  if (!selectedServices.value.delivery1 && !selectedServices.value.delivery2 && !selectedServices.value.delivery3) {
+    Swal.fire({
+      icon: 'warning',
+      title: '未選擇加價服務',
+      text: '請選擇至少一個加價服務',
+      confirmButtonText: '確定'
+    });
+    return; // 阻止繼續進行 checkout
+  }
 
   // orderProducts 內容
   const orderProducts = cartList.value.map(product => {
         const subtotal = product.dailyFeeOriginal * product.count; // 計算小計
         return {
             productId: product.productId,
-            dailyFeeOriginal: product.dailyFeeOriginal,
+    subtotal: formatPrice(subtotal), // 使用 formatPrice 格式化小計
             count: product.count,
             productName:  product.productName,
-            subtotal: subtotal, // 加入小計
+            dailyFeeOriginal:product.dailyFeeOriginal,
+            subtotal: formatPrice(subtotal), // 使用 formatPrice 格式化小計
             orderProductId: null ,// 如果需要，待後端生成
             mainPhoto: product.mainPhoto // 加入圖片資料
 
@@ -227,10 +257,23 @@ const viewCart = () => {
 const minusOne = (productId) => cartStore.minusOne(productId);
 const plusOne = (productId) => cartStore.plusOne(productId);
 const removeFromCart = (productId) => cartStore.delCart(productId);
+
 const clearCart = () => {
-  cartStore.clearCart();
-  cartStore.rentalStartDate = null;
-  cartStore.rentalEndDate = null;
+  Swal.fire({
+    title: '確定要清空購物車嗎?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '是的，清空',
+    cancelButtonText: '取消'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        await cartStore.clearCart(); // 這裡呼叫清空購物車的 API
+      } catch (error) {
+        console.error('清空購物車失敗:', error);
+      }
+    }
+  });
 };
 
 
@@ -241,6 +284,13 @@ const formattedRentalStartDate = computed(() => {
 const formattedRentalEndDate = computed(() => {
   return rentalEndDate.value ? dayjs(rentalEndDate.value).format('YYYY-MM-DD') : '';
 });
+
+
+
+
+
+
+
 </script>
 
 <style scoped>

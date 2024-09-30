@@ -3,6 +3,9 @@ import { ref, computed } from 'vue';
 import { removeFromCartAPI as delCartAPI, addCartAPI, findNewCartListAPI, plusOneAPI, minusOneAPI, ClearCartAPI } from '@/apis/cart';
 import useUserStore from '@/stores/user.js'; // 確保路徑正確
 import Swal from 'sweetalert2';
+import dayjs from 'dayjs';
+
+import { useOrderStore } from '@/stores/orderStore';
 
 
 export const useCartStore = defineStore('cartStore', () => {
@@ -22,13 +25,20 @@ export const useCartStore = defineStore('cartStore', () => {
     showCartDrawer.value = !showCartDrawer.value; // 切換購物車小視窗顯示狀態
   };
 
+
+
+
   const rentalStartDate = ref(null);
   const rentalEndDate = ref(null);
   const shouldShowCartIcon = ref(true); // 控制購物車圖標的顯示
-  const setRentalDates = (startDate, endDate) => {
-    rentalStartDate.value = startDate;
-    rentalEndDate.value = endDate;
-  };
+
+
+
+
+const setRentalDates = (startDate, endDate) => {
+  rentalStartDate.value = dayjs(startDate).format('YYYY-MM-DD'); // 使用 dayjs 格式化
+  rentalEndDate.value = dayjs(endDate).format('YYYY-MM-DD'); // 使用 dayjs 格式化
+};
 
 
 
@@ -184,24 +194,7 @@ const minusOne = async (productId) => {
 };
 
 
-  const clearCart = async () => {
-    try {
-      await ClearCartAPI(membersId.value); // 調用 ClearCartAPI
-      cartList.value = []; // 清空本地購物車列表
-      localStorage.removeItem('cartList'); // 清空 localStorage
 
-
-    } catch (error) {
-      console.error('清空購物車失敗:', error);
-      Swal.fire({
-        title: '錯誤',
-        text: "清空購物車失敗，請稍後再試。",
-        icon: "error",
-        confirmButtonText: '確定',
-        position: 'center'
-      });
-    }
-  };
 
 
 // 加價服務的狀態
@@ -230,6 +223,30 @@ const handleServiceSelection = (selectedOption) => {
 };
 
 
+const clearCart = async () => {
+  try {
+    await ClearCartAPI(membersId.value); 
+    cartList.value = []; // 清空本地購物車列表
+    localStorage.removeItem('cartList'); // 清空 localStorage
+rentalStartDate.value = null; // 清空租借開始日期
+ rentalEndDate.value = null; // 清空租借結束日期
+  // 清空加價服務的狀態
+  shippingMethod.value=null;
+
+
+  } catch (error) {
+    console.error('清空購物車失敗:', error);
+    Swal.fire({
+      title: '錯誤',
+      text: "清空購物車失敗，請稍後再試。",
+      icon: "error",
+      confirmButtonText: '確定',
+      position: 'center'
+    });
+  }
+};
+
+
  
 
 
@@ -249,7 +266,6 @@ const handleServiceSelection = (selectedOption) => {
     toggleCartDrawer,
     addProduct,
     cartList,
-    clearCart,
     rentalStartDate,
     rentalEndDate,
     setRentalDates,
@@ -261,6 +277,7 @@ const handleServiceSelection = (selectedOption) => {
     handleServiceSelection,
     shippingMethod,
     setShippingMethod,
+
 
   };
 },

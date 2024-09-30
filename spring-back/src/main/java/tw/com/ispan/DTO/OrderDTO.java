@@ -1,6 +1,7 @@
 package tw.com.ispan.DTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class OrderDTO {
     private LocalDate rentalStartDate;         // 租借開始日期
     private LocalDate rentalEndDate;           // 租借結束日期
     private Integer rentalDays;           // 租借天數
+    private LocalDateTime orderDate;      // 訂單創建日期
+
     private String orderStatus;            // 訂單狀態
     private List<OrderProductDTO> orderProducts;  // 訂單產品明細
     
@@ -46,6 +49,7 @@ public class OrderDTO {
                 ", rentalEndDate=" + rentalEndDate +
                 ", rentalDays=" + rentalDays +
                 ", orderStatus='" + orderStatus + '\'' +
+                 ", orderDate=" + orderDate +   // 添加訂單日期到輸出
                 ", orderProducts=" + orderProducts +
                 '}';
     }

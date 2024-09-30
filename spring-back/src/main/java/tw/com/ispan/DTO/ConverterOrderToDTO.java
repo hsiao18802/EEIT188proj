@@ -29,6 +29,8 @@ public class ConverterOrderToDTO {
         
      // 將 enum 狀態轉換為字串
         dto.setOrderStatus(order.getOrderStatus() != null ? order.getOrderStatus().name() : "");
+        // 設置訂單日期
+        dto.setOrderDate(order.getOrderDate());
 
         
         

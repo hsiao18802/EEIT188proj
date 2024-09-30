@@ -15,7 +15,7 @@
         <el-col :span="24">
           <el-card shadow="hover">
             <div class="order-header">
-              <span>下單時間：{{ formatDate(order.rentalStartDate) }}</span>
+              <span>下單時間：{{ formatDate(order.orderDate) }}</span>
               <span style="margin-left: 5px;">訂單編號：{{ order.orderId }}</span>
             </div>
             <div class="order-body-summary">
@@ -25,7 +25,7 @@
                     <img :src="`data:image/jpeg;base64,${product.mainPhoto}`" alt="product image" class="product-img" />
                   </el-col>
                   <el-col :span="8" class="product-name">{{ product.productName }}</el-col>
-                  <el-col :span="8" class="product-price">{{ product.price }} 元</el-col>
+                  <el-col :span="8" class="product-price">{{ formatPrice(product.price) }}</el-col>
                   <el-col :span="4" class="product-count">{{ product.count }}</el-col>
                 </el-row>
               </div>
@@ -34,8 +34,8 @@
                   <el-col :span="8" class="order-status">{{ order.orderStatus }}</el-col>
                   <el-col :span="8" class="order-price">
                     <div class="price-container">
-                      <div>＄{{ order.totalPrice + order.shippingFee }}</div>
-                      <div>(含運費：＄{{ order.shippingFee }})</div>
+                      <div>{{ formatPrice(order.totalPrice + order.shippingFee) }}</div>
+                      <div>(含運費：{{ formatPrice(order.shippingFee) }})</div>
                       <div>{{ order.paymentMethod || '信用卡支付' }}</div>
                     </div>
                   </el-col>
@@ -70,6 +70,15 @@
     CANCELLED: 'CANCELLED',
     RETURNED: 'RETURNED'
   };
+
+  const formatPrice = (price) => {
+  return new Intl.NumberFormat('zh-TW', {
+    style: 'currency',
+    currency: 'TWD',
+    minimumFractionDigits: 0, // 不顯示小數點
+    maximumFractionDigits: 0, // 不顯示小數點
+  }).format(price);
+};
   
   const cartStore = useCartStore();
   const membersId = cartStore.membersId;
