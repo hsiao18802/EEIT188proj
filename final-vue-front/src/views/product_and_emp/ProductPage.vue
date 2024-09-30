@@ -33,7 +33,7 @@
   <br> -->
 
   <div class="row">
-    <ProductCard v-for="product in products" :key="product.id" :item="product" 
+    <ProductCard v-for="product in products" :key="product.id" :item="product" :isDateSelected="isDateSelected"
     :available-quantity="availableQuantities[product.productId]" @open-rent="openModal"></ProductCard>
   </div>
 
@@ -231,6 +231,7 @@ const availableQuantities = ref({});
 // 當日期或產品資料改變時，發送請求取得可用庫存
 watch([rentalStartDate, rentalEndDate], async () => {
   if (rentalStartDate.value && rentalEndDate.value) {
+    isDateSelected.value = true;
     for (let product of products.value) {
       try {
         const response = await axiosapi.post('/rent/product/check-availability', {
@@ -250,7 +251,7 @@ watch([rentalStartDate, rentalEndDate], async () => {
 const checkAvailability = async () => {
   // 確保日期已經正確更新，並打印出來檢查
   console.log("傳送的租用日期: ", rentalStartDate.value, rentalEndDate.value); // 除錯：打印日期
-
+  isDateSelected.value = true;
   for (let product of products.value) {
     try {
       // 傳送API請求並附帶日期和產品ID
@@ -271,6 +272,8 @@ const checkAvailability = async () => {
     }
   }
 };
+
+const isDateSelected = ref(false);
 
 
 
