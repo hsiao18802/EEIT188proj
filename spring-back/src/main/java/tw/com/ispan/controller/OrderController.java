@@ -69,10 +69,6 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
     
-    @PostMapping("/ecpayCheckout")
-	public String ecpayCheckout() {
-		String aioCheckOutALLForm = orderService.ecpayCheckout();
-
-		return aioCheckOutALLForm;
-	}
+    
+ 
 }

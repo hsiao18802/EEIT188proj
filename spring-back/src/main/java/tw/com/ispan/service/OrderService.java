@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -166,12 +167,18 @@ public class OrderService {
                 .toList();
     }
     
+    
+    
+    
+    //ECPay結帳
 	public String ecpayCheckout() {
+		String uuId = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 20);
+   
 
 		AllInOne all = new AllInOne("");
 
 		AioCheckOutALL obj = new AioCheckOutALL();
-		obj.setMerchantTradeNo("testCompany0004");
+		obj.setMerchantTradeNo(uuId);
 		obj.setMerchantTradeDate("2017/01/01 08:05:23");
 		obj.setTotalAmount("50");
 		obj.setTradeDesc("test Description");
