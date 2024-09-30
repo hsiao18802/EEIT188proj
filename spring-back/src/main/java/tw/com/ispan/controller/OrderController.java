@@ -68,4 +68,11 @@ public class OrderController {
         List<OrderDTO> orders = orderService.getOrdersByMemberId(memberId);
         return ResponseEntity.ok(orders);
     }
+    
+    @PostMapping("/ecpayCheckout")
+	public String ecpayCheckout() {
+		String aioCheckOutALLForm = orderService.ecpayCheckout();
+
+		return aioCheckOutALLForm;
+	}
 }
