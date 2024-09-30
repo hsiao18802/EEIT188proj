@@ -1,41 +1,40 @@
 <template>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css">
-    
 
     <div class="col-lg-3 col-md-6">
-        <div class="card">
-            <img class="card-img-top" :alt="item.productName" v-default-img="item.mainPhoto">
-            <div class="card-body">
-                <h5 class="card-title">{{ item.productName }}</h5> <!-- 顯示產品名稱 -->
-                <div class="row">
-                    <!-- 將兩個按鈕放在同一行 -->
-                    <div class="d-flex justify-content-between">
-                          <button type="button" class="btn btn-primary me-8" 
-                                @click="emits('openRent', 'rent', item.productId)">商品詳細</button>
-                        
-                                <button type="button" class="btn-light" @click="addCart" alt="加入購物車">
-                                    <i class="mdi mdi-cart-plus cart-icon"></i><!-- 使用 MDI 購物車圖標 -->
-                                </button>
-                    </div>
+        <!-- 將 @click 綁定到整個卡片上 -->
+        <div class="card position-relative" @click="openRent">
+            <!-- 圖片 -->
+            <div class="image-container">
+                <img class="card-img-top" :alt="item.productName" v-default-img="item.mainPhoto">
+                <!-- 根據 isDateSelected 的值來決定是否顯示色塊 -->
+                <div v-if="isDateSelected" :class="rentBarClass">
+                    <span>{{ rentBarText }}</span>
                 </div>
             </div>
+            <div class="card-body position-relative">
+                <h4 class="card-title">{{ item.productName }}</h4> <!-- 顯示產品名稱 -->
+                <h5>每日租金：{{ item.dailyFeeOriginal }} 元</h5> <!-- 顯示產品名稱 -->
+                <!-- 購物車圖示放置於卡片右下角 -->
+                <button type="button" class="btn-light cart-button" @click.stop="addCart" alt="加入購物車">
+                    <i class="mdi mdi-cart-plus cart-icon"></i><!-- 使用 MDI 購物車圖標 -->
+                </button>
+            </div>
         </div>
-        
     </div>
-
 </template>
-    
+
 <script setup>
-    import { useRouter } from 'vue-router';
-    import { useCartStore } from '@/stores/cartStore';
-    import useUserStore from '@/stores/user.js';
-    import {  ref } from 'vue';
-    import { gsap } from 'gsap';
-    import '@mdi/font/css/materialdesignicons.css';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useCartStore } from '@/stores/cartStore';
+import useUserStore from '@/stores/user.js';
 
-
-
-const props = defineProps(["item"]);
+const props = defineProps({
+    item: Object,
+    availableQuantity: { type: Number, default: 0 },
+    isDateSelected: { type: Boolean, default: false }
+});
 const emits = defineEmits(["openRent"]);
 
 // 取得 userStore 和 cartStore
@@ -43,31 +42,52 @@ const cartStore = useCartStore();
 const userStore = useUserStore();
 const router = useRouter();
 
+// 將點擊卡片的行為與 emits('openRent', 'rent', item.productId) 綁定
+const openRent = () => {
+    emits('openRent', 'rent', props.item.productId);
+};
 
+// 計算色塊的類別和顯示的文字
+const rentBarClass = computed(() => {
+    if (props.availableQuantity <= 0) {
+        return 'rent-bar no-stock';  // 紅底
+    } else if (props.availableQuantity > 0 && props.availableQuantity <= 3) {
+        return 'rent-bar low-stock';  // 黃底
+    } else {
+        return 'rent-bar in-stock';   // 藍底
+    }
+});
+
+const rentBarText = computed(() => {
+    if (props.availableQuantity <= 0) {
+        return '該日期無庫存😭';
+    } else if (props.availableQuantity > 0 && props.availableQuantity <= 3) {
+        return `最後 ${props.availableQuantity} 件！`;
+    } else {
+        return `可租用數量：${props.availableQuantity}`;
+    }
+});
 
 // 添加商品到購物車
-const addCart = async () => {
+const addCart = async (event) => {
     const membersId = userStore.membersId;
 
     if (!userStore.isLogin) {
-        // 未登入，跳轉到登入頁面
         router.push('/secure/login');
         return;
     } else {
         try {
-            // 加入購物車
             await cartStore.addCart({
                 productId: props.item.productId,
                 productName: props.item.productName,
                 dailyFeeOriginal: props.item.dailyFeeOriginal,
-                count: 1, // 假設預設加入購物車數量為1
+                count: 1,
                 membersId: membersId,
                 mainPhoto: props.item.mainPhoto,
                 startDate: props.rentalStartDate, 
                 endDate: props.rentalEndDate,
                 cartId: null
             });
-
         } catch (error) {
             console.error('加入購物車失敗:', error);
             Swal.fire({
@@ -82,8 +102,53 @@ const addCart = async () => {
 };
 </script>
 
-    
 <style scoped>
+/* 圖片和長條形色塊的樣式 */
+.image-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+}
+
+.card-img-top {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 長條形色塊樣式，位於圖片的下方，圖片穿過長條形 */
+.rent-bar {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(50%); /* 讓色塊跨過圖片的下緣 */
+    width: 80%;
+    color: white;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 50px; /* 讓色塊兩邊呈現半圓形 */
+    font-size: 16px;
+}
+
+/* 沒有庫存時的樣式（紅色背景） */
+.no-stock {
+    background-color: rgba(255, 0, 0, 0.7); /* 半透明紅色背景 */
+    color: white;
+}
+
+/* 低庫存時的樣式（黃色背景） */
+.low-stock {
+    background-color: rgba(255, 255, 0, 0.7); /* 半透明黃色背景 */
+    color: black; /* 改為黑字 */
+}
+
+/* 有庫存時的樣式（藍色背景） */
+.in-stock {
+    background-color: rgba(0, 0, 255, 0.7); /* 半透明藍色背景 */
+    color: white;
+}
+
+/* 購物車圖標樣式 */
 .cart-icon {
     font-size: 40px; /* 調整圖標大小 */
     color: #131212; 
@@ -96,10 +161,21 @@ const addCart = async () => {
     border-radius: 5px; /* 圓角效果 */
 }
 
+/* 將購物車圖標置於卡片的右下角 */
+.cart-button {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background-color: transparent;
+    border: none;
+}
+
 .cart-icon:hover {
     color: #191b1a; 
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7); /* 懸停時增加陰影 */
 }
 
-
+.card {
+    cursor: pointer;
+}
 </style>

@@ -33,7 +33,7 @@
 
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'; // 引入 useRouter 來進行路由跳轉
-import axiosapi from '../../plugins/axios';
+import axiosapi from '../plugins/axios';
 
 // 獲取 Vue Router 的實例
 const router = useRouter();

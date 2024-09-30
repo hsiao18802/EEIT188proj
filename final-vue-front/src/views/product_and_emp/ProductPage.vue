@@ -8,6 +8,7 @@
                         <tr>
                             <td>歸還日期</td>
                             <td><input type="date" name="rentalEndDate" @input="doInput('rentalEndDate', $event)"></td>
+                            <td><button @click="checkAvailability">送出查詢</button></td> <!-- 新增的部分 -->
                         </tr>
   <!-- <div class="row">
     <div class="col-2">
@@ -32,8 +33,8 @@
   <br> -->
 
   <div class="row">
-    <ProductCard v-for="product in products" :key="product.id" :item="product" @open-rent="openModal">
-    </ProductCard>
+    <ProductCard v-for="product in products" :key="product.id" :item="product" :isDateSelected="isDateSelected"
+    :available-quantity="availableQuantities[product.productId]" @open-rent="openModal"></ProductCard>
   </div>
 
   <ProductModal ref="productModal" v-model:product="product" @rent="insertTheNameOfTheFunction">
@@ -62,19 +63,17 @@ const rentalEndDate = ref(null);
 
 // 更新日期的方法
 const updateDate = (type, event) => {
+  const value = event.target.value;
   if (type === 'rentalStartDate') {
-    rentalStartDate.value = event.target.value;
+    rentalStartDate.value = value;
   } else if (type === 'rentalEndDate') {
-    rentalEndDate.value = event.target.value;
+    rentalEndDate.value = value;
   }
-};
-
-// 監聽日期變化，自動加入購物車
-watch([rentalStartDate, rentalEndDate], ([newStartDate, newEndDate]) => {
-  if (newStartDate && newEndDate) {
+  // 自動加入購物車
+  if (rentalStartDate.value && rentalEndDate.value) {
     addToCart();
   }
-});
+};
 
 // 添加到購物車的方法
 const addToCart = () => {
@@ -217,11 +216,65 @@ onMounted(function () {
 function doInput(field, event) {
   const value = event.target.value;
   if (field === 'rentalStartDate') {
+    rentalStartDate.value = value; // 確保 rentalStartDate 更新
     cartStore.setRentalDates(value, cartStore.rentalEndDate);
   } else if (field === 'rentalEndDate') {
+    rentalEndDate.value = value; // 確保 rentalEndDate 更新
     cartStore.setRentalDates(cartStore.rentalStartDate, value);
   }
 }
+
+
+// 儲存每個產品的可租用數量
+const availableQuantities = ref({});
+
+// 當日期或產品資料改變時，發送請求取得可用庫存
+watch([rentalStartDate, rentalEndDate], async () => {
+  if (rentalStartDate.value && rentalEndDate.value) {
+    isDateSelected.value = true;
+    for (let product of products.value) {
+      try {
+        const response = await axiosapi.post('/rent/product/check-availability', {
+          dateA: rentalStartDate.value,
+          dateB: rentalEndDate.value,
+          productId: product.productId
+        });
+        availableQuantities.value[product.productId] = response.data;
+      } catch (error) {
+        console.error('Failed to get available quantity:', error);
+      }
+    }
+  }
+});
+
+// 手動查詢可用庫存的功能
+const checkAvailability = async () => {
+  // 確保日期已經正確更新，並打印出來檢查
+  console.log("傳送的租用日期: ", rentalStartDate.value, rentalEndDate.value); // 除錯：打印日期
+  isDateSelected.value = true;
+  for (let product of products.value) {
+    try {
+      // 傳送API請求並附帶日期和產品ID
+      const response = await axiosapi.post('/rent/product/check-availability', {
+        dateA: rentalStartDate.value, // 傳送的租用開始日期
+        dateB: rentalEndDate.value,   // 傳送的租用結束日期
+        productId: product.productId
+      });
+
+      // 記錄回傳的可租用數量
+      availableQuantities.value[product.productId] = response.data;
+
+      // 確認API回傳內容
+      console.log('可用數量 for productId ' + product.productId + ': ' + response.data);
+
+    } catch (error) {
+      console.error('獲取可用數量失敗:', error); // 如果請求失敗，打印錯誤訊息
+    }
+  }
+};
+
+const isDateSelected = ref(false);
+
 
 
 </script>

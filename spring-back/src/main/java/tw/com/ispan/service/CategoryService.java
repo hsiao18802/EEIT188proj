@@ -30,7 +30,7 @@ public class CategoryService {
         try {
             // 1. 找出該筆資料的 displaySequence 值
             ProductCategory category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("該 ID 的資料不存在"));
+                .orElseThrow(() -> new IllegalArgumentException("該分類不存在，無法刪除"));
             Integer x = category.getDisplaySequence();
 
             // 2. 找出所有 displaySequence 大於 x 的資料

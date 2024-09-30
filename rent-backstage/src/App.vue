@@ -27,7 +27,7 @@ import { useRoute } from 'vue-router';
 import { computed, onMounted } from 'vue';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import EmpNavbar from './views/product_and_emp/EmpNavbar.vue';
+import EmpNavbar from './views/EmpNavbar.vue';
 
 
 

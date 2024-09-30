@@ -1,5 +1,7 @@
 package tw.com.ispan.controller;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -163,5 +165,69 @@ public class ProductController {
                     .body(Map.of("success", false, "message", "圖片更新失敗"));
         }
     }
+    
+    // ------
+    
+    // 接收前端傳來的日期和 productId
+    @PostMapping("/check-availability")
+    public ResponseEntity<Integer> checkAvailability(@RequestBody CheckAvailabilityRequest request) {
+    	
+    	System.out.println("查詢 啟動");
+        System.out.println("前端傳來的 DateA: " + request.getDateA());
+        System.out.println("前端傳來的 DateB: " + request.getDateB());
+        System.out.println("前端傳來的 ProductId: " + request.getProductId());
+    	
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        
+        // 將字串日期轉換為 LocalDate
+        LocalDate dateA = LocalDate.parse(request.getDateA(), formatter);
+        LocalDate dateB = LocalDate.parse(request.getDateB(), formatter);
+        Integer productId = request.getProductId();
+
+        // 使用 System.out.println 進行除錯
+        System.out.println("Received check-availability request - DateA: " + dateA + ", DateB: " + dateB + ", ProductId: " + productId);
+
+        // 調用 Service 來計算可用庫存
+        Integer availableQuantity = productService.calculateAvailableQuantity(productId, dateA, dateB);
+
+        // 使用 System.out.println 打印計算出的可用庫存
+        System.out.println("Available quantity for ProductId " + productId + " between " + dateA + " and " + dateB + ": " + availableQuantity);
+
+        // 回傳剩餘庫存
+        return ResponseEntity.ok(availableQuantity);
+    }
+
+    // 用來接收前端傳來的資料
+    public static class CheckAvailabilityRequest {
+        private String dateA;
+        private String dateB;
+        private Integer productId;
+
+        // Getters and Setters
+        public String getDateA() {
+            return dateA;
+        }
+
+        public void setDateA(String dateA) {
+            this.dateA = dateA;
+        }
+
+        public String getDateB() {
+            return dateB;
+        }
+
+        public void setDateB(String dateB) {
+            this.dateB = dateB;
+        }
+
+        public Integer getProductId() {
+            return productId;
+        }
+
+        public void setProductId(Integer productId) {
+            this.productId = productId;
+        }
+    }
+
 
 }

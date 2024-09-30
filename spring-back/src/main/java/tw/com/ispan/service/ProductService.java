@@ -8,13 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import tw.com.ispan.domain.OrderProduct;
 import tw.com.ispan.domain.Product;
+import tw.com.ispan.repository.OrderProductRepository;
 import tw.com.ispan.repository.ProductRepository;
+
+import java.time.LocalDate;
 
 @Service
 @Transactional
 public class ProductService {
 
+    @Autowired
+    private OrderProductRepository orderProductRepository;
+	
     @Autowired
     private ProductRepository productRepository;
 
@@ -133,5 +140,22 @@ public class ProductService {
             System.out.println("產品圖片更新失敗，找不到該產品，ID: " + productId);
             return null; // 找不到產品，回傳 null
         }
+    }
+    
+    // ------
+    
+    // 計算剩餘庫存
+    public Integer calculateAvailableQuantity(Integer productId, LocalDate dateA, LocalDate dateB) {
+        // 1. 找到符合條件的 OrderProduct 列表
+        List<OrderProduct> orderProducts = orderProductRepository.findByProductIdAndDates(productId, dateA, dateB);
+
+        // 2. 計算所有符合條件的 count 的總和
+        Integer totalCount = orderProducts.stream().mapToInt(OrderProduct::getCount).sum();
+
+        // 3. 查詢該商品的 maxAvailableQuantity
+        Integer maxAvailableQuantity = productRepository.findMaxAvailableQuantity(productId);
+
+        // 4. 計算並返回剩餘庫存
+        return maxAvailableQuantity - totalCount;
     }
 }
