@@ -158,4 +158,14 @@ public class ProductService {
         // 4. 計算並返回剩餘庫存
         return maxAvailableQuantity - totalCount;
     }
+    
+
+    public List<Product> findByCategoryId(Integer categoryId) {
+        return productRepository.findByCategoryId(categoryId);
+    }
+
+
+    public Long countByCategoryId(Integer categoryId) {
+        return productRepository.countByCategoryId(categoryId);
+    }
 }

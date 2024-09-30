@@ -33,6 +33,7 @@ public class CategoryController {
     // 查詢所有 category 資料
     @GetMapping("/find")
     public ResponseEntity<List<ProductCategory>> getAllCategories() {
+    	System.out.println("查詢 啟動！");
         List<ProductCategory> categories = categoryService.findAllCategories();
         return ResponseEntity.ok(categories);
     }

@@ -228,6 +228,19 @@ public class ProductController {
             this.productId = productId;
         }
     }
-
+    
+    // 根據 categoryId 查找產品
+    @GetMapping("/findByCategory/{categoryId}")
+    public ResponseEntity<List<Product>> getProductsByCategoryId(@PathVariable Integer categoryId) {
+        List<Product> products = productService.findByCategoryId(categoryId);
+        return ResponseEntity.ok(products);
+    }
+    
+    // 根據 categoryId 計算產品數量
+    @GetMapping("/countByCategory/{categoryId}")
+    public ResponseEntity<Long> countProductsByCategoryId(@PathVariable Integer categoryId) {
+        Long count = productService.countByCategoryId(categoryId);
+        return ResponseEntity.ok(count);
+    }
 
 }
