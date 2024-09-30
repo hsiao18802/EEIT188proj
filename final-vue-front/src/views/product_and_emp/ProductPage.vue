@@ -33,6 +33,7 @@
   <br> -->
 
   <div class="row">
+ 
     <ProductCard v-for="product in products" :key="product.id" :item="product" :isDateSelected="isDateSelected"
     :available-quantity="availableQuantities[product.productId]" @open-rent="openModal"></ProductCard>
   </div>
@@ -65,20 +66,25 @@ const rentalEndDate = ref(null);
 const updateDate = (type, event) => {
   const value = event.target.value;
   if (type === 'rentalStartDate') {
+    
     rentalStartDate.value = value;
   } else if (type === 'rentalEndDate') {
+   
     rentalEndDate.value = value;
   }
+
   // 自動加入購物車
   if (rentalStartDate.value && rentalEndDate.value) {
     addToCart();
   }
+
 };
+
+
 
 // 添加到購物車的方法
 const addToCart = () => {
  
-
   // 將日期添加到購物車
   cartStore.addCart({
     rentalStartDate: rentalStartDate.value,

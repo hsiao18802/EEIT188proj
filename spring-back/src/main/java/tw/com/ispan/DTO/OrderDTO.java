@@ -1,6 +1,8 @@
 package tw.com.ispan.DTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +29,12 @@ public class OrderDTO {
     private LocalDate rentalEndDate;           // 租借結束日期
     private Integer rentalDays;           // 租借天數
     private String orderStatus;            // 訂單狀態
-    private List<OrderProductDTO> orderProducts;  // 訂單產品明細
+    private LocalDateTime orderDate = LocalDateTime.now();
+
+    private List<OrderProductDTO> orderProducts = new ArrayList<>();  // 直接初始化列表
+    
+   
+   
     
     @Override
     public String toString() {

@@ -36,7 +36,7 @@
             <div class="product-title">{{ product.productName }}</div>
           </div>
           <div class="product-details">
-            <div class="product-price">單價: ${{ product.dailyFeeOriginal }} / 每日</div>
+            <div class="product-price">單價: {{ formatPrice(product.dailyFeeOriginal) }} / 每日</div>
             <div class="product-actions">
               <button class="quantity-btn delete-btn" @click="removeFromCart(product.productId)">
                 <i class="fas fa-trash"></i>
@@ -84,7 +84,7 @@
 
       <div class="summary-card">
         <div class="cart-summary">
-          <p>小計: {{ totalPrice }} 元</p>
+          <p>小計: {{ formatPrice(totalPrice) }} 元</p>
         </div>
         <div class="footer-buttons">
           <v-btn @click="checkout">結帳</v-btn>
@@ -125,7 +125,7 @@
 import { computed, ref,watch,onMounted  } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import { useOrderStore } from '@/stores/orderStore';
-
+import Swal from 'sweetalert2'
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs'; // 引入 dayjs 函式庫 算天數
 
@@ -173,6 +173,9 @@ watch(rentalEndDate, (newValue) => {
   selectedEndDate.value = newValue;
 });
 
+
+
+
 // 格式化日期
 const formattedRentalStartDate = computed(() => {
   return rentalStartDate.value ? dayjs(rentalStartDate.value).format('YYYY-MM-DD') : '';
@@ -182,11 +185,14 @@ const formattedRentalEndDate = computed(() => {
   return rentalEndDate.value ? dayjs(rentalEndDate.value).format('YYYY-MM-DD') : '';
 });
 
-// 更新日期
+// 更新日期 (使用 Pinia actions)
 const updateDates = () => {
-  cartStore.rentalStartDate = newStartDate.value;
-  cartStore.rentalEndDate = newEndDate.value;
-  showDateModal.value = false;
+  if (newStartDate.value && newEndDate.value) {
+    cartStore.updateRentalDates(newStartDate.value, newEndDate.value);
+    showDateModal.value = false;
+  } else {
+    console.error('請選擇有效的日期');
+  }
 };
 
 const selectedServices = ref({
@@ -195,8 +201,8 @@ const selectedServices = ref({
   delivery3: false, // 20-40 公里
 });
 
+// 當組件加載時，初始化加價服務的狀態
 onMounted(() => {
-  console.log("Initial shipping method:", cartStore.shippingMethod); // Debugging
   if (cartStore.shippingMethod) {
     switch (cartStore.shippingMethod) {
       case '自取($0)大安區店':
@@ -209,10 +215,19 @@ onMounted(() => {
         selectedServices.value.delivery3 = true;
         break;
       default:
-        console.warn("Unrecognized shipping method:", cartStore.shippingMethod); // Debugging
+        console.warn("Unrecognized shipping method:", cartStore.shippingMethod);
     }
   }
 });
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('zh-TW', {
+    style: 'currency',
+    currency: 'TWD',
+    minimumFractionDigits: 0, // 不顯示小數點
+    maximumFractionDigits: 0, // 不顯示小數點
+  }).format(price);
+};
 
 
 const handleServiceSelection = (selectedOption) => {
@@ -230,6 +245,7 @@ const handleServiceSelection = (selectedOption) => {
     cartStore.shippingMethod = '20-40公里內的送貨和取貨 ($500) 大安區店'; // 更新為20-40公里送貨
   }
 };
+
 
 
 
@@ -260,6 +276,8 @@ const isCartEmpty = computed(() => cartList.value.length === 0);
 const minusOne = (productId) => cartStore.minusOne(productId);
 const plusOne = (productId) => cartStore.plusOne(productId);
 const removeFromCart = (productId) => cartStore.delCart(productId);
+
+
 const clearCart = () => {
   cartStore.clearCart();
   cartStore.rentalStartDate = null;
@@ -272,9 +290,26 @@ const continueShopping = () => {
 
 const checkout = async()=>{
 
-// 確保運送方式被設置
-if (!cartStore.shippingMethod) {
-      cartStore.setShippingMethod("未選擇運送方式(設定:大安店自取)");
+ // 檢查是否已經選擇日期
+ if (!cartStore.rentalStartDate || !cartStore.rentalEndDate) {
+    Swal.fire({
+      icon: 'warning',
+      title: '日期未選擇',
+      text: '請選擇租借的開始日期和結束日期',
+      confirmButtonText: '確定'
+    });
+    return; // 阻止繼續進行 checkout
+  }
+
+  // 檢查是否已經選擇加價服務
+  if (!selectedServices.value.delivery1 && !selectedServices.value.delivery2 && !selectedServices.value.delivery3) {
+    Swal.fire({
+      icon: 'warning',
+      title: '未選擇加價服務',
+      text: '請選擇至少一個加價服務',
+      confirmButtonText: '確定'
+    });
+    return; // 阻止繼續進行 checkout
   }
 
 // orderProducts 內容

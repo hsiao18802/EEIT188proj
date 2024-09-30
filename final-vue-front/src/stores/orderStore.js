@@ -1,17 +1,24 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { createOrderAPI, getOrdersByMemberIdAPI, getOrderByIdAPI, getAllOrdersAPI, updateOrderStatusAPI, deleteOrderAPI } from '@/apis/order'; // 假設這些是你的 API 調用
+import { createOrderAPI, getOrdersByMemberIdAPI, getOrderByIdAPI, getAllOrdersAPI, updateOrderStatusAPI, deleteOrderAPI } from '@/apis/order'; 
+
+
 
 export const useOrderStore = defineStore('order', () => {
     const orders = ref([]); // 儲存訂單列表
     const currentOrder = ref(null); // 儲存當前正在創建或查看的訂單
     const orderData = ref(null); // 暫存訂單資料
 
+    
+
     // 設置訂單資料，這個方法用於結帳前保存訂單資料
     function setOrderData(data) {
         orderData.value = data;
         console.log("設置的訂單資料:", orderData.value); // 確認設置的資料
     }
+
+
+
 
     // 獲取所有訂單
   const getAllOrders = async () => {
