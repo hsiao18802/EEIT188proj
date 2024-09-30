@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="app-container">
     <!-- 動態導航列 -->
-    <component :is="currentNavbar"></component>
+    <PublicNavbar></PublicNavbar>
 
     <CartDrawer></CartDrawer>
     <CartIcon v-if="!isCartPage" />
@@ -24,7 +24,7 @@ import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import EmpNavbar from './views/product_and_emp/EmpNavbar.vue';
+
 import PublicNavbar from './views/Navbar.vue';
 import CartDrawer from './components/cart/CartDrawer.vue'
 import CartIcon from './components/cart/CartIcon.vue'
@@ -33,13 +33,13 @@ import ChatComponent from './views/ChatComponent.vue';
 
 const route = useRoute();
 const userStore = useUserStore();
-const isEmpNavbar = computed(() => route.meta.navbar === 'EmpNavbar');
-const layoutClass = computed(() => isEmpNavbar.value ? 'container-fluid d-flex flex-row' : 'container-xxl d-flex flex-column');
+
+
 onMounted(() => {
   console.log('Token from Pinia after refresh:', userStore.token);
   console.log('Login status from Pinia after refresh:', userStore.login);
 });
-const currentNavbar = computed(() => isEmpNavbar.value ? EmpNavbar : PublicNavbar);
+
 const isCartPage = computed(() => route.path === '/pages/Cart');
 </script>
 

@@ -27,9 +27,6 @@ import memberOrder from '@/members/memberOrder.vue'
 
 // Lu's page
 import ProductPage from '@/views/product_and_emp/ProductPage.vue';
-import EmployeeHome from '@/views/product_and_emp/EmpHome.vue';
-import EmpProduct from '@/views/product_and_emp/emp_only/EmpProduct.vue';
-import EmpAdd from '@/views/product_and_emp/emp_only/EmpAdd.vue';
 
 
 
@@ -88,9 +85,6 @@ const routes = [
   // Lu's page
 
   { path: "/productpage", name: "productpage", component: ProductPage, meta: { navbar: 'PublicNavbar' } },
-  { path: "/employee/emphome", name: EmployeeHome, component: EmployeeHome, meta: { navbar: 'EmpNavbar', style: 'default' } },
-  { path: "/employee/empproduct", name: EmpProduct, component: EmpProduct, meta: { navbar: 'EmpNavbar', style: 'default' } },
-  { path: "/employee/empadd", name: EmpAdd, component: EmpAdd, meta: { navbar: 'EmpNavbar', style: 'default' } },
 
 
 
