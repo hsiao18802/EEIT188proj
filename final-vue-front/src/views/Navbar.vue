@@ -71,9 +71,7 @@
 
             </ul>
           </li>
-          <li class="nav-item">
-            <RouterLink class="nav-link active" aria-current="page" to="/employee/emphome">管理系統</RouterLink>
-          </li>
+        
         </ul>
       </div>
     </div>

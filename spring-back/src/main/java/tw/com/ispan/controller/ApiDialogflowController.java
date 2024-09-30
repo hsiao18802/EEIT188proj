@@ -1,6 +1,5 @@
 package tw.com.ispan.controller;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -14,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import tw.com.ispan.domain.CustomerServiceRequest;
+import com.google.cloud.dialogflow.v2.EventInput;
+import com.google.cloud.dialogflow.v2.QueryInput;
+
 import tw.com.ispan.domain.Members;
 import tw.com.ispan.repository.CustomerServiceRequestRepository;
 import tw.com.ispan.repository.MembersRepository;
@@ -60,29 +61,6 @@ public class ApiDialogflowController {
             // 調用 Dialogflow API 並獲取回應
             String responseText = dialogflowService.getDialogflowResponse(sessionId, message);
 
-//            // 判斷是否觸發了人工客服 Intent
-//            boolean isHumanAgent = dialogflowService.checkForHumanAgentIntent(sessionId, message);
-//
-//            if (isHumanAgent) {
-//                System.out.println("轉接人工客服...");
-//                // 檢查是否已經有未解決的客服請求
-//                Optional<CustomerServiceRequest> existingRequest = customerServiceRequestRepository.findTopByMemberAndStatusOrderByCreatedAtDesc(member, "Pending");
-//
-//                if (existingRequest.isPresent()) {
-//                    // 已經有未解決的請求，不需要創建新的
-//                    CustomerServiceRequest existing = existingRequest.get();
-//                    existing.setIssueDescription("User re-requested for human agent support."); // 可選：更新問題描述
-//                    customerServiceRequestRepository.save(existing);
-//                } else {
-//                    // 沒有未解決的請求，創建新的
-//                    CustomerServiceRequest customerServiceRequest = new CustomerServiceRequest();
-//                    customerServiceRequest.setMember(member);
-//                    customerServiceRequest.setIssueDescription("User requested for human agent support.");
-//                    customerServiceRequest.setStatus("Pending");
-//                    customerServiceRequest.setCreatedAt(new Date());
-//                    customerServiceRequestRepository.save(customerServiceRequest);
-//                }
-//            }
 
             // 返回回應
             Map<String, Object> response = new HashMap<>();
@@ -100,5 +78,31 @@ public class ApiDialogflowController {
     }
 
     
-    
+//     處理歡迎事件
+  @PostMapping("/welcome")
+  public ResponseEntity<Map<String, Object>> triggerWelcomeEvent(@RequestBody Map<String, Object> requestBody) {
+      String sessionId = (String) requestBody.get("sessionId");
+      if (sessionId == null || sessionId.isEmpty()) {
+          sessionId = UUID.randomUUID().toString();
+      }
+
+      EventInput eventInput = EventInput.newBuilder()
+              .setName("Welcome")
+              .setLanguageCode("zh-TW")
+              .build();
+      QueryInput queryInput = QueryInput.newBuilder()
+              .setEvent(eventInput)
+              .build();
+
+      String responseText = dialogflowService.getDialogflowResponse(sessionId, queryInput);
+
+      Map<String, Object> response = new HashMap<>();
+      response.put("sessionId", sessionId);
+      response.put("responseText", responseText);
+
+      return ResponseEntity.ok(response);
+  }
 }
+    
+    
+

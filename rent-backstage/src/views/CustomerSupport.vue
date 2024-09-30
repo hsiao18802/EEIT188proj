@@ -111,13 +111,19 @@
     display: flex;
     height: 100vh;
   }
-  
   .placeholder {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #aaa;
-  }
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px; /* 調整字體大小 */
+  font-weight: bold; /* 使字體更粗 */
+  color: #000; /* 黑色文字 */
+  background-color: #f0f0f0; /* 添加背景色，讓文字更突出 */
+  border: 1px solid #ccc; /* 增加邊框，讓區塊更明顯 */
+  padding: 20px; /* 添加內邊距，避免內容太靠邊 */
+  height: 100%; /* 確保占滿容器的高度 */
+}
+
   </style>
   

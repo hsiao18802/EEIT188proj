@@ -51,6 +51,9 @@ export default {
     }
   },
   mounted() {
+
+    
+    
     // 檢查 localStorage 是否有 sessionId，如果有則使用，否則生成一個新的
     const savedSessionId = localStorage.getItem('sessionId');
     if (savedSessionId) {
@@ -58,15 +61,32 @@ export default {
     } else {
       localStorage.setItem('sessionId', this.sessionId);
     }
-
-   
+    
+    
+    // 當組件加載時，自動觸發歡迎事件
+  this.triggerWelcomeEvent();
+    
   },
   methods: {
-    // 加載歷史聊天紀錄
+    triggerWelcomeEvent() {
+  console.log('Sending request to /api/welcome'); // 確認方法被調用
+  axiosapi.post('/api/welcome', {
+    sessionId: this.sessionId
+  }).then(response => {
+    console.log('Response received:', response); // 檢查是否收到響應
+    const botResponse = response.data.responseText;
+    this.messages.push({ sender: 'bot', text: botResponse });
+  }).catch(error => {
+    console.error("Error in API call:", error.response || error.message || error); // 檢查具體的錯誤資訊
+    this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
+  });
+},
+
+
 
 
   
-   
+  
     // 發送消息
     sendMessage() {
       if (this.userInput.trim() !== '') {

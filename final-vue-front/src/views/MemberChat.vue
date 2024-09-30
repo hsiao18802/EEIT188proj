@@ -194,74 +194,107 @@ export default {
 .member-chat {
   width: 600px;
   margin: 0 auto;
-  font-family: Arial, sans-serif;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+h3 {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  color: #333;
 }
 
 .messages {
   height: 400px;
   overflow-y: auto;
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin-bottom: 10px;
-  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  padding: 15px;
+  margin-bottom: 20px;
+  background-color: #fafafa;
   border-radius: 10px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* 增加訊息框之間的距離 */
 }
 
 .message-box {
-  margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 12px;
+  border-radius: 8px;
+  max-width: 75%; /* 限制最大寬度，不會超出視窗 */
+  word-wrap: break-word; /* 自動換行 */
+  transition: background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .user-message {
-  text-align: left;
-  background-color: #d1e7dd;
-  padding: 8px;
-  border-radius: 8px;
-  margin: 5px 0;
+  align-self: flex-start; /* 讓用戶消息靠左 */
+  background-color: #e0f7fa;
+  color: #00796b;
 }
 
 .support-message {
-  text-align: right;
-  background-color: #f8d7da;
-  padding: 8px;
-  border-radius: 8px;
-  margin: 5px 0;
+  align-self: flex-end; /* 讓客服消息靠右 */
+  background-color: #ffebee;
+  color: #c62828;
 }
 
 .message-sender {
-  font-weight: bold;
-  margin-bottom: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #555;
 }
 
 .message-content {
   margin: 0;
+  font-size: 14px;
 }
 
 .input-area {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
 .input-message {
   flex: 1;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 12px;
+  border-radius: 8px;
   border: 1px solid #ddd;
   font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.input-message:focus {
+  border-color: #00796b;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 121, 107, 0.2);
 }
 
 .send-button {
-  background-color: #4caf50;
+  background-color: #00796b;
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
+  padding: 12px 20px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  transition: background-color 0.3s ease;
 }
 
 .send-button:hover {
-  background-color: #45a049;
+  background-color: #004d40;
 }
+
+.send-button:active {
+  background-color: #00251a;
+}
+
+
 </style>
