@@ -60,7 +60,7 @@ const rentBarClass = computed(() => {
 
 const rentBarText = computed(() => {
     if (props.availableQuantity <= 0) {
-        return '該日期無庫存：（';
+        return '該日期無庫存😭';
     } else if (props.availableQuantity > 0 && props.availableQuantity <= 3) {
         return `最後 ${props.availableQuantity} 件！`;
     } else {
