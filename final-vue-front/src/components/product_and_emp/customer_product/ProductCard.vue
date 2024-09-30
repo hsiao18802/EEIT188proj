@@ -11,8 +11,8 @@
                     <!-- 將兩個按鈕放在同一行 -->
                     <div class="d-flex justify-content-between">
                           <button type="button" class="btn btn-primary me-8" 
-                                @click="emits('openRent', 'rent', item.productId)">商品詳細</button>
-                        
+                                @click="emits('openRent', 'rent', item.productId)">
+                                可租用數量={{ availableQuantity }}</button>
                                 <button type="button" class="btn-light" @click="addCart" alt="加入購物車">
                                     <i class="mdi mdi-cart-plus cart-icon"></i><!-- 使用 MDI 購物車圖標 -->
                                 </button>
@@ -35,7 +35,7 @@
 
 
 
-const props = defineProps(["item"]);
+const props = defineProps({ item: Object, availableQuantity: { type: Number, default: 0 } });
 const emits = defineEmits(["openRent"]);
 
 // 取得 userStore 和 cartStore
