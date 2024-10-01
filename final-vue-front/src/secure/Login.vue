@@ -28,16 +28,8 @@
         <!-- Google 登錄 -->
         <div class="google-login-container">
           <h4>或使用 Google 登錄</h4>
-          <button @click="googleSignIn" class="google-btn">Google 登錄</button>
+          <button id="google-button" class="google-btn">Google 登錄</button>
         </div>
-
-        <!-- 掃碼登錄按鈕 -->
-        <!-- <div class="qr-login-container">
-          <h4>或使用掃碼登錄</h4>
-          <button @click="generateQrCode" class="google-btn">生成 QR 掃碼登錄</button> -->
-          <!-- 顯示 QR Code -->
-          <!-- <canvas id="qrcode" style="margin-top: 20px;"></canvas>
-        </div> -->
       </div>
 
       <!-- 圖片部分 -->
@@ -49,10 +41,9 @@
 <script setup>
 import Swal from 'sweetalert2';
 import axiosapi from '@/plugins/axios.js';
-import { ref, onMounted, nextTick } from 'vue';  // 引入 nextTick
+import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import useUserStore from '@/stores/user.js';  // 引用 Pinia 的 store
-import QRCode from 'qrcode'; // 引入 qrcode 用來生成 QR code
+import useUserStore from '@/stores/user.js';
 import { useCartStore } from '@/stores/cartStore';
 
 const userStore = useUserStore();
@@ -60,11 +51,8 @@ const router = useRouter();
 const username = ref("");
 const password = ref("");
 const message = ref("");
-const qrCodeUrl = ref("");
-const cartStore =useCartStore();
+const cartStore = useCartStore();
 
-
-//這裡hsiao有改請YI再確認
 async function login() {
   message.value = "";
 
@@ -89,7 +77,6 @@ async function login() {
 
   try {
     const response = await axiosapi.post("/ajax/secure/login", body);
-    console.log(response.data.membersId);
 
     if (response.data.success) {
       // 使用 Pinia 存储登录状态和 token
@@ -98,7 +85,7 @@ async function login() {
       userStore.setToken(response.data.token);
       userStore.setMembersId(response.data.membersId);
       axiosapi.defaults.headers.authorization = `Bearer ${response.data.token}`;
-      
+
       // 確保獲取最新的購物車內容
       await cartStore.updateNewList();
 
@@ -125,49 +112,15 @@ async function login() {
   }
 }
 
-
-
 // Google 登錄邏輯
 function googleSignIn() {
-  google.accounts.id.prompt();  // 手動觸發 Google 登錄提示框
+  google.accounts.id.prompt(); // 手動觸發 Google 登錄提示框
 }
 
-// 掃碼登錄邏輯
-async function generateQrCode() {
-  // 使用實際的 Google OAuth 掃碼登錄 URL
-  qrCodeUrl.value = `https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com&redirect_uri=https://16ef-2001-b011-3801-7c9b-3dd3-eeca-8af5-f0e7.ngrok-free.app/&scope=email%20profile&state=${generateState()}`;
-
-  console.log("Before nextTick: QR Code URL is", qrCodeUrl.value);
-
-  // 等待 DOM 更新，確保 #qrcode 容器已被插入
+onMounted(async () => {
+  // 等待 DOM 更新，確保 Google 登錄按鈕已被插入
   await nextTick();
 
-  const canvasElement = document.getElementById('qrcode');
-  if (canvasElement) {
-    try {
-      QRCode.toCanvas(canvasElement, qrCodeUrl.value, function (error) {
-        if (error) {
-          console.error("QR Code generation error:", error);
-        } else {
-          console.log("QR code generated successfully for OAuth URL");
-        }
-      });
-    } catch (error) {
-      console.error("QRCode generation error:", error);
-    }
-  } else {
-    console.error('QR Code container not found after DOM update');
-  }
-}
-
-
-// 生成一個唯一的 state 用於 OAuth2 驗證
-const generateState = () => {
-  return Math.random().toString(36).substring(2, 15);
-};
-
-// 初始化 Google 登錄
-onMounted(() => {
   window.handleCredentialResponse = function (response) {
     const idToken = response.credential;
     console.log("Received ID Token from Google:", idToken);
@@ -200,13 +153,14 @@ onMounted(() => {
     });
   };
 
+  // 初始化 Google 登錄
   google.accounts.id.initialize({
     client_id: '817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com',
     callback: handleCredentialResponse,
-    auto_select: false,
-    cancel_on_tap_outside: true // 點擊空白處時關閉登入框
+    cancel_on_tap_outside: true
   });
 
+  // 渲染 Google 登錄按鈕
   google.accounts.id.renderButton(
     document.getElementById('google-button'),
     { theme: 'outline', size: 'large' }
@@ -215,23 +169,20 @@ onMounted(() => {
   // 檢查登入框是否成功顯示
   google.accounts.id.prompt((notification) => {
     if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      window.onGoogleSignInClosed();
+      console.error('Google Sign-In prompt not displayed');
     }
   });
 });
-
-
 </script>
 
 <style scoped>
-/* 样式保持不变 */
 .login-page {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* 讓內容貼近上方 */
+  align-items: flex-start;
   height: 100vh;
   background-color: white;
-  padding-top: 0; /* 可選，移除 padding */
+  padding-top: 0;
 }
 
 .login-container {
@@ -264,6 +215,7 @@ onMounted(() => {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
+  color: white;
 }
 
 .form-group input {
@@ -310,6 +262,17 @@ onMounted(() => {
   text-align: center;
 }
 
+.google-btn {
+  background-color: #53575a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
 .google-btn:hover {
   background-color: #357AE8;
 }
@@ -323,10 +286,10 @@ onMounted(() => {
 
 .login-image-container {
   flex: 1;
-  background-image: url('/public/rent1.jpg');  /* 設置背景圖片 */
-  background-size: cover;  /* 確保圖片完全覆蓋容器 */
-  background-position: center;  /* 讓圖片在容器中居中 */
-  border-radius: 10px;  /* 圖片的圓角效果 */
+  background-image: url('/public/rent1.jpg');
+  background-size: cover;
+  background-position: center;
+  border-radius: 10px;
 }
 
 .login-image {
@@ -335,23 +298,7 @@ onMounted(() => {
   border-radius: 10px;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: white; /* 字體顏色設置為白色 */
-}
-h3,h4 {
-  color: white ;
-}
-.google-btn {
-  background-color: #53575a;
+h3, h4 {
   color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 </style>

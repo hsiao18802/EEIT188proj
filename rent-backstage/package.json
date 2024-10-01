@@ -11,13 +11,14 @@
     "@stomp/stompjs": "^7.0.0",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "esbuild": "^0.24.0",
     "sockjs-client": "^1.6.1",
     "sweetalert2": "^11.14.1",
     "vue": "^3.3.4",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.2.3",
-    "vite": "^4.5.5"
+    "@vitejs/plugin-vue": "^5.1.4",
+    "vite": "^5.4.8"
   }
 }

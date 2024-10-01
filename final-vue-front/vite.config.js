@@ -15,5 +15,9 @@ export default defineConfig({
   },
   define: {
     global: 'window', // 將 global 定義為 window
+  },
+
+  build: {
+    chunkSizeWarningLimit: 1000,  // 將限制設置為 1000 KB
   }
 });

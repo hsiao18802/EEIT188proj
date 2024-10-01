@@ -45,10 +45,6 @@ let vuetifyLoaded = false; // **新增這一行以追踪 Vuetify 是否已加載
 
 
 
-// 動態導入其他資源
-await import('bootstrap/dist/css/bootstrap.min.css'); // 引入 Bootstrap CSS
-await import('bootstrap/dist/js/bootstrap.bundle.min.js'); // 引入 Bootstrap JS
-
 
 
 
