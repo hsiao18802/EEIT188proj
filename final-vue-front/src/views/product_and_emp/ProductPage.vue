@@ -26,9 +26,9 @@
       <br>
       <h4>商品分類</h4>
       <table>
-        <tr v-for="category in categories" :key="category.categoryId" @click="fetchProductsByCategory(category.categoryId)">
-        <td>{{ category.categoryName }} ({{ category.productCount }})</td>
-      </tr>
+        <tr v-for="category in categories" :key="category.categoryId" @click="callFind(1, category.categoryId)">
+          <td>{{ category.categoryName }} ({{ category.productCount }})</td>
+        </tr>
       </table>
       <!-- 產品搜尋欄位 -->
     </div>
@@ -36,22 +36,26 @@
 
     <!-- 右側產品區塊 -->
     <div class="col-md-10">
-      
       <!-- 產品列表 -->
       <div class="row">
         <ProductCard v-for="product in products" :key="product.productId" :item="product" :isDateSelected="isDateSelected"
         :available-quantity="availableQuantities[product.productId]" @open-rent="openModal"></ProductCard>
       </div>
-      <div class="row">
-        <Paginate v-show="total>0"
-            :first-last-button="true"
-            first-button-text="&lt;&lt;" last-button-text="&gt;&gt;"
-            prev-text="&lt;" next-text="&gt;"
-            :page-count="pages" :initial-page="current" v-model="current"
-            :click-handler="callFind">
-        </Paginate>
-        <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind">
-        </ProductSelect>
+      
+      <!-- 分頁與選擇欄 -->
+      <div class="row mt-3">
+        <div class="d-flex justify-content-center align-items-center">
+          <Paginate v-show="total>0"
+              :first-last-button="true"
+              first-button-text="&lt;&lt;" last-button-text="&gt;&gt;"
+              prev-text="&lt;" next-text="&gt;"
+              :page-count="pages" :initial-page="current" v-model="current"
+              :click-handler="callFind">
+          </Paginate>
+          <!-- 分頁選擇欄 -->
+          <ProductSelect v-model="max" :total="total" :options="[16, 20]" @max-change="callFind" class="ms-3">
+          </ProductSelect>
+        </div>
       </div>
     </div>
   </div>
@@ -162,69 +166,8 @@ function callFindById(id) {
   });
 }
 
-// 查詢全部 for whole page
-// function callFind(page) {
-//   console.log("callFind triggered, page:", page);
-
-//   if (page) {
-//     current.value = page;
-//     start.value = (page - 1) * max.value;
-//   } else {
-//     current.value = 1;
-//     start.value = 0;
-//   }
-
-//   console.log("Pagination values - start:", start.value, "max:", max.value, "current:", current.value);
-
-//   if (findName.value === "") {
-//     findName.value = null;
-//   }
-
-//   console.log("Search name value:", findName.value);
-
-//   let body = {
-//     "start": start.value,
-//     "max": max.value,
-//     "dir": false,
-//     "order": "id",
-//     "name": findName.value
-//   };
-
-//   console.log("Request body:", body);
-
-//   axiosapi.get("/rent/product/find", body)
-//     .then(function (response) {
-//       console.log("callFind response received:", response);
-
-//       // Check if response structure is as expected
-//       if (response.data && response.data) {
-//         products.value = response.data;
-//         total.value = response.data.count;
-//         pages.value = Math.ceil(total.value / max.value);
-//         lastPageRows.value = total.value % max.value;
-
-//         console.log("Updated products:", products.value);
-//         console.log("Total count:", total.value, "Pages:", pages.value, "Last page rows:", lastPageRows.value);
-//       } else {
-//         console.warn("Unexpected response structure:", response);
-//       }
-
-//       setTimeout(function () {
-//         Swal.close();
-//       }, 500);
-//     })
-//     .catch(function (error) {
-//       console.log("callFind error:", error);
-//       console.log("Error details - message:", error.message, "code:", error.code);
-
-//       Swal.fire({
-//         text: "錯誤：請先登錄會員!!!",
-//         icon: "error",
-//       });
-//     });
-// }
-function callFind(page) {
-    console.log("callFind", page);
+function callFind(page, categoryId = null) {
+    console.log("callFind", page, "categoryId", categoryId);
 
     if (page) {
         current.value = page;
@@ -243,10 +186,11 @@ function callFind(page) {
         "max": max.value,
         "dir": false,  // 這裡是排序方向，視需要修改為 true（desc）
         "order": "productId",  // 假設你要按產品 ID 排序，根據需求更改
-        "name": findName.value
+        "name": findName.value,
+        "categoryId": categoryId  // 新增 categoryId 條件
     };
 
-    axiosapi.post("/rent/product/find-advanced", body).then(function(response) {  // 更新到正確的路由
+    axiosapi.post("/rent/product/find-advanced", body).then(function(response) {
         console.log("callFind response", response);
         products.value = response.data.list;
         total.value = response.data.count;
@@ -264,11 +208,6 @@ function callFind(page) {
         });
     });
 }
-
-onMounted(function() {
-    callFind();  // 初次渲染時執行一次查詢
-});
-
 
 // 初始渲染
 onMounted(function () {
@@ -313,20 +252,8 @@ const fetchCategories = async () => {
   }
 };
 // 分類渲染 end
-
-// 分類查詢 start
-const fetchProductsByCategory = async (categoryId) => {
-  try {
-    const response = await axiosapi.get(`/rent/product/findByCategory/${categoryId}`);
-    products.value = response.data; // 更新右側顯示的商品列表
-  } catch (error) {
-    console.error(`獲取分類 ${categoryId} 的商品失敗：`, error);
-  }
-};
-// 分類查詢 end
+// 分類查詢（已合併）
 // 分類 end
-
-
 
 // 日期功能 start
 import FlatPickr from 'vue-flatpickr-component';
@@ -402,129 +329,4 @@ watch([rentalStartDate, rentalEndDate], async () => {
 
 </script>
 
-<style>
-
-</style>
-
-
-  <!-- <div class="row">
-    <div class="col-2">
-            <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
-        </div>
-    <div class="col-6">å
-            <input type="text" placeholder="請輸入查詢條件" v-model="findName" @input="callFind">
-        </div>
-    <div class="col-4">
-      <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind">
-      </ProductSelect>
-    </div>
-  </div>
-  <br> -->
-
-  <!-- <div class="row">
-    <Paginate v-show="total > 0" :first-last-button="true" first-button-text="&lt;&lt;" last-button-text="&gt;&gt;"
-      prev-text="&lt;" next-text="&gt;" :page-count="pages" :initial-page="current" v-model="current"
-      :click-handler="callFind">
-    </Paginate>
-  </div>
-  <br> -->
-
-<!-- 日期 doInput 舊程式碼備用 -->
-  <!-- function doInput(field, event) {
-    const value = event.target.value;
-    if (field === 'rentalStartDate') {
-      rentalStartDate.value = value; // 確保 rentalStartDate 更新
-      cartStore.setRentalDates(value, cartStore.rentalEndDate);
-    } else if (field === 'rentalEndDate') {
-      rentalEndDate.value = value; // 確保 rentalEndDate 更新
-      cartStore.setRentalDates(cartStore.rentalStartDate, value);
-    }
-  } -->
-
-<!-- 日期 doInput Sweetalert2 備用 -->
-  <!-- function doInput(field, event) {
-    const value = event.target.value;
-    if (field === 'rentalStartDate') {
-      rentalStartDate.value = value; // 確保 rentalStartDate 更新
-      cartStore.setRentalDates(value, cartStore.rentalEndDate);
-  
-      // 如果歸還日期早於租用日期，彈出提示
-      if (rentalEndDate.value && rentalEndDate.value <= rentalStartDate.value) {
-        Swal.fire({
-          icon: 'error',
-          title: '日期錯誤',
-          text: '請輸入正確的日期，歸還日期必須晚於租用日期。',
-        }).then(() => {
-          // 點擊OK後才清空歸還日期
-          rentalEndDate.value = null; 
-          cartStore.setRentalDates(rentalStartDate.value, null);
-        });
-      }
-    } else if (field === 'rentalEndDate') {
-      rentalEndDate.value = value; // 確保 rentalEndDate 更新
-      cartStore.setRentalDates(cartStore.rentalStartDate, value);
-  
-      // 如果歸還日期早於租用日期，彈出提示
-      if (rentalEndDate.value && rentalEndDate.value <= rentalStartDate.value) {
-        Swal.fire({
-          icon: 'error',
-          title: '日期錯誤',
-          text: '請輸入正確的日期，歸還日期必須晚於租用日期。',
-        }).then(() => {
-          // 點擊OK後才清空歸還日期
-          rentalEndDate.value = null;
-          cartStore.setRentalDates(cartStore.rentalStartDate, null);
-        });
-      }
-    }
-  } -->
-
-  <!-- 舊的日期功能 -->
-  <!-- // function doInput(field, event) {
-    //   const value = event.target.value;
-    //   if (field === 'rentalStartDate') {
-    //     rentalStartDate.value = value; // 確保 rentalStartDate 更新
-    //     cartStore.setRentalDates(value, cartStore.rentalEndDate);
-    
-    //     // 如果歸還日期早於租用日期，自動清空歸還日期
-    //     if (rentalEndDate.value && rentalEndDate.value <= rentalStartDate.value) {
-    //       rentalEndDate.value = null; // 清空歸還日期
-    //       cartStore.setRentalDates(rentalStartDate.value, null);
-    //     }
-    //   } else if (field === 'rentalEndDate') {
-    //     rentalEndDate.value = value; // 確保 rentalEndDate 更新
-    //     cartStore.setRentalDates(cartStore.rentalStartDate, value);
-    
-    //     // 如果歸還日期早於租用日期，自動清空歸還日期
-    //     if (rentalEndDate.value && rentalEndDate.value <= rentalStartDate.value) {
-    //       rentalEndDate.value = null; // 清空歸還日期
-    //       cartStore.setRentalDates(cartStore.rentalStartDate, null);
-    //     }
-    //   }
-    // } -->
-
-    <!-- // 手動查詢可用庫存的功能
-const checkAvailability = async () => {
-  // 確保日期已經正確更新，並打印出來檢查
-  console.log("傳送的租用日期: ", rentalStartDate.value, rentalEndDate.value); // 除錯：打印日期
-  isDateSelected.value = true;
-  for (let product of products.value) {
-    try {
-      // 傳送API請求並附帶日期和產品ID
-      const response = await axiosapi.post('/rent/product/check-availability', {
-        dateA: rentalStartDate.value, // 傳送的租用開始日期
-        dateB: rentalEndDate.value,   // 傳送的租用結束日期
-        productId: product.productId
-      });
-
-      // 記錄回傳的可租用數量
-      availableQuantities.value[product.productId] = response.data;
-
-      // 確認API回傳內容
-      console.log('可用數量 for productId ' + product.productId + ': ' + response.data);
-
-    } catch (error) {
-      console.error('獲取可用數量失敗:', error); // 如果請求失敗，打印錯誤訊息
-    }
-  }
-}; -->
+<style></style>

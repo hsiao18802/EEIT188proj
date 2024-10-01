@@ -38,13 +38,28 @@ public class ProductController {
         return productService.findAll();
     }
     
-
+    // 帶分頁的複雜搜尋
     @PostMapping("/find-advanced")
     public ResponseEntity<Map<String, Object>> findProducts(@RequestBody String json) {
+        // 打印收到的前端 JSON
+        System.out.println("Received JSON from frontend: " + json);
+
         try {
             JSONObject obj = new JSONObject(json);
+
+            // 打印解析出的查詢條件
+            System.out.println("Parsed 'name' from JSON: " + obj.optString("name"));
+            System.out.println("Parsed 'categoryId' from JSON: " + obj.optInt("categoryId", -1));
+            System.out.println("Parsed 'start' from JSON: " + obj.optInt("start"));
+            System.out.println("Parsed 'max' from JSON: " + obj.optInt("max"));
+
+            // 查詢產品列表和總數
             List<Product> products = productService.findProducts(obj);
             Long count = productService.countProducts(obj);
+
+            // 打印查詢結果
+            System.out.println("Products found: " + products.size());
+            System.out.println("Total count: " + count);
 
             Map<String, Object> response = new HashMap<>();
             response.put("list", products);
@@ -53,9 +68,11 @@ public class ProductController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Error occurred while processing the request.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
     
     @GetMapping("/{id}")
     public Product getRentById(@PathVariable Integer id) {

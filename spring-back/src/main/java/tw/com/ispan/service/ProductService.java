@@ -35,13 +35,19 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    // 帶分頁的複雜查詢
+    // 帶分頁的複雜搜尋
     public List<Product> findProducts(JSONObject obj) {
-        return productDAO.find(obj);
+        System.out.println("Calling findProducts in ProductDAO with: " + obj.toString());
+        List<Product> products = productDAO.find(obj);
+        System.out.println("ProductDAO returned: " + products.size() + " products.");
+        return products;
     }
 
     public Long countProducts(JSONObject obj) {
-        return productDAO.count(obj);
+        System.out.println("Calling countProducts in ProductDAO with: " + obj.toString());
+        Long count = productDAO.count(obj);
+        System.out.println("ProductDAO returned count: " + count);
+        return count;
     }
     
     // 根據 ID 查詢
