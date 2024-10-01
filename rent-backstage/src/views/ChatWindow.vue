@@ -62,7 +62,7 @@
         }
   
         stompClient = new Client({
-          brokerURL: 'ws://192.168.36.65:6174/ws/websocket',
+          brokerURL: 'ws://localhost:8080/ws/websocket',
           connectHeaders: {
             login: 'user',
             passcode: 'password',
