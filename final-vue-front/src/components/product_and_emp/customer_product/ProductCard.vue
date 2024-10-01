@@ -16,7 +16,13 @@
                 <h4 class="card-title">{{ item.productName }}</h4> <!-- 顯示產品名稱 -->
                 <h5>每日租金：{{ item.dailyFeeOriginal }} 元</h5> <!-- 顯示產品名稱 -->
                 <!-- 購物車圖示放置於卡片右下角 -->
-                <button type="button" class="btn-light cart-button" @click.stop="addCart" alt="加入購物車">
+                <button
+                    type="button"
+                    class="btn-light cart-button"
+                    :class="{ 'disabled-cart': !canAddToCart }"
+                    @click.stop="handleCartClick"
+                    alt="加入購物車"
+                >
                     <i class="mdi mdi-cart-plus cart-icon"></i><!-- 使用 MDI 購物車圖標 -->
                 </button>
             </div>
@@ -29,6 +35,7 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cartStore';
 import useUserStore from '@/stores/user.js';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
     item: Object,
@@ -68,8 +75,27 @@ const rentBarText = computed(() => {
     }
 });
 
+// 計算按鈕是否可用
+const canAddToCart = computed(() => {
+    return props.availableQuantity > 0;
+});
+
+// 處理購物車按鈕點擊事件
+const handleCartClick = () => {
+    if (!canAddToCart.value) {
+        Swal.fire({
+            title: '很抱歉',
+            html: '您所選擇的日期已經沒有庫存😭',
+            icon: 'error',
+            confirmButtonText: '確定'
+        });
+        return;
+    }
+    addCart();
+};
+
 // 添加商品到購物車
-const addCart = async (event) => {
+const addCart = async () => {
     const membersId = userStore.membersId;
 
     if (!userStore.isLogin) {
@@ -161,6 +187,12 @@ const addCart = async (event) => {
     border-radius: 5px; /* 圓角效果 */
 }
 
+/* 禁用 hover 效果 */
+.disabled-cart .cart-icon:hover {
+    color: #131212; /* 禁用時不變色 */
+    text-shadow: none; /* 禁用時無陰影效果 */
+}
+
 /* 將購物車圖標置於卡片的右下角 */
 .cart-button {
     position: absolute;
@@ -168,6 +200,11 @@ const addCart = async (event) => {
     bottom: 10px;
     background-color: transparent;
     border: none;
+}
+
+/* 禁用購物車按鈕時的樣式 */
+.disabled-cart {
+    cursor: not-allowed;
 }
 
 .cart-icon:hover {

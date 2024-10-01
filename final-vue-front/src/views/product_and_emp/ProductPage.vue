@@ -1,16 +1,25 @@
 <template>
-  <div class="row">
+  <div class="row mt-5">
     <!-- 左側分類區塊 -->
     <div class="col-md-2">
-      <tr>
-          <td>租用日期</td>
-          <td><input type="date" name="rentalStartDate" :max="rentalEndDate" @input="doInput('rentalStartDate', $event)"></td>
-      </tr>
-      <tr>
-          <td>歸還日期</td>
-          <td><input type="date" name="rentalEndDate" :min="rentalStartDate" @input="doInput('rentalEndDate', $event)"></td>
-          <!-- <td><button @click="checkAvailability">送出查詢</button></td> -->
-      </tr>
+      <v-card class="mb-4">
+        <v-card-title>租用日期</v-card-title>
+        <v-card-text>
+          <flat-pickr v-model="rentalStartDate" @input="doInput('rentalStartDate', $event)" placeholder="請選擇日期"
+            :config="{ maxDate: rentalEndDate ? new Date(new Date(rentalEndDate).setDate(new Date(rentalEndDate).getDate() - 1)) : null, }" />
+        </v-card-text>
+      </v-card>
+      <v-card class="mb-4">
+        <v-card-title>歸還日期</v-card-title>
+        <v-card-text>
+          <flat-pickr v-model="rentalEndDate" @input="doInput('rentalEndDate', $event)" placeholder="請選擇日期"
+            :config="{ minDate: rentalStartDate ? new Date(new Date(rentalStartDate).setDate(new Date(rentalStartDate).getDate() + 1)) : null, }" />
+        </v-card-text>
+      </v-card>
+      <div class="d-flex">
+        <button class="btn btn-danger" @click="clearDates">重新選擇</button>
+      </div>
+      <br>
       <h4>商品分類</h4>
       <table>
         <tr v-for="category in categories" :key="category.categoryId" @click="fetchProductsByCategory(category.categoryId)">
@@ -26,7 +35,7 @@
 
       <!-- 產品列表 -->
       <div class="row">
-        <ProductCard v-for="product in products" :key="product.id" :item="product" :isDateSelected="isDateSelected"
+        <ProductCard v-for="product in products" :key="product.productId" :item="product" :isDateSelected="isDateSelected"
         :available-quantity="availableQuantities[product.productId]" @open-rent="openModal"></ProductCard>
       </div>
     </div>
@@ -44,7 +53,7 @@
 import ProductCard from '@/components/product_and_emp/customer_product/ProductCard.vue';
 import Swal from 'sweetalert2';
 import axiosapi from '@/plugins/axios';
-import { onMounted, ref ,watch} from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 //hsiao
 import CartModal from '@/components/cart/CartModal.vue';
@@ -255,28 +264,71 @@ const fetchProductsByCategory = async (categoryId) => {
 
 
 // 日期功能 start
-function doInput(field, event) {
-  const value = event.target.value;
-  if (field === 'rentalStartDate') {
-    rentalStartDate.value = value; // 確保 rentalStartDate 更新
-    cartStore.setRentalDates(value, cartStore.rentalEndDate);
+// function doInput(field, event) {
+//   const value = event.target.value;
+//   if (field === 'rentalStartDate') {
+//     rentalStartDate.value = value; // 確保 rentalStartDate 更新
+//     cartStore.setRentalDates(value, cartStore.rentalEndDate);
 
-    // 如果歸還日期早於租用日期，自動清空歸還日期
+//     // 如果歸還日期早於租用日期，自動清空歸還日期
+//     if (rentalEndDate.value && rentalEndDate.value <= rentalStartDate.value) {
+//       rentalEndDate.value = null; // 清空歸還日期
+//       cartStore.setRentalDates(rentalStartDate.value, null);
+//     }
+//   } else if (field === 'rentalEndDate') {
+//     rentalEndDate.value = value; // 確保 rentalEndDate 更新
+//     cartStore.setRentalDates(cartStore.rentalStartDate, value);
+
+//     // 如果歸還日期早於租用日期，自動清空歸還日期
+//     if (rentalEndDate.value && rentalEndDate.value <= rentalStartDate.value) {
+//       rentalEndDate.value = null; // 清空歸還日期
+//       cartStore.setRentalDates(cartStore.rentalStartDate, null);
+//     }
+//   }
+// }
+// 更新日期的方法，去除了 event 處理，因為 v-model 會自動更新值
+import FlatPickr from 'vue-flatpickr-component';
+import 'flatpickr/dist/flatpickr.css';
+function doInput(field) {
+  if (field === 'rentalStartDate') {
+    // rentalStartDate 會由 v-model 自動更新
+    cartStore.setRentalDates(rentalStartDate.value, rentalEndDate.value);
+
+    // 檢查歸還日期是否早於租用日期
     if (rentalEndDate.value && rentalEndDate.value <= rentalStartDate.value) {
-      rentalEndDate.value = null; // 清空歸還日期
-      cartStore.setRentalDates(rentalStartDate.value, null);
+      Swal.fire({
+        icon: 'error',
+        title: '日期錯誤',
+        text: '請輸入正確的日期，歸還日期必須晚於租用日期。',
+      }).then(() => {
+        rentalEndDate.value = null;
+        cartStore.setRentalDates(rentalStartDate.value, null);
+      });
     }
   } else if (field === 'rentalEndDate') {
-    rentalEndDate.value = value; // 確保 rentalEndDate 更新
-    cartStore.setRentalDates(cartStore.rentalStartDate, value);
+    // rentalEndDate 會由 v-model 自動更新
+    cartStore.setRentalDates(rentalStartDate.value, rentalEndDate.value);
 
-    // 如果歸還日期早於租用日期，自動清空歸還日期
+    // 檢查歸還日期是否早於租用日期
     if (rentalEndDate.value && rentalEndDate.value <= rentalStartDate.value) {
-      rentalEndDate.value = null; // 清空歸還日期
-      cartStore.setRentalDates(cartStore.rentalStartDate, null);
+      Swal.fire({
+        icon: 'error',
+        title: '日期錯誤',
+        text: '請輸入正確的日期，歸還日期必須晚於租用日期。',
+      }).then(() => {
+        rentalEndDate.value = null;
+        cartStore.setRentalDates(rentalStartDate.value, null);
+      });
     }
   }
 }
+
+// 清除兩個日期的方法
+const clearDates = () => {
+  rentalStartDate.value = null;
+  rentalEndDate.value = null;
+  cartStore.setRentalDates(null, null); // 同步清除購物車中的日期
+};
 // 日期功能 end
 
 // 個數計算 start
@@ -334,7 +386,9 @@ const checkAvailability = async () => {
 
 </script>
 
-<style></style>
+<style>
+
+</style>
 
 
   <!-- <div class="row">
