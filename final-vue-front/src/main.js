@@ -56,7 +56,7 @@ let vuetifyLoaded = false; // **新增這一行以追踪 Vuetify 是否已加載
 
 // 動態載入和移除資源
 router.beforeEach(async (to, from, next) => {
-  if (to.meta.style !== 'default'&& !vuetifyLoaded) { // **這裡加上條件檢查**
+  if (to.meta.style !== 'default' && !vuetifyLoaded) { // **這裡加上條件檢查**
     // 動態導入 Vuetify
     const { createVuetify } = await import('vuetify');
     const { aliases, fa } = await import('vuetify/iconsets/fa');
@@ -113,7 +113,7 @@ router.beforeEach(async (to, from, next) => {
 
 // beforeEach 邏輯負責正常導航
 //outer.beforeEach((to, from, next) => {
- // next(); // 正常進行導航
+// next(); // 正常進行導航
 //});
 
 // afterEach 邏輯來處理重整
@@ -132,3 +132,4 @@ router.afterEach((to, from) => {
     sessionStorage.removeItem('hasReloaded');
   }
 });
+// import './assets/custom.css' // 再引入自定義的 CSS 檔案，這樣會覆蓋 Bootstrap 的設定
