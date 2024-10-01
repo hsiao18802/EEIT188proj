@@ -4,10 +4,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import tw.com.ispan.DAO.ProductDAO;
 import tw.com.ispan.domain.OrderProduct;
 import tw.com.ispan.domain.Product;
 import tw.com.ispan.repository.OrderProductRepository;
@@ -24,10 +26,22 @@ public class ProductService {
 	
     @Autowired
     private ProductRepository productRepository;
+    
+    @Autowired
+    private ProductDAO productDAO;
 
     // 查詢所有資料
     public List<Product> findAll() {
         return productRepository.findAll();
+    }
+
+    // 帶分頁的複雜查詢
+    public List<Product> findProducts(JSONObject obj) {
+        return productDAO.find(obj);
+    }
+
+    public Long countProducts(JSONObject obj) {
+        return productDAO.count(obj);
     }
     
     // 根據 ID 查詢

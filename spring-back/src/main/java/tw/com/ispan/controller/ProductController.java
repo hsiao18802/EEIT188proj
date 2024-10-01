@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,25 @@ public class ProductController {
     @GetMapping("/find")
     public List<Product> getAllRents() {
         return productService.findAll();
+    }
+    
+
+    @PostMapping("/find-advanced")
+    public ResponseEntity<Map<String, Object>> findProducts(@RequestBody String json) {
+        try {
+            JSONObject obj = new JSONObject(json);
+            List<Product> products = productService.findProducts(obj);
+            Long count = productService.countProducts(obj);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("list", products);
+            response.put("count", count);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
     
     @GetMapping("/{id}")

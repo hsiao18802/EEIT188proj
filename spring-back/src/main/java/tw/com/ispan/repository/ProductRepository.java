@@ -23,4 +23,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     // 2. 根據 categoryId 計算產品數量
     Long countByCategoryId(Integer categoryId);
     
+    @Query("select count(*) from Product where productName=:productName")
+    public Long countByName(String productName);
+    
 }
