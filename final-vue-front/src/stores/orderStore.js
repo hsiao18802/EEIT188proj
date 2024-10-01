@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { createOrderAPI, getOrdersByMemberIdAPI, getOrderByIdAPI, getAllOrdersAPI, updateOrderStatusAPI, deleteOrderAPI } from '@/apis/order'; 
+import Swal from 'sweetalert2';
+
 
 
 
@@ -41,21 +43,32 @@ export const useOrderStore = defineStore('order', () => {
   };
 
 
-   // 創建新訂單
-   const createOrder = async (newOrderData) => {
+  const createOrder = async (newOrderData) => {
     try {
-        if (!orderData.value) {
+        if (!newOrderData) {
             throw new Error("沒有可用的訂單資料");
         }
-          // 確保 orderData 包含地址信息
+        console.log("即將創建的訂單資料:", newOrderData);
+
         const response = await createOrderAPI(newOrderData); // 使用暫存的訂單資料創建訂單
         currentOrder.value = response.data; // 保存創建成功的訂單
         return response.data;
     } catch (error) {
         console.error("創建訂單失敗:", error);
+        if (error.response) {
+            console.error("後端返回的錯誤:", error.response.data); // 獲取後端錯誤信息
+        }
+        // 這裡可以使用 SweetAlert 通知用戶失敗原因
+        await Swal.fire({
+            title: '訂單創建失敗',
+            text: error.response ? error.response.data.message : '請檢查輸入的資料',
+            icon: 'error',
+            confirmButtonText: '確定'
+        });
         throw error;
     }
 };
+
 
 
     // 根據會員 ID 獲取訂單

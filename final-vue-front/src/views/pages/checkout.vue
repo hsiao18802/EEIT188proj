@@ -108,14 +108,14 @@
 
 
 
-
-  const formatPrice = (price) => {
+// 格式化價格，確保是有效的整數
+const formatPrice = (price) => {
   return new Intl.NumberFormat('zh-TW', {
     style: 'currency',
     currency: 'TWD',
-    minimumFractionDigits: 0, // 不顯示小數點
-    maximumFractionDigits: 0, // 不顯示小數點
-  }).format(price);
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.round(price)); // 確保傳入的是有效的整數
 };
 
 
@@ -228,15 +228,20 @@ const showTerms = async () => {
 
   // 提交訂單
   const submitOrder = async () => {
+
+    
     try {
       const newOrderData = { 
         ...orderData.value, 
         shippingAddress: shippingMethod.value !== '自取($0)大安區店' ? address.value : "",       
-         shippingName: name.value,
-        shippingPhoneNum: contact.value ,
-        remarks: remarks.value // 傳送備註
+        shippingName: name.value || "",  // 如果未填則設為空字串
+      shippingPhoneNum: contact.value || "", // 如果未填則設為空字串
+      remarks: remarks.value || "", // 傳送備註，如果未填則設為空字串
+      payMethod: null // 可以根據需求設定
 
       };
+
+     
   
       const newOrder = await orderStore.createOrder(newOrderData);
       console.log("訂單創建成功:", newOrder);
@@ -255,6 +260,9 @@ const showTerms = async () => {
       });
       
       cartStore.clearCart();
+      // 清空 shippingMethod
+    shippingMethod.value = ""; 
+
 
       router.push('/'); // 跳轉到訂單成功頁面
     } catch (error) {

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
+    <script src="https://unpkg.com/axios@1.7.4/dist/axios.min.js"></script>
+    <script>
+        var request = new XMLHttpRequest();
+        function doclick1() {
+            request.onreadystatechange =  function() {
+                if(request.readyState==4 && request.status==200) {
+                    console.log("成功");
+                }
+            };
+            request.open("GET", "http://localhost:8080/ajax/pages/products/2");
+            request.send();
+        }
+        function callFindById() {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+            axios.get("http://localhost:8080/ajax/pages/products/AAA").then(function(response) {
+                console.log("callFindById response", response);
+                setTimeout(function() {
+                    Swal.close();
+                }, 500);
+            }).catch(function(error) {
+                console.log("callFindById error", error);
+                Swal.fire({
+                    text: "錯誤："+error.message,
+                    icon: "error",
+                });
+            });
+        }
+        async function callCreate() {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+            let request = {
+                "id": 100,
+                "name": "hahaha",
+                "price": 2.3,
+                "make": "2024-04-15",
+                "expire": 4
+            };
+
+            try {
+                const response = await axios.post("http://localhost:8080/ajax/pages/products", request);
+                console.log("callCreate response", response);
+                if(response.data.success) {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "success",
+                    });
+                } else {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "error",
+                    });
+                }
+            } catch(error) {
+                console.log("callCreate error", error);
+                Swal.fire({
+                    text: "錯誤："+error.message,
+                    icon: "error",
+                });
+            }
+        }
+        function callModify() {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+
+            let request = {
+                "id": 100,
+                "name": "hehehe",
+                "price": 5.6,
+                "make": "2024/04/30",
+                "expire": 7
+            };
+
+            axios.put("http://localhost:8080/ajax/pages/products/100", request).then(function(response) {
+                console.log("callModify response", response);
+                if(response.data.success) {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "success",
+                    });
+                } else {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "error",
+                    });
+                }
+            }).catch(function(error) {
+                console.log("callModify error", error);
+                Swal.fire({
+                    text: "錯誤："+error.message,
+                    icon: "error",
+                });
+            });
+        }
+        function callRemove() {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+
+            axios.delete("http://localhost:8080/ajax/pages/products/100").then(function(response) {
+                console.log("callRemove response", response);
+                if(response.data.success) {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "success",
+                    });
+                } else {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "error",
+                    });
+                }
+            }).catch(function(error) {
+                console.log("callRemove error", error);
+                Swal.fire({
+                    text: "錯誤："+error.message,
+                    icon: "error",
+                });
+            });
+        }
+        function callFind() {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+
+            let request = {
+                "start": 0,
+                "max": 100,
+                "dir": false,
+                "order": "id",
+                // "name": "a"
+            };
+
+            axios.post("http://localhost:8080/ajax/pages/products/find", request).then(function(response) {
+                console.log("callFind response", response);
+                setTimeout(function() {
+                    Swal.close();
+                }, 500);
+            }).catch(function(error) {
+                console.log("callFind error", error);
+                Swal.fire({
+                    text: "錯誤："+error.message,
+                    icon: "error",
+                });
+            });
+        }
+        function login() {
+            Swal.fire({
+                text: "Loading......",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+
+            let body = {
+                "username": "Alex",
+                "password": "A"
+            }
+
+            axios.post("http://localhost:8080/ajax/secure/login", body).then(function(response) {
+                console.log("response", response);
+                if(response.data.success) {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "success",
+                    });
+                } else {
+                    Swal.fire({
+                        text: response.data.message,
+                        icon: "error",
+                    });
+                }
+            }).catch(function(error) {
+                console.log("error", error);
+                Swal.fire({
+                    text: "錯誤："+error.message,
+                    icon: "error",
+                });
+            }).finally(function() {
+                console.log("finally");
+
+            });
+        }
+    </script>
+</head>
+<body>
+    <button type="button" onclick="doclick1()">XMLHttpRequest</button>
+    <button type="button" onclick="callFindById()">callFindById</button>
+    <button type="button" onclick="callCreate()">callCreate</button>
+    <button type="button" onclick="callModify()">callModify</button>
+    <button type="button" onclick="callRemove()">callRemove</button>
+    <button type="button" onclick="callFind()">callFind</button>
+    <button type="button" onclick="login()">login</button>
+</body>
+</html>

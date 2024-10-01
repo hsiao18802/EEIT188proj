@@ -87,7 +87,10 @@ public class Order {
     
     @Column(name = "order_creation_date")
     private LocalDateTime orderDate = LocalDateTime.now();
-    
+
+    private String merchantTradeNo; // ECPay的商家交易編號
+    private String ecpayTradeNo;     // ECPay的交易編號
+   
     // 新增的方法
     public static String getOrderStatusString(int status) {
         switch (status) {
@@ -98,10 +101,11 @@ public class Order {
             case 4: return "DONE";
             case 5: return "CANCELLED";
             case 6: return "RETURNED";
+            case 7: return "FAILED";      // 支付失敗
             default: return "UNKNOWN";
         }
     }
-    
+   
 
     @Override
     public String toString() {
@@ -121,6 +125,8 @@ public class Order {
                 ", rentalEndDate=" + rentalEndDate +
                 ", rentalDays=" + rentalDays +
                 ", orderStatus='" + orderStatus + '\'' +
+                ", merchantTradeNo='" + merchantTradeNo + '\'' + // 加入 merchantTradeNo
+                ", ecpayTradeNo='" + ecpayTradeNo + '\'' + // 加入 ecpayTradeNo
                 ", orderProducts=" + (orderProduct != null ? orderProduct.toString() : null) +
                 '}';
     }

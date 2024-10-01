@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <script src="https://unpkg.com/axios@1.7.4/dist/axios.min.js"></script>
+</head>
+<body>
+    <h3>Product</h3>
+    <table>
+        <tr>
+            <td>編號</td>
+            <td><input type="text" name="id"></td>
+        </tr>
+        <tr>
+            <td>名稱</td>
+            <td><input type="text" name="name" onblur="doblur()"><span id="error"></span></td>
+        </tr>
+        <tr>
+            <td>價格</td>
+            <td>
+                <input type="number" name="startPrice">～
+                <input type="number" name="endPrice">
+            </td>
+        </tr>
+        <tr>
+            <td>製造日期</td>
+            <td>
+                <input type="date" name="startMake">～
+                <input type="date" name="endMake">
+            </td>
+        </tr>
+        <tr>
+            <td>保存期限</td>
+            <td>
+                <input type="number" name="startExpire">～
+                <input type="number" name="endExpire">
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <button type="button">查詢</button>
+            </td>
+        </tr>
+    </table>
+    <script>
+        async function doblur() {
+            document.querySelector("#error").innerHTML = "";
+
+            let name = document.querySelector("input[name='name']").value;
+            console.log("name", name, (name!=""));
+                        
+            if(name!="") {
+                try {
+                    const response = await axios.get(`http://localhost:8080/ajax/pages/products/name/${name}`);
+                    console.log("response", response);
+
+                    document.querySelector("#error").innerHTML = response.data.message;
+                } catch(error) {
+                    console.log("error", error);
+
+                }
+            }
+        }
+    </script>
+</body>
+</html>

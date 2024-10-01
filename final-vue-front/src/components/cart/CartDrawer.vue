@@ -215,11 +215,10 @@ const checkout = async()=>{
         const subtotal = product.dailyFeeOriginal * product.count; // 計算小計
         return {
             productId: product.productId,
-    subtotal: formatPrice(subtotal), // 使用 formatPrice 格式化小計
+            subtotal: subtotal, // 使用 formatPrice 格式化小計
             count: product.count,
             productName:  product.productName,
             dailyFeeOriginal:product.dailyFeeOriginal,
-            subtotal: formatPrice(subtotal), // 使用 formatPrice 格式化小計
             orderProductId: null ,// 如果需要，待後端生成
             mainPhoto: product.mainPhoto // 加入圖片資料
 
