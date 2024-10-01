@@ -1,30 +1,31 @@
 package tw.com.ispan.service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ecpay.payment.integration.AllInOne;
 import ecpay.payment.integration.domain.AioCheckOutALL;
 import jakarta.transaction.Transactional;
+import tw.com.ispan.DTO.ConverterOrderToDTO;
+import tw.com.ispan.DTO.ConverterOrderToECPayDTO;
+
+import tw.com.ispan.DTO.OrderDTO;
+import tw.com.ispan.DTO.OrderRequestDTO;
 import tw.com.ispan.domain.Members;
 import tw.com.ispan.domain.Order;
 import tw.com.ispan.domain.OrderProduct;
 import tw.com.ispan.domain.OrderStatus;
 import tw.com.ispan.domain.Product;
 import tw.com.ispan.exception.ResourceNotFoundException;
-import tw.com.ispan.DTO.ConverterOrderToDTO;
-import tw.com.ispan.DTO.OrderDTO;
-import tw.com.ispan.DTO.OrderProductDTO;
 import tw.com.ispan.repository.MembersRepository;
 import tw.com.ispan.repository.OrderRepository;
 import tw.com.ispan.repository.ProductRepository;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -40,6 +41,9 @@ public class OrderService {
     
     @Autowired 
     private ProductRepository productRepository;
+    
+    @Autowired
+    private ConverterOrderToECPayDTO converterOrderToECPayDTO;
     
     
 
@@ -166,27 +170,73 @@ public class OrderService {
                 .toList();
     }
     
-	public String ecpayCheckout() {
+    // ECPay結帳
+    @Transactional
+    public String ecpayCheckout(Integer orderId) {
+        // 從資料庫獲取訂單
+    
+    	 // 從資料庫獲取訂單
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-		AllInOne all = new AllInOne("");
+        System.out.println("order="+order);
+        // 將訂單轉換為 ECPay DTO
+        OrderRequestDTO orderRequestDTO = converterOrderToECPayDTO.toECPayDTO(order);
 
-		AioCheckOutALL obj = new AioCheckOutALL();
-		obj.setMerchantTradeNo("testCompany0004");
-		obj.setMerchantTradeDate("2017/01/01 08:05:23");
-		obj.setTotalAmount("50");
-		obj.setTradeDesc("test Description");
-		obj.setItemName("TestItem");
-		// 交易結果回傳網址，只接受 https 開頭的網站，可以使用 ngrok
-		obj.setReturnURL("<http://211.23.128.214:5000>");
-		obj.setNeedExtraPaidInfo("N");
-		// 商店轉跳網址 (Optional)
-		obj.setClientBackURL("<http://192.168.1.37:8080/>");
-		String form = all.aioCheckOut(obj, null);
+        // 初始化 ECPay AllInOne 服務
+        AllInOne all = new AllInOne("");
 
-		return form;
-	}
+        // 創建 AioCheckOutALL 對象，準備填充資料
+        AioCheckOutALL obj = new AioCheckOutALL();
+        System.out.println("orderRequestDTO="+orderRequestDTO.getItemName());
+        System.out.println("orderRequestDTO_getMerchantTradeNo="+orderRequestDTO.getMerchantTradeNo());
+
+        // 填充訂單資訊
+        obj.setMerchantTradeNo(orderRequestDTO.getMerchantTradeNo()); // 設置商家交易編號
+        obj.setMerchantTradeDate(orderRequestDTO.getMerchantTradeDate()); // 設置商店交易日期
+        obj.setTotalAmount(orderRequestDTO.getTotalAmount().toString()); // 設置總金額
+        obj.setTradeDesc("------------------"); // 設置交易描述
+        obj.setItemName(orderRequestDTO.getItemName()); // 設置商品名稱
+
+        // 設置回傳網址和商店轉跳網址
+        obj.setReturnURL(orderRequestDTO.getReturnURL()); 
+        obj.setNeedExtraPaidInfo("N"); // 是否需要額外付款資訊
+        obj.setClientBackURL(orderRequestDTO.getClientBackURL()); // 設置商店轉跳網址
+        obj.setChooseSubPayment("Credit"); // 設置付款方式
+        
+        // 調用 ECPay 的 aioCheckOut 方法，生成支付表單
+        String form = all.aioCheckOut(obj, null);
+
+        // 保存交易編號到訂單，並更新數據庫
+        order.setMerchantTradeNo(orderRequestDTO.getMerchantTradeNo());
+        orderRepository.save(order);
+
+        // 返回支付表單給前端
+        return form;
+    }
+    
+ // 查找訂單根據 MerchantTradeNo
+    @Transactional
+    public Optional<Order> findByMerchantTradeNo(String merchantTradeNo) {
+
+        return orderRepository.findByMerchantTradeNo(merchantTradeNo);
+
+    }
+
+
+
+    // 保存訂單
+    @Transactional
+    public Order saveOrder(Order order) {
+
+        return orderRepository.save(order);
+
+    }
 
     
+    
 }
-
+    
+    
+    
 

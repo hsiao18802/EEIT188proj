@@ -1,0 +1,64 @@
+spring:
+
+
+
+  application:
+    name: labboot-hibernate
+  datasource:
+    username: sa
+    password: P@ssw0rd
+    url: jdbc:sqlserver://localhost:1433;database=Rent;trustServerCertificate=true
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+  output:
+    ansi:
+      enabled: always
+  servlet:
+    multipart:
+      max-file-size: 5MB   # 單個文件最大上傳大小
+      max-request-size: 5MB # 整個請求最大上傳大小
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: kwkw4183704@gmail.com
+    password: coyyichtyvntpfog
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+#  cloud:
+#    gcp:
+#      credentials:
+#        location: file:C:/final-exam/spring-back/src/main/resources/gcp/demo1-ufum-6b8b1556c965.json  # 確保文件路徑正確
+redis:
+    host: localhost
+    port: 6379
+
+jwt:
+  token:
+    expire: 100
+
+# LINE Bot 配置
+line:
+  bot:
+    channelToken: 'k6s9lpZH/+jBD/rxpuuLf7iQR2rq2k0KVq0WZ/dYCPi5ZjrJKScJQFI1ZAIHLVHWi0A9NeWK7KVlLXe65oGFW31NuTZjjzCEWRei1G7wGUqrzDpGJ/6+MCpB15tTF06gsQ1JyQe1PfoZanhr4cqs3gdB04t89/1O/w1cDnyilFU='
+    channelSecret: '3770f6038a028afd9f78e48a76eb3708'
+
+dialogflow:
+  project-id: demo1-ufum  # 請替換為你的 Dialogflow 專案 ID
+  
+  
+  
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true

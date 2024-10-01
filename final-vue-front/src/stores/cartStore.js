@@ -55,6 +55,10 @@ const setRentalDates = (startDate, endDate) => {
     shippingMethod.value = method;
   };
 
+  const clearShippingMethod = () => {
+    shippingMethod.value = null; // 清空運輸方式
+  };
+
 
   const updateNewList = async () => {
     try {
@@ -86,7 +90,8 @@ const setRentalDates = (startDate, endDate) => {
         {
           productId, count, membersId: currentMembersId,
           rentalStartDate: rentalStartDate.value,
-          rentalEndDate: rentalEndDate.value
+          rentalEndDate: rentalEndDate.value,
+
         }
       );
       console.log('Rental Start Date:', rentalStartDate.value);
@@ -231,7 +236,8 @@ const clearCart = async () => {
 rentalStartDate.value = null; // 清空租借開始日期
  rentalEndDate.value = null; // 清空租借結束日期
   // 清空加價服務的狀態
-  shippingMethod.value=null;
+  clearShippingMethod(); // 清空運輸方式
+
 
 
   } catch (error) {
@@ -277,6 +283,7 @@ rentalStartDate.value = null; // 清空租借開始日期
     handleServiceSelection,
     shippingMethod,
     setShippingMethod,
+    clearShippingMethod
 
 
   };

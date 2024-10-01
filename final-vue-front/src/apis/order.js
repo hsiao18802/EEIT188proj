@@ -3,6 +3,12 @@ import axiosapi from "@/plugins/axios";
 const BASE_URL = '/rent/order';
 
 
+//綠界付款API
+export const ecpayAPI = (orderId) => {
+  return axiosapi.post(`${BASE_URL}/ecpayCheckout/${orderId}`);
+};
+
+
 
 // 創建新訂單
 export const createOrderAPI = (data) => {
@@ -33,3 +39,4 @@ export const deleteOrderAPI = (orderId) => {
 export const getOrdersByMemberIdAPI = (memberId) => {
   return axiosapi.get(`${BASE_URL}/member/${memberId}`);
 };
+

@@ -93,6 +93,7 @@
   import { useOrderStore } from '@/stores/orderStore';
   import { useRouter } from 'vue-router';
   import Swal from 'sweetalert2';
+  import { ecpayAPI } from '@/apis/order'; 
   
   const hasAppliedCoupon = ref(false); // 新增變數以追蹤是否已輸入折扣碼
   const discountMessage = ref('');
@@ -108,14 +109,14 @@
 
 
 
-
-  const formatPrice = (price) => {
+// 格式化價格，確保是有效的整數
+const formatPrice = (price) => {
   return new Intl.NumberFormat('zh-TW', {
     style: 'currency',
     currency: 'TWD',
-    minimumFractionDigits: 0, // 不顯示小數點
-    maximumFractionDigits: 0, // 不顯示小數點
-  }).format(price);
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.round(price)); // 確保傳入的是有效的整數
 };
 
 
@@ -227,46 +228,65 @@ const showTerms = async () => {
 
 
   // 提交訂單
-  const submitOrder = async () => {
-    try {
-      const newOrderData = { 
-        ...orderData.value, 
-        shippingAddress: shippingMethod.value !== '自取($0)大安區店' ? address.value : "",       
-         shippingName: name.value,
-        shippingPhoneNum: contact.value ,
-        remarks: remarks.value // 傳送備註
+const submitOrder = async () => {
+  try {
+    const newOrderData = { 
+      ...orderData.value, 
+      shippingAddress: shippingMethod.value !== '自取($0)大安區店' ? address.value : "",       
+      shippingName: name.value || "",  // 如果未填則設為空字串
+      shippingPhoneNum: contact.value || "", // 如果未填則設為空字串
+      remarks: remarks.value || "", // 傳送備註，如果未填則設為空字串
+      payMethod: null // 可以根據需求設定
+    };
 
-      };
-  
-      const newOrder = await orderStore.createOrder(newOrderData);
-      console.log("訂單創建成功:", newOrder);
-       // router.push('/'); // 跳轉到Payment
+    console.log("訂單數據:", newOrderData);
+
+    // 提交訂單
+    const newOrder = await orderStore.createOrder(newOrderData);
+    console.log("訂單創建成功:", newOrder);
+
+    // 更新本地 orderStore 的 orderProducts
+    const updatedOrderProducts = newOrder.orderProducts.map((product, index) => ({
+      ...orderData.value.orderProducts[index],
+      orderProductId: product.orderProductId
+    }));
+
+    orderStore.setOrderData({
+      ...orderData.value,
+      orderProducts: updatedOrderProducts
+    });
     
-  
-      // 更新本地 orderStore 的 orderProducts
-      const updatedOrderProducts = newOrder.orderProducts.map((product, index) => ({
-        ...orderData.value.orderProducts[index],
-        orderProductId: product.orderProductId
-      }));
-  
-      orderStore.setOrderData({
-        ...orderData.value,
-        orderProducts: updatedOrderProducts
-      });
-      
-      cartStore.clearCart();
+    // 清空購物車
+    cartStore.clearCart();
+    
+    // 清空 shippingMethod
+    shippingMethod.value = ""; 
 
-      router.push('/'); // 跳轉到訂單成功頁面
-    } catch (error) {
-      console.error("訂單創建失敗:", error);
-      await Swal.fire({
-            title: '提交失敗',
-            text: '抱歉，您的訂單未能提交。請重試。',
-            icon: 'error',
-            confirmButtonText: '確定'
-        });
+    // 調用 ecpayAPI，進行付款跳轉
+    const ecpayForm = await ecpayAPI(newOrder.orderId);
+    console.log("綠界付款表單:", ecpayForm);
+
+    // 將表單插入 DOM 並自動提交
+    const formWrapper = document.createElement('div');
+    formWrapper.innerHTML = ecpayForm.data;
+    document.body.appendChild(formWrapper);
+
+    const paymentForm = formWrapper.querySelector('form');
+    if (paymentForm) {
+      paymentForm.submit(); // 自動提交表單
     }
-  };
+    
+  } catch (error) {
+    console.error("訂單創建失敗:", error);
+    await Swal.fire({
+      title: '提交失敗',
+      text: '抱歉，您的訂單未能提交。請重試。',
+      icon: 'error',
+      confirmButtonText: '確定'
+    });
+  }
+};
+
 
   // 日期格式化函數
 const formatDate = (dateString) => {
