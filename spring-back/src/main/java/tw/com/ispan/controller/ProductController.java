@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,42 @@ public class ProductController {
     public List<Product> getAllRents() {
         return productService.findAll();
     }
+    
+    // 帶分頁的複雜搜尋
+    @PostMapping("/find-advanced")
+    public ResponseEntity<Map<String, Object>> findProducts(@RequestBody String json) {
+        // 打印收到的前端 JSON
+        System.out.println("Received JSON from frontend: " + json);
+
+        try {
+            JSONObject obj = new JSONObject(json);
+
+            // 打印解析出的查詢條件
+            System.out.println("Parsed 'name' from JSON: " + obj.optString("name"));
+            System.out.println("Parsed 'categoryId' from JSON: " + obj.optInt("categoryId", -1));
+            System.out.println("Parsed 'start' from JSON: " + obj.optInt("start"));
+            System.out.println("Parsed 'max' from JSON: " + obj.optInt("max"));
+
+            // 查詢產品列表和總數
+            List<Product> products = productService.findProducts(obj);
+            Long count = productService.countProducts(obj);
+
+            // 打印查詢結果
+            System.out.println("Products found: " + products.size());
+            System.out.println("Total count: " + count);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("list", products);
+            response.put("count", count);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error occurred while processing the request.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
     
     @GetMapping("/{id}")
     public Product getRentById(@PathVariable Integer id) {
@@ -228,6 +265,19 @@ public class ProductController {
             this.productId = productId;
         }
     }
-
+    
+    // 根據 categoryId 查找產品
+    @GetMapping("/findByCategory/{categoryId}")
+    public ResponseEntity<List<Product>> getProductsByCategoryId(@PathVariable Integer categoryId) {
+        List<Product> products = productService.findByCategoryId(categoryId);
+        return ResponseEntity.ok(products);
+    }
+    
+    // 根據 categoryId 計算產品數量
+    @GetMapping("/countByCategory/{categoryId}")
+    public ResponseEntity<Long> countProductsByCategoryId(@PathVariable Integer categoryId) {
+        Long count = productService.countByCategoryId(categoryId);
+        return ResponseEntity.ok(count);
+    }
 
 }

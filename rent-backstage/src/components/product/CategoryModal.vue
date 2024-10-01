@@ -126,4 +126,9 @@ function submitEdit(category) {
     .fa-bars {
         cursor: move;
     }
+
+    table td {
+    vertical-align: middle;
+    }
+    
 </style>

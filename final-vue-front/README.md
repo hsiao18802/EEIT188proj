@@ -10,8 +10,8 @@ npm install element-plus
 
 
 
-
-
+## Lu 日曆
+npm install flatpickr vue-flatpickr-component --save
 
 # vue-front
 

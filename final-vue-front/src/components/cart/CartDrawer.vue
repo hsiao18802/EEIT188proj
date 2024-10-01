@@ -20,7 +20,12 @@
             <div class="product-details">
               單價: {{ formatPrice(product.dailyFeeOriginal) }} / 每日
               <br />
-              租借數量: {{ product.count }}
+              <!-- <button @click="fetchAvailableQuantity(product.productId, rentalStartDate.value, rentalEndDate.value)">
+                查詢可租借數量
+              </button> -->
+              <div v-if="availableQuantities[product.productId] !== undefined">
+                可租借數量: {{ availableQuantities[product.productId] }}
+              </div>
             </div>
             <div class="product-actions">
               <button class="quantity-btn" @click="minusOne(product.productId)">-</button>
@@ -90,13 +95,13 @@
 
 
 <script setup>
-import { computed,ref  } from 'vue';
+import { computed,ref,onMounted,watch  } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import { useOrderStore } from '@/stores/orderStore';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs'; // 引入 dayjs 函式庫 算天數
 import Swal from 'sweetalert2'
-
+import axiosapi from '@/plugins/axios';
 
 
 const cartStore = useCartStore();
@@ -285,9 +290,75 @@ const formattedRentalEndDate = computed(() => {
 });
 
 
+const availableQuantities = ref({});
+// 定義函數來調用後端 API，並在多處加入 console.log 幫助偵錯
+// const fetchAvailableQuantity = async (productId, rentalStartDate, rentalEndDate) => {
 
+//   if (!cartStore.rentalStartDate || !cartStore.rentalEndDate) {
+//     console.error('租借日期未定義，無法查詢可租借數量');
+//     return;
+//   }
 
+//   try {
+//     const response = await axiosapi.post('/rent/product/check-availability', {
+//       dateA: cartStore.rentalStartDate,
+//       dateB: cartStore.rentalEndDate,
+//       productId,
+//     });
 
+//     console.log('API 請求已完成，返回數據:', response.data);
+
+//     if (response.data && response.data.availableQuantity !== undefined) {
+//       console.log(`成功獲取 productId ${productId} 的可租借數量:`, response.data.availableQuantity);
+//       availableQuantities.value[productId] = response.data.availableQuantity;
+//     } else {
+//       console.error('無法取得可租借數量，API 返回的數據異常');
+//     }
+//   } catch (error) {
+//     console.error('API 請求失敗:', error);
+//   }
+// };
+
+const fetchAvailableQuantity = async (productId, rentalStartDate, rentalEndDate) => {
+
+if (!cartStore.rentalStartDate || !cartStore.rentalEndDate) {
+  console.error('租借日期未定義，無法查詢可租借數量');
+  return;
+}
+
+try {
+  const response = await axiosapi.post('/rent/product/check-availability', {
+    dateA: cartStore.rentalStartDate,
+    dateB: cartStore.rentalEndDate,
+    productId,
+  });
+
+  console.log('API 請求已完成，返回數據:', response.data);
+
+  // 檢查是否直接返回數字
+  if (typeof response.data === 'number') {
+    console.log(`成功獲取 productId ${productId} 的可租借數量:`, response.data);
+    availableQuantities.value[productId] = response.data; // 直接將數據分配給 productId 對應的可租借數量
+  } else {
+    console.error('無法取得可租借數量，API 返回的數據異常:', response.data);
+  }
+} catch (error) {
+  console.error('API 請求失敗:', error);
+}
+};
+
+onMounted(() => {
+  cartStore.sortedCartList.forEach(product => {
+    fetchAvailableQuantity(product.productId, rentalStartDate.value, rentalEndDate.value);
+  });
+});
+
+// 當租借日期變化時重新獲取數據
+watch([rentalStartDate, rentalEndDate], () => {
+  cartStore.sortedCartList.forEach(product => {
+    fetchAvailableQuantity(product.productId, rentalStartDate.value, rentalEndDate.value);
+  });
+});
 
 
 </script>
