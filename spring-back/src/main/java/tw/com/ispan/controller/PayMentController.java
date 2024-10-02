@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import tw.com.ispan.DTO.ConverterOrderToDTO;
 import tw.com.ispan.DTO.OrderDTO;
 import tw.com.ispan.DTO.OrderRequestDTO;
 import tw.com.ispan.domain.Order;
@@ -30,12 +31,16 @@ public class PayMentController {
 
     @Autowired
     private OrderService orderService;
+    
+    @Autowired
+    private ConverterOrderToDTO orderConverter;
+    
 
     // 在類中創建 Logger 實例
     private static final Logger logger = LoggerFactory.getLogger(PayMentController.class);
     
     
-
+//付款
     @PostMapping("/ecpayCheckout/{orderId}")
     public String ecpayCheckout(@PathVariable Integer orderId){
    
@@ -48,30 +53,28 @@ public class PayMentController {
    
    
    
-
+//返回的訂單狀態
     @PostMapping("/ecpay/callback")
     public String handleECPayCallback(@RequestParam Map<String, String> params) {
         String merchantTradeNo = params.get("MerchantTradeNo");
-        String paymentStatus = params.get("RtnCode"); // 支付結果代碼
-        String tradeNo = params.get("TradeNo");
+        String paymentStatus = params.get("RtnCode");
 
-        // 根據 MerchantTradeNo 查詢訂單
-        Order order = orderService.findByMerchantTradeNo(merchantTradeNo)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-
-        // 根據支付狀態更新訂單狀態
+        // 根據支付狀態決定如何更新訂單狀態
         if ("1".equals(paymentStatus)) {
-            order.setOrderStatus(OrderStatus.PAID); // 支付成功
+            // 支付成功，更新訂單狀態為 PAID
+            orderService.updateOrderStatus2(merchantTradeNo, OrderStatus.PAID);
         } else {
-            order.setOrderStatus(OrderStatus.CANCELLED); // 支付失敗
+            // 支付失敗，更新訂單狀態為 PENDING
+            orderService.updateOrderStatus2(merchantTradeNo, OrderStatus.PENDING);
         }
 
-        // 更新交易編號
-        order.setEcpayTradeNo(tradeNo);
-
-        // 更新訂單
-        orderService.saveOrder(order);
-
+        // 回傳 "1|OK" 表示通知成功接收
         return "1|OK";
     }
+    
+    
+
 }
+
+
+

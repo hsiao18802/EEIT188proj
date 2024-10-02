@@ -1,6 +1,6 @@
 <template>
     <!-- <component :is="currentNavbar"></component> -->
-<h1 style="font-family: Consolas, 'Courier New', monospace; font-size: xx-large;">403 Forbidden</h1>
+    <h1 style="font-family: Consolas, 'Courier New', monospace; font-size: xx-large;">403 Forbidden </h1>
 </template>
 
 <script setup>
@@ -18,6 +18,4 @@
 // });
 </script>
 
-<style>
-
-</style>
+<style></style>

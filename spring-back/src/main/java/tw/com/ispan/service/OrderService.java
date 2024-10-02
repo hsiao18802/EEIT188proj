@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,7 +138,7 @@ public class OrderService {
     }
 
 
-    // 更新訂單狀態
+    // 根據ＩＤ更新訂單狀態
     @Transactional
     public OrderDTO updateOrderStatus(Integer orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId)
@@ -147,6 +148,21 @@ public class OrderService {
         Order updatedOrder = orderRepository.save(order);
         return orderConverter.toDTO(updatedOrder);
     }
+    
+    //根據訂單號碼更新訂單狀態
+    @Transactional
+    public Order updateOrderStatus2(String merchantTradeNo, OrderStatus status) {
+        // 根據 MerchantTradeNo 查詢訂單
+        Order order = orderRepository.findByMerchantTradeNo(merchantTradeNo)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        // 更新訂單狀態和交易編號
+        order.setOrderStatus(status);
+        
+
+        return orderRepository.save(order);
+    
+}
     
     
     
@@ -161,7 +177,7 @@ public class OrderService {
     }
 
     
-    
+    //用會員ＩＤ找訂單
     public List<OrderDTO> getOrdersByMemberId(Integer membersId) {
         Members member = membersRepository.findById(membersId)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
@@ -170,16 +186,49 @@ public class OrderService {
                 .toList();
     }
     
+ // 更新訂單狀態，並返回新的付款請求
+    @Transactional
+    public OrderRequestDTO regeneratePaymentRequest(Integer orderId) {
+        // 查找訂單
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        // 檢查訂單狀態，確保是取消狀態，允許重新產生付款
+        if (order.getOrderStatus() == OrderStatus.PENDING) {
+            String newMerchantTradeNo = "gogoCampingNo" + UUID.randomUUID().toString().replace("-", "").substring(0,5);
+            order.setMerchantTradeNo(newMerchantTradeNo);
+            orderRepository.save(order);
+            
+            // 使用 Converter 生成 ECPay DTO
+            return converterOrderToECPayDTO.toECPayDTO(order);
+        } else {
+            throw new IllegalStateException("Only cancelled orders can be paid again");
+        }
+    }
+
+    
     // ECPay結帳
     @Transactional
     public String ecpayCheckout(Integer orderId) {
-        // 從資料庫獲取訂單
     
     	 // 從資料庫獲取訂單
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         System.out.println("order="+order);
+        
+        
+     // 檢查訂單狀態
+        if (order.getOrderStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Order is not eligible for payment.");
+        }
+
+        // 檢查是否需要重新生成 MerchantTradeNo（如果付款失敗過，可以選擇生成新的）
+        if (order.getMerchantTradeNo() == null || order.getMerchantTradeNo().isEmpty()) {
+            String newMerchantTradeNo = "gogoCampingNo" + UUID.randomUUID().toString().replace("-", "").substring(0, 5);
+            order.setMerchantTradeNo(newMerchantTradeNo);
+        }
+        
         // 將訂單轉換為 ECPay DTO
         OrderRequestDTO orderRequestDTO = converterOrderToECPayDTO.toECPayDTO(order);
 

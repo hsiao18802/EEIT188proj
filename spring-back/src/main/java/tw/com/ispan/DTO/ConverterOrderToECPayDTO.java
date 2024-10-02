@@ -15,7 +15,7 @@ public class ConverterOrderToECPayDTO {
     public OrderRequestDTO toECPayDTO(Order order) {
         OrderRequestDTO dto = new OrderRequestDTO();
         
-        String gogoCampingNo =UUID.randomUUID().toString().replace("-", "").substring(0,20);
+        String gogoCampingNo = "gogoCampingNo" + UUID.randomUUID().toString().replace("-", "").substring(0,5);
         
         dto.setMerchantTradeNo(gogoCampingNo);  // 設置商店交易編號
         dto.setMerchantTradeDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"))); // 設置商店交易日期
