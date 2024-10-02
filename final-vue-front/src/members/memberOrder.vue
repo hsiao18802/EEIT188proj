@@ -83,6 +83,8 @@ import { ElMessage } from 'element-plus';
 import Swal from 'sweetalert2';
 import { useCartStore } from '@/stores/cartStore';
 import { useRouter } from 'vue-router';
+import { ecpayAPI } from '@/apis/order';
+
 
 const router = useRouter();
 
@@ -159,10 +161,28 @@ const viewOrderDetail = (orderId) => {
 };
 
 
-const goToCheckout = (orderId) => {
+const goToCheckout = async (orderId) => {
+
   console.log(`前往結帳頁面，訂單編號: ${orderId}`);
-  // 這裡可以導航到結帳頁面
-};
+  // 調用 ecpayAPI，進行付款跳轉
+  const ecpayForm = await ecpayAPI(orderId);
+  console.log("綠界付款表單:", ecpayForm);
+
+  // 將表單插入 DOM 並自動提交
+  const formWrapper = document.createElement('div');
+  formWrapper.innerHTML = ecpayForm.data;
+  document.body.appendChild(formWrapper);
+  console.log("表單已插入"); // 確認表單插入是否成功
+  // 手動提交表單
+  const form = document.getElementById('allPayAPIForm');
+  if (form) {
+    form.submit();
+    console.log("表單已提交");
+  } else {
+    console.error("找不到表單");
+  }
+}
+
 
 const buyAgain = async (orderId) => {
   console.log(`再買一次，訂單編號: ${orderId}`);

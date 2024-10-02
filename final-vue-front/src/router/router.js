@@ -21,6 +21,7 @@ import Order from "@/views/pages/Order.vue";
 import checkout from '@/views/pages/checkout.vue';
 import memberOrder from '@/members/memberOrder.vue'
 import OrderDetail from '@/components/orders/OrderDetail.vue';
+import readyToPay from '@/views/pages/readyToPay.vue'
 
 
 
@@ -77,6 +78,8 @@ const routes = [
   { path: "/pages/Cart", name: "Cart-link", component: Cart, meta: { navbar: 'PublicNavbar' } },
   { path: "/pages/Order", name: "Order-link", component: Order, meta: { navbar: 'PublicNavbar' } },
   { path: "/pages/checkout", name: "checkout-link", component: checkout },
+  { path: "/pages/readyToPay", name: "readyToPay-link", component: readyToPay },
+
   // { path: "/members/memberOrder", name: "memberOrderlink", component: memberOrder },
   {
     path: '/members/memberOrder',

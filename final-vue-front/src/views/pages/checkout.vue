@@ -53,8 +53,8 @@
           <p :style="{ textDecoration: hasAppliedCoupon ? 'line-through' : 'none' }">
             總計: {{ formatPrice(originalPrice) }} <!-- 使用 formatPrice 格式化總計 -->
           </p>
-          <p v-if="hasAppliedCoupon">折扣金額: {{ formatPrice(discountValue) }} 元</p> <!-- 使用 formatPrice 格式化折扣金額 -->
-          <p v-if="hasAppliedCoupon">折扣後優惠價: {{ formatPrice(finalPrice) }} 元</p> <!-- 使用 formatPrice 格式化最終價格 -->
+          <p v-if="hasAppliedCoupon">折扣金額: {{ formatPrice(discountValue) }} 元</p>
+          <p v-if="hasAppliedCoupon">折扣後優惠價: {{ formatPrice(finalPrice) }} 元</p>
           <div class="coupon-container" v-if="!hasAppliedCoupon">
             <button class="coupon-button" @click="showCouponPrompt">
               <i class="fas fa-tag"></i> 輸入優惠碼
@@ -256,28 +256,8 @@ const submitOrder = async () => {
     // 清空 shippingMethod
     shippingMethod.value = "";
 
-    // 調用 ecpayAPI，進行付款跳轉
-    const ecpayForm = await ecpayAPI(newOrder.orderId);
-    console.log("綠界付款表單:", ecpayForm);
+    await router.push('/pages/readyToPay');
 
-    // 將表單插入 DOM 並自動提交
-    const formWrapper = document.createElement('div');
-    formWrapper.innerHTML = ecpayForm.data;
-    document.body.appendChild(formWrapper);
-
-    const paymentForm = formWrapper.querySelector('form');
-    if (paymentForm) {
-      // 顯示 loading 樣式
-      await Swal.fire({
-        title: '跳轉中...',
-        text: '正在跳轉到支付頁面，請稍候。',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-      paymentForm.submit(); // 自動提交表單
-    }
 
   } catch (error) {
     console.error("訂單創建失敗:", error);
@@ -288,7 +268,7 @@ const submitOrder = async () => {
       confirmButtonText: '確定'
     });
   }
-};
+}
 
 
 // 日期格式化函數
