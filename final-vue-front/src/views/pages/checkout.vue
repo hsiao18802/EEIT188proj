@@ -100,6 +100,8 @@ const name = ref(""); // 新增手機號碼響應式變數
 const contact = ref(""); // 新增聯絡電話響應式變數
 const termsAccepted = ref(false); // 新增變數以追蹤是否接受條款
 const remarks = ref("");
+const couponCode = ref(""); // 儲存當前的折扣碼
+
 
 
 
@@ -152,6 +154,8 @@ const showCouponPrompt = async () => {
 
   if (couponCode) {
     hasAppliedCoupon.value = true; // 成功輸入折扣碼後更新狀態
+    couponCode.value = couponCode; // 將有效的折扣碼存儲
+
   }
 };
 
@@ -230,7 +234,11 @@ const submitOrder = async () => {
       shippingName: name.value || "",  // 如果未填則設為空字串
       shippingPhoneNum: contact.value || "", // 如果未填則設為空字串
       remarks: remarks.value || "", // 傳送備註，如果未填則設為空字串
-      payMethod: null // 可以根據需求設定
+      payMethod: null ,// 可以根據需求設定
+      totalPrice: finalPrice.value, // 將折扣後的價格傳入
+      discountCode: couponCode.value || "", // 傳遞折扣碼
+
+
     };
 
     console.log("訂單數據:", newOrderData);
@@ -247,7 +255,9 @@ const submitOrder = async () => {
 
     orderStore.setOrderData({
       ...orderData.value,
-      orderProducts: updatedOrderProducts
+      orderProducts: updatedOrderProducts,
+      totalPrice: finalPrice.value, // 將折扣後的價格傳入
+
     });
 
     // 清空購物車

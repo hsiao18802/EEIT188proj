@@ -1,10 +1,11 @@
 <template>
     <el-card class="order-card">
         <h2>訂單已建立！</h2>
+        <p>訂單編號：{{ orderStore.orderId }}</p>
         <canvas id="countdownClock" width="200" height="200"></canvas>
-        <p class="countdown-time">{{ formatTime(remainingTime) }}</p>
-        <p v-if="isExpired" class="expired-message">訂單已過期，請重新下單。</p>
-        <p>總金額: {{ formatPrice(orderStore.totalPrice) }} 元</p>
+        <p class="countdown-time" aria-live="polite">{{ formatTime(remainingTime) }}</p>
+        <p v-if="isExpired" class="expired-message">已逾期，訂單取消。</p>
+        <p v-else-if="!isExpired">總金額: {{ formatPrice(orderStore.totalPrice) }} 元</p>
         <el-button type="success" size="large" @click="proceedToPayment" :disabled="isExpired" class="payment-button">
             使用綠界支付
         </el-button>
@@ -20,7 +21,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { ecpayAPI } from '@/apis/order';
 import { useOrderStore } from '@/stores/orderStore';
 
-const countdownTime = 30; // 倒數30分鐘
+const countdownTime = 1; // 倒數30分鐘
 const remainingTime = ref(countdownTime * 60); // 倒數秒數
 const isExpired = ref(false);
 const orderStore = useOrderStore();
@@ -56,12 +57,6 @@ const drawClock = () => {
     context.strokeStyle = 'red'; // 秒針顏色
     context.stroke();
     context.restore();
-
-    // 畫數字時分秒
-    context.font = 'bold 30px Arial'; // 字體大小
-    context.fillStyle = '#000';
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
 };
 
 const startCountdown = () => {
@@ -150,7 +145,7 @@ console.log("訂單金額:", orderStore.totalPrice);
     text-align: center;
     border-radius: 10px;
     background-color: #fff3cd;
-    /* 提示信息的背景颜色 */
+    /* 提示信息的背景顏色 */
     border: 1px solid #ffeeba;
     /* 边框颜色 */
 }

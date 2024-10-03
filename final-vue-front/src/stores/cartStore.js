@@ -35,10 +35,10 @@ export const useCartStore = defineStore('cartStore', () => {
 
 
 
-const setRentalDates = (startDate, endDate) => {
-  rentalStartDate.value = dayjs(startDate).format('YYYY-MM-DD'); // 使用 dayjs 格式化
-  rentalEndDate.value = dayjs(endDate).format('YYYY-MM-DD'); // 使用 dayjs 格式化
-};
+  const setRentalDates = (startDate, endDate) => {
+    rentalStartDate.value = dayjs(startDate).format('YYYY-MM-DD'); // 使用 dayjs 格式化
+    rentalEndDate.value = dayjs(endDate).format('YYYY-MM-DD'); // 使用 dayjs 格式化
+  };
 
 
 
@@ -57,6 +57,8 @@ const setRentalDates = (startDate, endDate) => {
 
   const clearShippingMethod = () => {
     shippingMethod.value = null; // 清空運輸方式
+    console.log('運輸方式已清空:', shippingMethod.value); // 日誌
+
   };
 
 
@@ -81,7 +83,7 @@ const setRentalDates = (startDate, endDate) => {
 
   const addCart = async (goods) => {
     const { productId, count } = goods;
-    const currentMembersId = userStore.membersId; 
+    const currentMembersId = userStore.membersId;
     console.log('Request payload:', { productId, count, membersId: currentMembersId });
     console.log('Adding to cart with membersId:', currentMembersId); // 調試用
 
@@ -96,7 +98,7 @@ const setRentalDates = (startDate, endDate) => {
       );
       console.log('Rental Start Date:', rentalStartDate.value);
       console.log('Rental End Date:', rentalEndDate.value);
-      console.log('API response carstore:', response);  
+      console.log('API response carstore:', response);
 
       await updateNewList();
       // 判斷商品是否成功加入購物車
@@ -105,14 +107,14 @@ const setRentalDates = (startDate, endDate) => {
         showCartDrawer.value = true;
         cartId.value = response.data.data.cartId; // 使用 .value
         console.log('cartId.value:', cartId.value);
-    } else {
+      } else {
         console.error('Cart ID not found in the response:', response);
+      }
+    } catch (error) {
+      console.error('Failed to add to cart:', error.message);
+      console.error('Error stack trace:', error.stack);
     }
-} catch (error) {
-    console.error('Failed to add to cart:', error.message);
-    console.error('Error stack trace:', error.stack);
-}
-};
+  };
 
 
   const addProduct = (product) => {
@@ -152,108 +154,116 @@ const setRentalDates = (startDate, endDate) => {
 
   const plusOne = async (productId) => {
     try {
-        await plusOneAPI({ membersId: membersId.value, productId });
-        // 更新狀態，例如
-        const product = cartList.value.find(item => item.productId === productId);
-        if (product) {
-            product.count += 1; // 直接更新購物車中的商品數量
-        }
+      await plusOneAPI({ membersId: membersId.value, productId });
+      // 更新狀態，例如
+      const product = cartList.value.find(item => item.productId === productId);
+      if (product) {
+        product.count += 1; // 直接更新購物車中的商品數量
+      }
+      await updateNewList(); // 更新購物車列表
+
+    } catch (error) {
+      console.error('增加數量失敗:', error);
+      Swal.fire({
+        title: '錯誤',
+        text: "增加數量失敗，請稍後再試。",
+        icon: "error",
+        confirmButtonText: '確定',
+        position: 'center'
+      });
+    }
+  };
+
+  const minusOne = async (productId) => {
+    try {
+      const product = cartList.value.find(item => item.productId === productId);
+      if (product && product.count > 1) {
+        await minusOneAPI({ membersId: membersId.value, productId });
+        product.count -= 1; // 直接更新購物車中的商品數量
+        await updateNewList(); // 更新購物車列表
+      } else if (product && product.count === 1) {
+        // 考慮是否要從購物車中移除該商品
+        await delCartAPI({ membersId: membersId.value, productId });
         await updateNewList(); // 更新購物車列表
 
-    } catch (error) {
-        console.error('增加數量失敗:', error);
-        Swal.fire({
-            title: '錯誤',
-            text: "增加數量失敗，請稍後再試。",
-            icon: "error",
-            confirmButtonText: '確定',
-            position: 'center'
-        });
-    }
-};
 
-const minusOne = async (productId) => {
+      }
+    } catch (error) {
+      console.error('減少數量失敗:', error);
+      Swal.fire({
+        title: '錯誤',
+        text: "減少數量失敗，請稍後再試。",
+        icon: "error",
+        confirmButtonText: '確定',
+        position: 'center'
+      });
+    }
+  };
+
+
+
+
+
+  // 加價服務的狀態
+  const selectedServices = ref({
+    delivery1: false, // 自取
+    delivery2: false, // 1-20 公里
+    delivery3: false, // 20-40 公里
+  });
+
+  // 計算加價服務的總價
+  const selectedServicesPrice = computed(() => {
+    let total = 0;
+    if (selectedServices.value.delivery2) total += 300;
+    if (selectedServices.value.delivery3) total += 500;
+    return total;
+  });
+
+  // 控制互斥邏輯
+  const handleServiceSelection = (selectedOption) => {
+    if (selectedOption === 1) {
+      selectedServices.value.delivery2 = false;
+      selectedServices.value.delivery3 = false;
+    } else {
+      selectedServices.value.delivery1 = false;
+    }
+  };
+
+
+  const clearCart = async () => {
     try {
-        const product = cartList.value.find(item => item.productId === productId);
-        if (product && product.count > 1) {
-            await minusOneAPI({ membersId: membersId.value, productId });
-            product.count -= 1; // 直接更新購物車中的商品數量
-            await updateNewList(); // 更新購物車列表
-        } else if (product && product.count === 1) {
-            // 考慮是否要從購物車中移除該商品
-            await delCartAPI({ membersId: membersId.value, productId });
-            await updateNewList(); // 更新購物車列表
+      const response = await ClearCartAPI(membersId.value); // 獲取 API 回應
+      console.log('清空購物車的 API 回應:', response); // 查看回應
 
-            
-        }
-    } catch (error) {
-        console.error('減少數量失敗:', error);
+      // 根據 API 返回的內容判斷成功與否
+      if (response.status === 200 && response.data === '購物車已清空') {
+        cartList.value = []; // 清空本地購物車列表
+        localStorage.removeItem('cartList'); // 清空 localStorage
+        rentalStartDate.value = null; // 清空租借開始日期
+        rentalEndDate.value = null; // 清空租借結束日期
+        clearShippingMethod(); // 清空運輸方式
+      } else {
+        console.error('清空購物車 API 返回錯誤:', response);
         Swal.fire({
-            title: '錯誤',
-            text: "減少數量失敗，請稍後再試。",
-            icon: "error",
-            confirmButtonText: '確定',
-            position: 'center'
+          title: '錯誤',
+          text: "清空購物車失敗，請稍後再試。",
+          icon: "error",
+          confirmButtonText: '確定',
+          position: 'center'
         });
+      }
+    } catch (error) {
+      console.error('清空購物車失敗:', error);
+      Swal.fire({
+        title: '錯誤',
+        text: "清空購物車失敗，請稍後再試。",
+        icon: "error",
+        confirmButtonText: '確定',
+        position: 'center'
+      });
     }
-};
+  };
 
-
-
-
-
-// 加價服務的狀態
-const selectedServices = ref({
-  delivery1: false, // 自取
-  delivery2: false, // 1-20 公里
-  delivery3: false, // 20-40 公里
-});
-
-// 計算加價服務的總價
-const selectedServicesPrice = computed(() => {
-  let total = 0;
-  if (selectedServices.value.delivery2) total += 300;
-  if (selectedServices.value.delivery3) total += 500;
-  return total;
-});
-
-// 控制互斥邏輯
-const handleServiceSelection = (selectedOption) => {
-  if (selectedOption === 1) {
-    selectedServices.value.delivery2 = false;
-    selectedServices.value.delivery3 = false;
-  } else {
-    selectedServices.value.delivery1 = false;
-  }
-};
-
-
-const clearCart = async () => {
-  try {
-    await ClearCartAPI(membersId.value); 
-    cartList.value = []; // 清空本地購物車列表
-    localStorage.removeItem('cartList'); // 清空 localStorage
-rentalStartDate.value = null; // 清空租借開始日期
- rentalEndDate.value = null; // 清空租借結束日期
-  // 清空加價服務的狀態
-  clearShippingMethod(); // 清空運輸方式
-
-
-
-  } catch (error) {
-    console.error('清空購物車失敗:', error);
-    Swal.fire({
-      title: '錯誤',
-      text: "清空購物車失敗，請稍後再試。",
-      icon: "error",
-      confirmButtonText: '確定',
-      position: 'center'
-    });
-  }
-};
-
-
- 
 
 
 

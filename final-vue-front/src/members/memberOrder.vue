@@ -41,7 +41,7 @@
                   <el-col :span="8" class="order-status">{{ order.orderStatus }}</el-col>
                   <el-col :span="8" class="order-price">
                     <div class="price-container">
-                      <div>{{ formatPrice(order.totalPrice + order.shippingFee) }}</div>
+                      <div>{{ formatPrice(order.totalPrice) }}</div>
                       <div>(含運費：{{ formatPrice(order.shippingFee) }})</div>
                       <div v-if="!['PENDING', 'CANCELLED'].includes(order.orderStatus)">
                         {{ order.paymentMethod || '信用卡支付' }}
