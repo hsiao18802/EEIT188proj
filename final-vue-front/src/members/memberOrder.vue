@@ -43,6 +43,9 @@
                     <div class="price-container">
                       <div>{{ formatPrice(order.totalPrice) }}</div>
                       <div>(含運費：{{ formatPrice(order.shippingFee) }})</div>
+                      <div v-if="isValidDiscountValue(order.discountValue)">
+                      (折扣金額：{{ formatPrice(order.discountValue) }})</div>
+
                       <div v-if="!['PENDING', 'CANCELLED'].includes(order.orderStatus)">
                         {{ order.paymentMethod || '信用卡支付' }}
                       </div>
@@ -56,6 +59,12 @@
                       @click="buyAgain(order.orderId)">再買一次</el-button>
                   </el-col>
                 </el-row>
+              </div>
+
+               <!-- 顯示折扣碼及折扣金額 -->
+               <div v-if="order.discountCode" style="margin-top: 10px;">
+                <div>使用優惠碼：{{ order.discountCode }}</div>
+                
               </div>
             </div>
           </el-card>
@@ -99,6 +108,12 @@ const OrderStatus = {
   RETURNED: 'RETURNED'
 };
 
+// 檢查折扣金額是否有效
+const isValidDiscountValue = (value) => {
+  return typeof value === 'number' && !isNaN(value) && value >= 0;
+};
+
+
 const formatPrice = (price) => {
   return new Intl.NumberFormat('zh-TW', {
     style: 'currency',
@@ -113,7 +128,7 @@ const membersId = cartStore.membersId;
 const activeTab = ref('PENDING');
 const orderList = ref([]);
 const currentPage = ref(1);
-const pageSize = ref(2); // 每頁顯示的訂單數量
+const pageSize = ref(5); // 每頁顯示的訂單數量
 const loading = ref(true); // 新增 loading 狀態
 
 
@@ -144,6 +159,7 @@ const getOrdersByMember = async (membersId) => {
   try {
     const response = await getOrdersByMemberIdAPI(membersId);
     orderList.value = response.data;
+    orderList.value.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
   } catch (error) {
     ElMessage.error("獲取訂單失敗: " + error);
   } finally {

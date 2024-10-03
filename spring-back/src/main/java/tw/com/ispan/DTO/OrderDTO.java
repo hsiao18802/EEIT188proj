@@ -30,6 +30,10 @@ public class OrderDTO {
     private Integer rentalDays;           // 租借天數
     private String orderStatus;            // 訂單狀態
     private LocalDateTime orderDate = LocalDateTime.now();
+    private String discountCode; // 儲存折扣碼
+    private Double discountValue;
+
+
 
     private List<OrderProductDTO> orderProducts = new ArrayList<>();  // 直接初始化列表
     
@@ -54,6 +58,8 @@ public class OrderDTO {
                 ", rentalDays=" + rentalDays +
                 ", orderStatus='" + orderStatus + '\'' +
                 ", orderProducts=" + orderProducts +
+                 ", discountCode=" + discountCode +
+                    ", discountValue=" + discountValue +
                 '}';
     }
 }

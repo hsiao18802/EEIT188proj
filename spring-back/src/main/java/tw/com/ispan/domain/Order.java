@@ -76,9 +76,13 @@ public class Order {
     @Column(name = "rental_days")
     private Integer rentalDays;  // 租借天數
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "discount_id", nullable = true)  // 折扣碼外鍵
-    private Discount discount;  // 對應的折扣碼
+    @Column(name = "discount_code")
+    private String discountCode; // 儲存折扣碼
+    
+    @Column(name = "discount_value")
+    private Double discountValue;
+    
+
     
     
     @Enumerated(EnumType.ORDINAL) 

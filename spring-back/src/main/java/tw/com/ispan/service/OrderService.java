@@ -18,11 +18,13 @@ import tw.com.ispan.DTO.ConverterOrderToECPayDTO;
 
 import tw.com.ispan.DTO.OrderDTO;
 import tw.com.ispan.DTO.OrderRequestDTO;
+import tw.com.ispan.domain.Discount;
 import tw.com.ispan.domain.Members;
 import tw.com.ispan.domain.Order;
 import tw.com.ispan.domain.OrderProduct;
 import tw.com.ispan.domain.OrderStatus;
 import tw.com.ispan.domain.Product;
+import tw.com.ispan.exception.InvalidDiscountCodeException;
 import tw.com.ispan.exception.ResourceNotFoundException;
 import tw.com.ispan.repository.MembersRepository;
 import tw.com.ispan.repository.OrderRepository;
@@ -45,6 +47,10 @@ public class OrderService {
     
     @Autowired
     private ConverterOrderToECPayDTO converterOrderToECPayDTO;
+    
+    @Autowired
+    private DiscountService discountService;
+    
     
     
 
@@ -83,8 +89,21 @@ public class OrderService {
         order.setRemarks(orderDTO.getRemarks());
         order.setRentalStartDate(orderDTO.getRentalStartDate());
         order.setRentalEndDate(orderDTO.getRentalEndDate());
-     
+        order.setDiscountValue(orderDTO.getDiscountValue());
+
         order.setOrderStatus(OrderStatus.PENDING); // 預設為待付款
+        
+     // 處理折扣碼
+        if (orderDTO.getDiscountCode() != null) {
+            Discount discount = discountService.findDiscountByCode(orderDTO.getDiscountCode());
+            if (discount != null && discount.getIsActive()) {
+                order.setDiscountCode(orderDTO.getDiscountCode());
+                // 可以根據需要計算折扣金額並更新訂單總價
+            } else {
+                // 處理無效的折扣碼情況
+                throw new InvalidDiscountCodeException("Invalid or expired discount code");
+            }
+        }
 
         
         // 設置會員資訊

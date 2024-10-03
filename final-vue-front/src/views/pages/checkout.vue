@@ -125,9 +125,8 @@ const shippingMethod = computed(() => {
 // 確保從 orderStore 取得暫存的訂單資料
 const orderData = computed(() => orderStore.orderData);
 
-// 顯示優惠碼提示框
 const showCouponPrompt = async () => {
-  const { value: couponCode } = await Swal.fire({
+  const { value: code } = await Swal.fire({
     title: '輸入優惠碼',
     html: `
       <input id="swal-input1" class="swal2-input" placeholder="請輸入優惠碼">
@@ -138,26 +137,26 @@ const showCouponPrompt = async () => {
     cancelButtonText: '取消',
     focusConfirm: false,
     preConfirm: async () => {
-      const code = document.getElementById('swal-input1').value; // 取得輸入的優惠碼
-      if (!code) {
+      const inputCode = document.getElementById('swal-input1').value; // 取得輸入的優惠碼
+      if (!inputCode) {
         document.getElementById('discount-message').innerText = '請輸入優惠碼';
         return false;
       }
-      const isValid = await validateCoupon(code);
+      const isValid = await validateCoupon(inputCode);
       if (!isValid) {
         document.getElementById('discount-message').innerText = discountMessage.value; // 更新顯示的錯誤訊息
         return false;
       }
-      return code; // 返回有效的優惠碼
+      return inputCode; // 返回有效的優惠碼
     },
   });
 
-  if (couponCode) {
+  if (code) { // 使用 `code` 而不是 `couponCode`
     hasAppliedCoupon.value = true; // 成功輸入折扣碼後更新狀態
-    couponCode.value = couponCode; // 將有效的折扣碼存儲
-
+    couponCode.value = code; // 將有效的折扣碼存儲
   }
 };
+
 
 // 驗證優惠碼
 const validateCoupon = async (code) => {
@@ -237,6 +236,7 @@ const submitOrder = async () => {
       payMethod: null ,// 可以根據需求設定
       totalPrice: finalPrice.value, // 將折扣後的價格傳入
       discountCode: couponCode.value || "", // 傳遞折扣碼
+      discountValue: discountValue.value// 傳遞折扣金額，預設為0
 
 
     };
@@ -262,10 +262,8 @@ const submitOrder = async () => {
 
     // 清空購物車
     cartStore.clearCart();
-
     // 清空 shippingMethod
     shippingMethod.value = "";
-
     await router.push('/pages/readyToPay');
 
 

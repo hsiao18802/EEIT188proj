@@ -26,11 +26,18 @@ public class ConverterOrderToDTO {
         dto.setRemarks(order.getRemarks());
         dto.setRentalStartDate(order.getRentalStartDate());
         dto.setRentalEndDate(order.getRentalEndDate());
+        dto.setDiscountValue(order.getDiscountValue());
+
         
      // 將 enum 狀態轉換為字串
         dto.setOrderStatus(order.getOrderStatus() != null ? order.getOrderStatus().name() : "");
         // 設置訂單日期
         dto.setOrderDate(order.getOrderDate());
+        
+        // 將折扣碼設置到 DTO
+        if (order.getDiscountCode() != null) { // 假設 Order 有 discountCode 屬性
+            dto.setDiscountCode(order.getDiscountCode()); // 將折扣碼添加到 DTO
+        }
 
         
         
