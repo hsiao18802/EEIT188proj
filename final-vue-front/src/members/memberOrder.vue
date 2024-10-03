@@ -1,8 +1,8 @@
-<template>
+<template> 
   <div>
     <el-tabs v-model="activeTab" @tab-click="filterOrdersByStatus">
       <el-tab-pane label="待付款" name="PENDING"></el-tab-pane>
-      <el-tab-pane label="已付款/等待取貨" name="PAID"></el-tab-pane>
+      <el-tab-pane label="已付款 (等待取貨)" name="PAID"></el-tab-pane>
       <el-tab-pane label="運送中" name="SHIPPED"></el-tab-pane>
       <el-tab-pane label="已領貨" name="DELIVERED"></el-tab-pane>
       <el-tab-pane label="交易完成" name="DONE"></el-tab-pane>
@@ -10,20 +10,18 @@
       <el-tab-pane label="退貨/退款" name="RETURNED"></el-tab-pane>
       <el-tab-pane label="商品損壞" name="DAMAGED"></el-tab-pane>
       <el-tab-pane label="全部訂單" name="ALL"></el-tab-pane>
-
     </el-tabs>
 
-    <el-skeleton v-if="loading" :rows="5">
-
-    </el-skeleton>
+    <el-skeleton v-if="loading" :rows="5"></el-skeleton>
 
     <div v-if="paginatedOrders.length > 0">
       <el-row :gutter="20" v-for="order in paginatedOrders" :key="order.orderId">
         <el-col :span="24">
           <el-card shadow="hover">
-            <div class="order-header">
+            <div class="order-header" style="display: flex; justify-content: space-between;">
               <span>下單時間：{{ formatDate(order.orderDate) }}</span>
-              <span style="margin-left: 5px;">訂單編號：{{ order.orderId }}</span>
+              <span style="margin-left: 15px;">訂單編號：{{ order.orderId }}</span>
+              <span style="margin-left: 15px; text-align: right; flex-grow: 1;">📅 租借時間：{{ order.rentalStartDate }}  → {{ order.rentalEndDate }}  共 {{ order.rentalDays }} 天</span>
             </div>
             <div class="order-body-summary">
               <div class="order-body">
@@ -42,10 +40,15 @@
                   <el-col :span="8" class="order-price">
                     <div class="price-container">
                       <div>{{ formatPrice(order.totalPrice) }}</div>
-                      <div>(含運費：{{ formatPrice(order.shippingFee) }})</div>
-                      <div v-if="isValidDiscountValue(order.discountValue)">
-                      (折扣金額：{{ formatPrice(order.discountValue) }})</div>
-
+                      <div v-if="order.shippingFee > 0">(含運費：{{ formatPrice(order.shippingFee) }})</div>
+                      <div v-else>大安店自取</div>
+                      <div v-if="isValidDiscountValue(order.discountValue) && order.discountValue > 0">
+                        (折扣金額：{{ formatPrice(order.discountValue) }})
+                      </div>
+                      <!-- 顯示折扣碼及折扣金額 -->
+                      <div v-if="order.discountCode" style="margin-top: 10px;">
+                        <div>✨使用優惠碼：{{ order.discountCode }}✨</div>
+                      </div>
                       <div v-if="!['PENDING', 'CANCELLED'].includes(order.orderStatus)">
                         {{ order.paymentMethod || '信用卡支付' }}
                       </div>
@@ -60,12 +63,6 @@
                   </el-col>
                 </el-row>
               </div>
-
-               <!-- 顯示折扣碼及折扣金額 -->
-               <div v-if="order.discountCode" style="margin-top: 10px;">
-                <div>使用優惠碼：{{ order.discountCode }}</div>
-                
-              </div>
             </div>
           </el-card>
         </el-col>
@@ -78,12 +75,9 @@
     </div>
 
     <p v-else-if="!loading">暫無訂單</p>
-
-
-
-
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed } from 'vue';

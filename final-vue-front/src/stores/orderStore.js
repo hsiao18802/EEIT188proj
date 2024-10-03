@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { createOrderAPI, getOrdersByMemberIdAPI, getOrderByIdAPI, getAllOrdersAPI, updateOrderStatusAPI, deleteOrderAPI } from '@/apis/order';
 import Swal from 'sweetalert2';
 
@@ -82,9 +82,9 @@ export const useOrderStore = defineStore('order', () => {
 
 
   // 根據會員 ID 獲取訂單
-  const getOrdersByMember = async (memberId) => {
+  const getOrdersByMember = async (membersId) => {
     try {
-      const response = await getOrdersByMemberAPI(memberId);
+      const response = await getOrdersByMemberIdAPI(membersId);
       orders.value = response.data;
     } catch (error) {
       console.error("獲取訂單失敗:", error);
@@ -121,19 +121,79 @@ export const useOrderStore = defineStore('order', () => {
 
 
 
+
+  // 開始倒數計時
+
+  const remainingTime = ref(0); // 默認為0
+  const countdownInterval = ref(null);
+  const orderStatus = ref(null);
+
+
+
+  const startCountdown = (duration) => {
+    if (duration > 0) {
+      remainingTime.value = duration; // 設定初始倒數時間
+      countdownInterval.value = setInterval(() => {
+        if (remainingTime.value > 0) {
+          remainingTime.value--;
+        } else {
+          clearInterval(countdownInterval.value);
+          countdownInterval.value = null; // 停止計時器
+        }
+      }, 1000); // 每秒減少一次
+    } else {
+      remainingTime.value = 0; // 若 duration 為負數，則設為 0
+    }
+  };
+
+  // 停止倒數計時
+  const stopCountdown = () => {
+    if (countdownInterval.value) {
+      clearInterval(countdownInterval.value);
+      countdownInterval.value = null;
+    }
+  };
+
+  const getRemainingTime = (orderDate) => {
+    const now = Math.floor(Date.now() / 1000); // 當前時間的秒數
+    const orderTimestamp = new Date(orderDate).getTime() / 1000; // 訂單時間的秒數
+    const elapsedTime = now - orderTimestamp; // 計算已經過去的時間
+    return Math.max(0, 1800 - elapsedTime); // 計算剩餘時間，假設設置30分鐘（1800秒）
+  };
+
+  const fetchOrderStatus = async () => {
+    if (orderId.value) {
+      try {
+        const order = await getOrderByIdAPI(orderId.value); // 獲取訂單 API
+        orderStatus.value = order.orderStatus;
+        const time = getRemainingTime(order.orderDate);
+        remainingTime.value = time;
+        startCountdown(time); // 啟動倒數計時
+      } catch (error) {
+        console.error("獲取訂單狀態失敗:", error);
+      }
+    }
+  };
+
   return {
     orders,
     currentOrder,
     getOrdersByMember,
     clearCurrentOrder,
-    orderData, // 暫存的訂單資料
-    setOrderData, // 設置暫存訂單資料
-    createOrder, // 創建最終訂單
+    orderData,
+    setOrderData,
+    createOrder,
     getAllOrders,
     updateOrderStatus,
     deleteOrder,
     getOrderById,
     orderId,
     totalPrice,
+    remainingTime,
+    getRemainingTime,
+    orderStatus,
+    fetchOrderStatus,
+    startCountdown,
+    stopCountdown,
   };
 });

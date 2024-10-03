@@ -235,8 +235,8 @@ const submitOrder = async () => {
       remarks: remarks.value || "", // 傳送備註，如果未填則設為空字串
       payMethod: null ,// 可以根據需求設定
       totalPrice: finalPrice.value, // 將折扣後的價格傳入
-      discountCode: couponCode.value || "", // 傳遞折扣碼
-      discountValue: discountValue.value// 傳遞折扣金額，預設為0
+      discountCode: couponCode.value && couponCode.value.trim() !== "" ? couponCode.value : null, // 如果沒有折扣碼則設為 null
+      discountValue: discountValue.value || 0
 
 
     };

@@ -7,6 +7,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +19,6 @@ import ecpay.payment.integration.domain.AioCheckOutALL;
 import jakarta.transaction.Transactional;
 import tw.com.ispan.DTO.ConverterOrderToDTO;
 import tw.com.ispan.DTO.ConverterOrderToECPayDTO;
-
 import tw.com.ispan.DTO.OrderDTO;
 import tw.com.ispan.DTO.OrderRequestDTO;
 import tw.com.ispan.domain.Discount;
@@ -51,7 +54,8 @@ public class OrderService {
     @Autowired
     private DiscountService discountService;
     
-    
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
+
     
 
     // 查詢所有訂單
@@ -69,6 +73,86 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         return orderConverter.toDTO(order);
     }
+    
+    // 根據ＩＤ更新訂單狀態
+    @Transactional
+    public OrderDTO updateOrderStatus(Integer orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        
+        order.setOrderStatus(status); // 使用 Enum 更新狀態
+        Order updatedOrder = orderRepository.save(order);
+        return orderConverter.toDTO(updatedOrder);
+    }
+    
+    
+    
+    
+    
+    
+    //根據訂單號碼更新訂單狀態++++++++++++
+    @Transactional
+    public Order updateOrderStatus2(String merchantTradeNo, OrderStatus status) {
+        // 根據 MerchantTradeNo 查詢訂單
+        Order order = orderRepository.findByMerchantTradeNo(merchantTradeNo)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        
+        System.out.println("Updating order: " + order.getOrderId() + " to status: " + status);
+
+
+
+        // 更新訂單狀態和交易編號
+        order.setOrderStatus(status);
+
+        
+
+        return orderRepository.save(order);
+    
+}
+    
+    
+    
+
+    // 刪除訂單
+    @Transactional
+    public void deleteOrder(Integer orderId) {
+        if (!orderRepository.existsById(orderId)) {
+            throw new ResourceNotFoundException("Order not found");
+        }
+        orderRepository.deleteById(orderId);
+    }
+
+    
+    //用會員ＩＤ找訂單
+    public List<OrderDTO> getOrdersByMemberId(Integer membersId) {
+        Members member = membersRepository.findById(membersId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+        return orderRepository.findByMembers(member).stream()
+                .map(orderConverter::toDTO)
+                .toList();
+    }
+    
+    
+    
+   // @Scheduled(fixedRate = 300000) // 每5分鐘執行一次
+    @Transactional
+    public void cancelExpiredOrders() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime thirtyMinutesAgo = now.minusMinutes(30);
+
+        // 查找所有待付款且超過30分鐘的訂單
+        List<Order> expiredOrders = orderRepository.findByOrderStatusAndOrderDateBefore(OrderStatus.PENDING, thirtyMinutesAgo);
+
+        for (Order order : expiredOrders) {
+            order.setOrderStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order); // 保存更改
+            System.out.println("訂單 " + order.getOrderId() + " 已被自動取消"); // 日誌輸出
+        }
+    }
+    
+    
+    
+    
     
 
     // 新增訂單
@@ -157,53 +241,7 @@ public class OrderService {
     }
 
 
-    // 根據ＩＤ更新訂單狀態
-    @Transactional
-    public OrderDTO updateOrderStatus(Integer orderId, OrderStatus status) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-        
-        order.setOrderStatus(status); // 使用 Enum 更新狀態
-        Order updatedOrder = orderRepository.save(order);
-        return orderConverter.toDTO(updatedOrder);
-    }
-    
-    //根據訂單號碼更新訂單狀態
-    @Transactional
-    public Order updateOrderStatus2(String merchantTradeNo, OrderStatus status) {
-        // 根據 MerchantTradeNo 查詢訂單
-        Order order = orderRepository.findByMerchantTradeNo(merchantTradeNo)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-
-        // 更新訂單狀態和交易編號
-        order.setOrderStatus(status);
-        
-
-        return orderRepository.save(order);
-    
-}
-    
-    
-    
-
-    // 刪除訂單
-    @Transactional
-    public void deleteOrder(Integer orderId) {
-        if (!orderRepository.existsById(orderId)) {
-            throw new ResourceNotFoundException("Order not found");
-        }
-        orderRepository.deleteById(orderId);
-    }
-
-    
-    //用會員ＩＤ找訂單
-    public List<OrderDTO> getOrdersByMemberId(Integer membersId) {
-        Members member = membersRepository.findById(membersId)
-                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
-        return orderRepository.findByMembers(member).stream()
-                .map(orderConverter::toDTO)
-                .toList();
-    }
+   
     
  // 更新訂單狀態，並返回新的付款請求
     @Transactional

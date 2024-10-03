@@ -22,6 +22,8 @@ import checkout from '@/views/pages/checkout.vue';
 import memberOrder from '@/members/memberOrder.vue'
 import OrderDetail from '@/components/orders/OrderDetail.vue';
 import readyToPay from '@/views/pages/readyToPay.vue'
+import PaymentCallback from '@/components/orders/payResult.vue';
+import coupon from '@/components/orders/coupon.vue';
 
 
 
@@ -73,12 +75,13 @@ const routes = [
 
 
   //hsiao
-
-
+  { path: "/coupon", name: "coupon-link", component: coupon },
   { path: "/pages/Cart", name: "Cart-link", component: Cart, meta: { navbar: 'PublicNavbar' } },
   { path: "/pages/Order", name: "Order-link", component: Order, meta: { navbar: 'PublicNavbar' } },
   { path: "/pages/checkout", name: "checkout-link", component: checkout },
   { path: "/pages/readyToPay", name: "readyToPay-link", component: readyToPay },
+  { path: "/PaymentCallback", name: "PaymentCallback-link", component: PaymentCallback },
+  { path: "/PaymentCallback", name: "PaymentCallback-link", component: PaymentCallback },
 
   // { path: "/members/memberOrder", name: "memberOrderlink", component: memberOrder },
   {

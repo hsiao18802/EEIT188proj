@@ -56,15 +56,25 @@ public class PayMentController {
 //返回的訂單狀態
     @PostMapping("/ecpay/callback")
     public String handleECPayCallback(@RequestParam Map<String, String> params) {
+        logger.info("ECPay callback received with params: " + params);
+
+        System.out.println("ECPay callback received with params: " + params);
+
         String merchantTradeNo = params.get("MerchantTradeNo");
         String paymentStatus = params.get("RtnCode");
+        
+
 
         // 根據支付狀態決定如何更新訂單狀態
         if ("1".equals(paymentStatus)) {
             // 支付成功，更新訂單狀態為 PAID
             orderService.updateOrderStatus2(merchantTradeNo, OrderStatus.PAID);
+            System.out.println("Payment successful for order: " + merchantTradeNo + ", payment status: " + paymentStatus);
+
         } else {
             // 支付失敗，更新訂單狀態為 PENDING
+            System.out.println("Payment failed for order: " + merchantTradeNo);
+
             orderService.updateOrderStatus2(merchantTradeNo, OrderStatus.PENDING);
         }
 

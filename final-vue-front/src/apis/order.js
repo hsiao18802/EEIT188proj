@@ -36,7 +36,7 @@ export const deleteOrderAPI = (orderId) => {
 };
 
 // 獲取指定會員的所有訂單
-export const getOrdersByMemberIdAPI = (memberId) => {
-  return axiosapi.get(`${BASE_URL}/member/${memberId}`);
+export const getOrdersByMemberIdAPI = (membersId) => {
+  return axiosapi.get(`${BASE_URL}/member/${membersId}`);
 };
 
