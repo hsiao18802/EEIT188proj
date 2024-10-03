@@ -2,6 +2,7 @@ package tw.com.ispan.service;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -9,16 +10,9 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -66,64 +60,66 @@ public class MemberService {
 		return null;
 	}
 
-	// Google 登錄和註冊邏輯
+	// Google 登錄和黑名單檢查邏輯
 	public JSONObject googleLogin(String idTokenString) {
-		JSONObject responseJson = new JSONObject();
+	    JSONObject responseJson = new JSONObject();
 
-		// 验证 Google Token
-		GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
-				GsonFactory.getDefaultInstance())
-				.setAudience(Collections
-						.singletonList("817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com")) // 替换为你的
-																													// Google
-																													// 客户端
-																													// ID
-				.build();
+	    // 验证 Google Token
+	    GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
+	            GsonFactory.getDefaultInstance())
+	            .setAudience(Collections
+	                    .singletonList("817520602073-7t549n8e39okn7hg67oql84u71kp0e5t.apps.googleusercontent.com")) // 替换为你的 Google 客户端 ID
+	            .build();
 
-		try {
-			GoogleIdToken idToken = verifier.verify(idTokenString);
-			if (idToken != null) {
-				GoogleIdToken.Payload payload = idToken.getPayload();
-				String email = payload.getEmail();
-				String name = (String) payload.get("name");
+	    try {
+	        GoogleIdToken idToken = verifier.verify(idTokenString);
+	        if (idToken != null) {
+	            GoogleIdToken.Payload payload = idToken.getPayload();
+	            String email = payload.getEmail();
+	            String name = (String) payload.get("name");
 
-				// 检查用户是否已经存在
-				Members member = membersRepository.findByEmail(email).orElse(null);
-				if (member == null) {
-					// 如果用户不存在，注册新用户
-					member = registerMember(email, null, name, email, null, null);
-				}
+	            // 查找用户是否已经存在
+	            Members member = membersRepository.findByEmail(email).orElse(null);
+	            if (member == null) {
+	                // 如果用户不存在，注册新用户
+	                member = registerMember(email, null, name, email, null, null);
+	            }
 
-				// 检查 member 对象是否有 realName
-				System.out.println("Realname from member: " + member.getRealName());
+	            // 黑名單檢查邏輯
+	            if (member.isBlacklisted()) {
+	                responseJson.put("success", true);
+	                responseJson.put("blacklisted", true);
+	                responseJson.put("message", "您已被列入黑名單，請等待自動登出");
+	                return responseJson;
+	            }
 
-				// 生成 JWT 并返回
-				String date = DatetimeConverter.toString(member.getRegistrationDate(), "yyyy-MM-dd");
-				JSONObject user = new JSONObject().put("membername", member.getUsername())
-						.put("realname", member.getRealName()) // 填充 realname
-						.put("email", member.getEmail()).put("date", date);
-				String token = jsonWebTokenUtility.createEncryptedToken(user.toString(), null);
+	            // 生成 JWT 并返回
+	            String date = DatetimeConverter.toString(member.getRegistrationDate(), "yyyy-MM-dd");
+	            JSONObject user = new JSONObject().put("membername", member.getUsername())
+	                    .put("realname", member.getRealName()) // 填充 realname
+	                    .put("email", member.getEmail()).put("date", date);
+	            String token = jsonWebTokenUtility.createEncryptedToken(user.toString(), null);
 
-				// 构建返回 JSON
-				responseJson.put("success", true);
-				responseJson.put("token", token);
-				responseJson.put("realname", member.getRealName()); // 返回 realname
-				responseJson.put("membersId", member.getMembersId());
-				return responseJson;
+	            // 構建返回 JSON
+	            responseJson.put("success", true);
+	            responseJson.put("token", token);
+	            responseJson.put("realname", member.getRealName()); // 返回 realname
+	            responseJson.put("membersId", member.getMembersId());
+	            responseJson.put("blacklisted", false); // 用户未被列入黑名单
+	            return responseJson;
 
-			} else {
-				responseJson.put("success", false);
-				responseJson.put("message", "無效的 Google 登錄");
-				return responseJson;
-			}
-		} catch (Exception e) {
-			responseJson.put("success", false);
-			responseJson.put("message", "Google 驗證失敗");
-			return responseJson;
-		}
+	        } else {
+	            responseJson.put("success", false);
+	            responseJson.put("message", "無效的 Google 登錄");
+	            return responseJson;
+	        }
+	    } catch (Exception e) {
+	        responseJson.put("success", false);
+	        responseJson.put("message", "Google 驗證失敗");
+	        return responseJson;
+	    }
 	}
-	
-	
+
 
 
 	
@@ -267,4 +263,37 @@ public class MemberService {
 		}
 		return false;
 	}
+	
+	
+	
+	
+	// 獲取所有會員
+    public List<Members> getAllMembers() {
+        return membersRepository.findAll();
+    }
+
+    // 將會員加入黑名單
+    public void addToBlacklist(Integer id) {
+        Members member = membersRepository.findById(id).orElseThrow(() -> new RuntimeException("會員未找到"));
+        member.setBlacklisted(true);
+        membersRepository.save(member);
+    }
+
+    // 將會員移出黑名單
+    public void removeFromBlacklist(Integer id) {
+        Members member = membersRepository.findById(id).orElseThrow(() -> new RuntimeException("會員未找到"));
+        member.setBlacklisted(false);
+        membersRepository.save(member);
+    }
+
+
+    // 根據會員ID獲取會員資料
+    public Members findById(Integer id) {
+        return membersRepository.findById(id).orElseThrow(() -> new RuntimeException("會員未找到"));
+    }
+	
+	
+	
+	
+	
 }

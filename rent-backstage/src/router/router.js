@@ -13,6 +13,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import Home from '../views/Home.vue';
 import CustomerSupport from '../views/CustomerSupport.vue';
+import MemberManagement from '../views/MemberManagement.vue';
 
 
 
@@ -50,6 +51,7 @@ const routes = [
   { path: "/customersupport", name: "customersupport-link", component: CustomerSupport, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/emp/login", name: "emplogin-link", component: Login },
   { path: "/", name: "home-link", component: Home },
+  { path: "/employee/empmember", name: "Emp-memeber", component: MemberManagement, meta: { navbar: 'EmpNavbar', style: 'default' } },
 
 
 
@@ -69,6 +71,7 @@ const routes = [
   { path: "/employee/emphome", name: EmployeeHome, component: EmployeeHome, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/employee/empproduct", name: EmpProduct, component: EmpProduct, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/employee/empadd", name: EmpAdd, component: EmpAdd, meta: { navbar: 'EmpNavbar', style: 'default' } },
+ 
 
 
 

@@ -11,7 +11,7 @@
         <RouterLink to="/employee/empproduct" class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">商品管理</RouterLink>
       </li>
       <li class="mb-1">
-        <RouterLink to="/employee/member" class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">會員一覽</RouterLink>
+        <RouterLink to="/employee/empmember" class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">會員一覽</RouterLink>
       </li>
       <li class="mb-1">
         <RouterLink to="/plceholder/forphoto/remembertodelete" class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">員工管理</RouterLink>

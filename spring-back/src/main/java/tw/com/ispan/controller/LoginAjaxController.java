@@ -33,12 +33,11 @@ public class LoginAjaxController {
 
         // 调用 service 层来处理 Google 登录逻辑
         JSONObject responseJson = memberService.googleLogin(idTokenString);
-
+        
         // 返回 JSON 响应
         System.out.println("Response JSON: " + responseJson.toString());  // 打印完整响应
         return responseJson.toString();
     }
-
 
     // 一般登錄邏輯
     @PostMapping("/login")
@@ -73,11 +72,18 @@ public class LoginAjaxController {
                 .put("email", member.getEmail())
                 .put("date", date);
            
-            
             String token = jsonWebTokenUtility.createEncryptedToken(user.toString(), null);
             responseJson.put("token", token);
             responseJson.put("realname", member.getRealName());
             responseJson.put("membersId", member.getMembersId());
+
+            // 檢查是否為黑名單會員
+            if (member.isBlacklisted()) {
+                responseJson.put("blacklisted", true);
+                responseJson.put("message", "您已被列入黑名單，請等待自動登出");
+            } else {
+                responseJson.put("blacklisted", false);
+            }
         }
 
         return responseJson.toString();

@@ -21,8 +21,7 @@ import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.ToString.Exclude; // 加入這個
+import lombok.ToString; // 加入這個
 
 @ToString
 @NoArgsConstructor
@@ -68,6 +67,14 @@ public class Members {
     @Column(name = "member_photo")
     private byte[] memberPhoto;
 
+    
+    // 黑名單標記
+    @Column(name = "black_listed", nullable = false)
+    private boolean blacklisted = false;
+    
+    
+    
+    
     // 聊天記錄
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     @JsonIgnore

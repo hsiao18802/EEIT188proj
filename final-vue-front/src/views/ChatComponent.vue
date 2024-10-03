@@ -51,9 +51,6 @@ export default {
     }
   },
   mounted() {
-
-    
-    
     // 檢查 localStorage 是否有 sessionId，如果有則使用，否則生成一個新的
     const savedSessionId = localStorage.getItem('sessionId');
     if (savedSessionId) {
@@ -61,32 +58,27 @@ export default {
     } else {
       localStorage.setItem('sessionId', this.sessionId);
     }
-    
-    
+
     // 當組件加載時，自動觸發歡迎事件
-  this.triggerWelcomeEvent();
-    
+    this.triggerWelcomeEvent();
   },
   methods: {
     triggerWelcomeEvent() {
-  console.log('Sending request to /api/welcome'); // 確認方法被調用
-  axiosapi.post('/api/welcome', {
-    sessionId: this.sessionId
-  }).then(response => {
-    console.log('Response received:', response); // 檢查是否收到響應
-    const botResponse = response.data.responseText;
-    this.messages.push({ sender: 'bot', text: botResponse });
-  }).catch(error => {
-    console.error("Error in API call:", error.response || error.message || error); // 檢查具體的錯誤資訊
-    this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
-  });
-},
+      console.log('Sending request to /api/welcome'); // 確認方法被調用
+      axiosapi.post('/api/welcome', {
+        sessionId: this.sessionId
+      }).then(response => {
+        console.log('Response received:', response); // 檢查是否收到響應
+        const botResponse = response.data.responseText;
+        this.messages.push({ sender: 'bot', text: botResponse });
+        this.scrollToBottom(); // 確保初始消息顯示後滾動到最新消息
+      }).catch(error => {
+        console.error("Error in API call:", error.response || error.message || error); // 檢查具體的錯誤資訊
+        this.messages.push({ sender: 'bot', text: '抱歉，處理您的請求時發生了錯誤。' });
+        this.scrollToBottom(); // 出錯時也滾動
+      });
+    },
 
-
-
-
-  
-  
     // 發送消息
     sendMessage() {
       if (this.userInput.trim() !== '') {
@@ -138,8 +130,10 @@ export default {
 
         // 清空輸入框
         this.userInput = '';
+        this.scrollToBottom(); // 確保清空後也滾動
       }
     },
+
     // 發送消息給人工客服
     sendMessageToAgent(message) {
       if (message.trim() !== '') {
@@ -167,19 +161,25 @@ export default {
           });
       }
     },
-    
+
     // 滾動到最新消息
     scrollToBottom() {
       this.$nextTick(() => {
-        const chatWindow = this.$refs.chatWindow;
-        if (chatWindow) {
-          chatWindow.scrollTop = chatWindow.scrollHeight;
+        const messages = this.$refs.chatWindow.querySelector('.messages');
+        if (messages) {
+          messages.scrollTop = messages.scrollHeight;
         }
       });
     },
+
     // 切換聊天窗口顯示狀態
     toggleChat() {
       this.chatVisible = !this.chatVisible;
+      this.$nextTick(() => {
+        if (this.chatVisible) {
+          this.scrollToBottom(); // 打開聊天窗口後滾動到底部
+        }
+      });
     }
   }
 }
@@ -188,7 +188,6 @@ export default {
 <style scoped>
 /* 整體容器 */
 .chat-container {
-
   position: fixed;
   bottom: 20px;
   left: 20px; /* 更改到左下角 */
@@ -237,6 +236,7 @@ export default {
   overflow-y: auto;
   padding: 10px;
   background-color: #f9f9f9;
+  max-height: 300px; /* 確保有最大高度，讓滾動條出現 */
 }
 
 .message-row {

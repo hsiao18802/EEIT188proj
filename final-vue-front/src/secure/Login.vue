@@ -79,25 +79,44 @@ async function login() {
     const response = await axiosapi.post("/ajax/secure/login", body);
 
     if (response.data.success) {
-      // 使用 Pinia 存储登录状态和 token
-      userStore.setLogin(true);
-      userStore.setRealname(response.data.realname);
-      userStore.setToken(response.data.token);
-      userStore.setMembersId(response.data.membersId);
-      axiosapi.defaults.headers.authorization = `Bearer ${response.data.token}`;
+      // 檢查是否為黑名單用戶
+      if (response.data.blacklisted) {
+        Swal.fire({
+          title: "您已被列入黑名單",
+          text: "5秒後將自動登出",
+          icon: "warning",
+          timer: 5000,
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();  // 顯示加載提示
+          },
+          willClose: () => {
+            // 黑名單用戶5秒後登出並重定向
+            userStore.setLogin(false);
+            axiosapi.defaults.headers.authorization = "";
+            router.push({ name: "home-link" });
+          }
+        });
+      } else {
+        // 正常的會員登錄邏輯
+        userStore.setLogin(true);
+        userStore.setRealname(response.data.realname);
+        userStore.setToken(response.data.token);
+        userStore.setMembersId(response.data.membersId);
+        axiosapi.defaults.headers.authorization = `Bearer ${response.data.token}`;
 
-      // 確保獲取最新的購物車內容
-      await cartStore.updateNewList();
+        // 確保獲取最新的購物車內容
+        await cartStore.updateNewList();
+        cartStore.shouldShowCartIcon = cartStore.cartList.length > 0;
 
-      // 判斷購物車內容，更新 shouldShowCartIcon 狀態
-      cartStore.shouldShowCartIcon = cartStore.cartList.length > 0;
-
-      Swal.fire({
-        text: response.data.message,
-        icon: "success",
-      }).then(() => {
-        router.push({ name: "home-link" });
-      });
+        Swal.fire({
+          text: response.data.message,
+          icon: "success",
+        }).then(() => {
+          router.push({ name: "home-link" });
+        });
+      }
     } else {
       Swal.fire({
         text: response.data.message,
@@ -127,18 +146,40 @@ onMounted(async () => {
 
     axiosapi.post('/ajax/secure/google-login', { token: idToken }).then(res => {
       if (res.data.success) {
-        userStore.setLogin(true);
-        userStore.setRealname(res.data.realname);
-        userStore.setToken(res.data.token);
-        userStore.setMembersId(res.data.membersId);
+        // 檢查是否為黑名單用戶
+        if (res.data.blacklisted) {
+          Swal.fire({
+            title: "您已被列入黑名單",
+            text: "5秒後將自動登出",
+            icon: "warning",
+            timer: 5000,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();  // 顯示加載提示
+            },
+            willClose: () => {
+              // 黑名單用戶5秒後登出並重定向
+              userStore.setLogin(false);
+              axiosapi.defaults.headers.authorization = "";
+              router.push({ name: "home-link" });
+            }
+          });
+        } else {
+          // 正常的會員登錄邏輯
+          userStore.setLogin(true);
+          userStore.setRealname(res.data.realname);
+          userStore.setToken(res.data.token);
+          userStore.setMembersId(res.data.membersId);
 
-        axiosapi.defaults.headers.authorization = `Bearer ${res.data.token}`;
-        Swal.fire({
-          text: 'Google 登錄成功',
-          icon: 'success'
-        }).then(() => {
-          router.push({ name: 'home-link' });
-        });
+          axiosapi.defaults.headers.authorization = `Bearer ${res.data.token}`;
+          Swal.fire({
+            text: 'Google 登錄成功',
+            icon: 'success'
+          }).then(() => {
+            router.push({ name: 'home-link' });
+          });
+        }
       } else {
         Swal.fire({
           text: res.data.message,
@@ -174,6 +215,7 @@ onMounted(async () => {
   });
 });
 </script>
+
 
 <style scoped>
 .login-page {
