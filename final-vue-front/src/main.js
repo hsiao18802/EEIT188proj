@@ -95,11 +95,12 @@ router.beforeEach(async (to, from, next) => {
     vuetifyLoaded = true; // **新增這一行以標記 Vuetify 已加載**
 
 
-    // 動態導入其他資源
+    // 動態導入其他資源 
     await import('bootstrap/dist/css/bootstrap.min.css'); // 引入 Bootstrap CSS
     await import('bootstrap/dist/js/bootstrap.bundle.min.js'); // 引入 Bootstrap JS
     await import('@mdi/font/css/materialdesignicons.css'); // 引入 Material Design Icons
-    await import('element-plus/dist/index.css'); // 引入 Element Plus 的 CSS
+    import('element-plus/dist/index.css'); // 10/03 請不要把這個＋await memberOreder出現一大堆黃色警告 by hsiao
+
     const ElementPlus = (await import('element-plus')).default;
     app.use(ElementPlus); // 使用 Element Plus
 

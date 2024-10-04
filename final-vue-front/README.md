@@ -7,6 +7,8 @@ npm install dayjs
 //購物車ICON
 npm install @mdi/font
 npm install element-plus
+npm install vue-countdown --save
+
 
 
 

@@ -282,6 +282,12 @@ const clearCart = () => {
   cartStore.clearCart();
   cartStore.rentalStartDate = null;
   cartStore.rentalEndDate = null;
+  cartStore.shippingMethod = ''; // 重設運送方式
+        selectedServices.value = { // 重設選擇的服務
+          delivery1: false, // 自取
+          delivery2: false, // 1-20 公里
+          delivery3: false, // 20-40 公里
+        };
 };
 
 const continueShopping = () => {

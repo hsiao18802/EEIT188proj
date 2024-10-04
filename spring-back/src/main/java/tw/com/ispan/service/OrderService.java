@@ -4,8 +4,13 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +19,15 @@ import ecpay.payment.integration.domain.AioCheckOutALL;
 import jakarta.transaction.Transactional;
 import tw.com.ispan.DTO.ConverterOrderToDTO;
 import tw.com.ispan.DTO.ConverterOrderToECPayDTO;
-
 import tw.com.ispan.DTO.OrderDTO;
 import tw.com.ispan.DTO.OrderRequestDTO;
+import tw.com.ispan.domain.Discount;
 import tw.com.ispan.domain.Members;
 import tw.com.ispan.domain.Order;
 import tw.com.ispan.domain.OrderProduct;
 import tw.com.ispan.domain.OrderStatus;
 import tw.com.ispan.domain.Product;
+import tw.com.ispan.exception.InvalidDiscountCodeException;
 import tw.com.ispan.exception.ResourceNotFoundException;
 import tw.com.ispan.repository.MembersRepository;
 import tw.com.ispan.repository.OrderRepository;
@@ -45,6 +51,11 @@ public class OrderService {
     @Autowired
     private ConverterOrderToECPayDTO converterOrderToECPayDTO;
     
+    @Autowired
+    private DiscountService discountService;
+    
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
+
     
 
     // 查詢所有訂單
@@ -63,10 +74,106 @@ public class OrderService {
         return orderConverter.toDTO(order);
     }
     
+    // 根據ＩＤ更新訂單狀態
+    @Transactional
+    public OrderDTO updateOrderStatus(Integer orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        
+        order.setOrderStatus(status); // 使用 Enum 更新狀態
+        Order updatedOrder = orderRepository.save(order);
+        return orderConverter.toDTO(updatedOrder);
+    }
+    
+    
+    
+    
+    
+    
+    //根據訂單號碼更新訂單狀態++++++++++++
+    @Transactional
+    public Order updateOrderStatus2(String merchantTradeNo, OrderStatus status) {
+        // 根據 MerchantTradeNo 查詢訂單
+        Order order = orderRepository.findByMerchantTradeNo(merchantTradeNo)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        
+        System.out.println("Updating order: " + order.getOrderId() + " to status: " + status);
+
+
+
+        // 更新訂單狀態和交易編號
+        order.setOrderStatus(status);
+
+        
+
+        return orderRepository.save(order);
+    
+}
+    
+    
+    
+
+    // 刪除訂單
+    @Transactional
+    public void deleteOrder(Integer orderId) {
+        if (!orderRepository.existsById(orderId)) {
+            throw new ResourceNotFoundException("Order not found");
+        }
+        orderRepository.deleteById(orderId);
+    }
+
+    
+    //用會員ＩＤ找訂單
+    public List<OrderDTO> getOrdersByMemberId(Integer membersId) {
+        Members member = membersRepository.findById(membersId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+        return orderRepository.findByMembers(member).stream()
+                .map(orderConverter::toDTO)
+                .toList();
+    }
+    
+    
+    
+   // @Scheduled(fixedRate = 300000) // 每5分鐘執行一次
+    @Transactional
+    public void cancelExpiredOrders() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime thirtyMinutesAgo = now.minusMinutes(30);
+
+        // 查找所有待付款且超過30分鐘的訂單
+        List<Order> expiredOrders = orderRepository.findByOrderStatusAndOrderDateBefore(OrderStatus.PENDING, thirtyMinutesAgo);
+
+        for (Order order : expiredOrders) {
+            order.setOrderStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order); // 保存更改
+            System.out.println("訂單 " + order.getOrderId() + " 已被自動取消"); // 日誌輸出
+        }
+    }
+    
+    
+    
+    
+    
 
     // 新增訂單
     @Transactional
     public OrderDTO createOrder(OrderDTO orderDTO) {
+    	
+    	// 處理折扣碼
+        if (orderDTO.getDiscountCode() != null) {
+            Discount discount = discountService.findDiscountByCode(orderDTO.getDiscountCode());
+            if (discount != null && discount.getIsActive()) {
+                // 更新使用次數
+                discount.setUsageCount(discount.getUsageCount() + 1);
+                discountService.updateDiscount(discount.getDiscountId(), discount);
+                orderDTO.setDiscountValue(discount.getDiscountValue()); // 將折扣值設置到訂單 DTO 中
+                orderDTO.setDiscountCode(discount.getCode()); // 設置折扣碼到訂單中
+            } else {
+                // 處理無效的折扣碼情況
+                throw new InvalidDiscountCodeException("Invalid or expired discount code");
+            }
+        }
+
         
       
         Order order = new Order();
@@ -81,9 +188,11 @@ public class OrderService {
         order.setPayMethod(orderDTO.getPayMethod());
         order.setRemarks(orderDTO.getRemarks());
         order.setRentalStartDate(orderDTO.getRentalStartDate());
-        order.setRentalEndDate(orderDTO.getRentalEndDate());
-     
+    //    order.setRentalEndDate(orderDTO.getRentalEndDate());
+      //  order.setDiscountValue(orderDTO.getDiscountValue());
+
         order.setOrderStatus(OrderStatus.PENDING); // 預設為待付款
+        
 
         
         // 設置會員資訊
@@ -137,49 +246,51 @@ public class OrderService {
     }
 
 
-    // 更新訂單狀態
+   
+    
+ // 更新訂單狀態，並返回新的付款請求
     @Transactional
-    public OrderDTO updateOrderStatus(Integer orderId, OrderStatus status) {
+    public OrderRequestDTO regeneratePaymentRequest(Integer orderId) {
+        // 查找訂單
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-        
-        order.setOrderStatus(status); // 使用 Enum 更新狀態
-        Order updatedOrder = orderRepository.save(order);
-        return orderConverter.toDTO(updatedOrder);
-    }
-    
-    
-    
 
-    // 刪除訂單
-    @Transactional
-    public void deleteOrder(Integer orderId) {
-        if (!orderRepository.existsById(orderId)) {
-            throw new ResourceNotFoundException("Order not found");
+        // 檢查訂單狀態，確保是取消狀態，允許重新產生付款
+        if (order.getOrderStatus() == OrderStatus.PENDING) {
+            String newMerchantTradeNo = "gogoCampingNo" + UUID.randomUUID().toString().replace("-", "").substring(0,5);
+            order.setMerchantTradeNo(newMerchantTradeNo);
+            orderRepository.save(order);
+            
+            // 使用 Converter 生成 ECPay DTO
+            return converterOrderToECPayDTO.toECPayDTO(order);
+        } else {
+            throw new IllegalStateException("Only cancelled orders can be paid again");
         }
-        orderRepository.deleteById(orderId);
     }
 
-    
-    
-    public List<OrderDTO> getOrdersByMemberId(Integer membersId) {
-        Members member = membersRepository.findById(membersId)
-                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
-        return orderRepository.findByMembers(member).stream()
-                .map(orderConverter::toDTO)
-                .toList();
-    }
     
     // ECPay結帳
     @Transactional
     public String ecpayCheckout(Integer orderId) {
-        // 從資料庫獲取訂單
     
     	 // 從資料庫獲取訂單
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         System.out.println("order="+order);
+        
+        
+     // 檢查訂單狀態
+        if (order.getOrderStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Order is not eligible for payment.");
+        }
+
+        // 檢查是否需要重新生成 MerchantTradeNo（如果付款失敗過，可以選擇生成新的）
+        if (order.getMerchantTradeNo() == null || order.getMerchantTradeNo().isEmpty()) {
+            String newMerchantTradeNo = "gogoCampingNo" + UUID.randomUUID().toString().replace("-", "").substring(0, 5);
+            order.setMerchantTradeNo(newMerchantTradeNo);
+        }
+        
         // 將訂單轉換為 ECPay DTO
         OrderRequestDTO orderRequestDTO = converterOrderToECPayDTO.toECPayDTO(order);
 

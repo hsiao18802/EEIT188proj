@@ -15,7 +15,7 @@ public class ConverterOrderToECPayDTO {
     public OrderRequestDTO toECPayDTO(Order order) {
         OrderRequestDTO dto = new OrderRequestDTO();
         
-        String gogoCampingNo =UUID.randomUUID().toString().replace("-", "").substring(0,20);
+        String gogoCampingNo = "gogoCampingNo" + UUID.randomUUID().toString().replace("-", "").substring(0,5);
         
         dto.setMerchantTradeNo(gogoCampingNo);  // 設置商店交易編號
         dto.setMerchantTradeDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"))); // 設置商店交易日期
@@ -27,8 +27,8 @@ public class ConverterOrderToECPayDTO {
             .map(op -> op.getProduct().getProductName() + " x " + op.getCount())
             .collect(Collectors.joining(", "));
         dto.setItemName(itemNames);
-        
-        dto.setReturnURL("http://localhost:5173/rent/ecpay/callback");  // 設置回傳網址
+        dto.setReturnURL("http://localhost:8080/rent/order/ecpay/callback");  // 設置回傳網址        
+       
         dto.setClientBackURL("http://localhost:5173/");  // 設置商店轉跳網址
        // dto.setPaymentMethod(order.getPayMethod());  // 設置付款方式
 

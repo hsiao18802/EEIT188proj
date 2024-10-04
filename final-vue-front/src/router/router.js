@@ -20,6 +20,13 @@ import Cart from "@/views/pages/Cart.vue";
 import Order from "@/views/pages/Order.vue";
 import checkout from '@/views/pages/checkout.vue';
 import memberOrder from '@/members/memberOrder.vue'
+import OrderDetail from '@/components/orders/OrderDetail.vue';
+import readyToPay from '@/views/pages/readyToPay.vue'
+import PaymentCallback from '@/components/orders/payResult.vue';
+import coupon from '@/components/orders/coupon.vue';
+import discount from "@/views/pages/discount.vue";
+
+
 
 
 
@@ -70,13 +77,25 @@ const routes = [
 
 
   //hsiao
-
-
+  { path: "/coupon", name: "coupon-link", component: coupon },
   { path: "/pages/Cart", name: "Cart-link", component: Cart, meta: { navbar: 'PublicNavbar' } },
   { path: "/pages/Order", name: "Order-link", component: Order, meta: { navbar: 'PublicNavbar' } },
   { path: "/pages/checkout", name: "checkout-link", component: checkout },
-  { path: "/members/memberOrder", name: "memberOrderlink", component: memberOrder },
+  { path: "/pages/readyToPay", name: "readyToPay-link", component: readyToPay },
+  { path: "/PaymentCallback", name: "PaymentCallback-link", component: PaymentCallback },
+  { path: "/pages/discount", name: "discount-link", component: discount },
 
+  // { path: "/members/memberOrder", name: "memberOrderlink", component: memberOrder },
+  {
+    path: '/members/memberOrder',
+    name: 'memberOrderlink',
+    component: memberOrder,
+  },
+  {
+    path: '/orders/OrderDetail/:orderId', // orderId 作為路由參數
+    name: 'OrderDetail',
+    component: OrderDetail,
+  },
 
 
 
