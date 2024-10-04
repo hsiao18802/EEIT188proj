@@ -7,7 +7,7 @@
       </div>
       <div class="pointer"></div>
       <button @click="spinWheel" :disabled="isSpinning">Spin the Wheel</button>
-      <p v-if="selectedCoupon">你抽到的優惠碼是: {{ selectedCoupon }}</p>
+      <p v-if="selectedCoupon">恭喜!你抽到的優惠碼是: {{ selectedCoupon }} !</p>
     </div>
   </template>
   
@@ -19,11 +19,11 @@
   
   // 獎品內容及其對應的優惠碼
   const prizes = [
-    { label: '超特價✨✨✨✨✨', coupon: 'COUPON50' },
-    { label: '超划算✨✨✨✨✨', coupon: 'COUPON40' },
-    { label: '哈啾哈✨✨✨✨✨', coupon: 'COUPON30' },
-    { label: '神秘大獎✨✨✨✨✨', coupon: '下次再來' },
-    { label: '嘻嘻嘻✨✨✨✨✨', coupon: 'COUPON50' },
+    { label: '超特價✨✨✨✨', coupon: 'COUPON50' },
+    { label: '超划算✨✨✨✨', coupon: 'COUPON40' },
+    { label: '不騙你✨✨✨✨✨', coupon: 'COUPON30' },
+    { label: '神秘大獎✨✨✨✨', coupon: '下次再來' },
+    { label: '皮卡啾✨✨✨✨✨', coupon: 'COUPON50' },
     { label: '超值得✨✨✨✨✨', coupon: 'COUPON40' },
     { label: '超好玩✨✨✨✨✨', coupon: 'COUPON30' },
     { label: '猜猜看✨✨✨✨', coupon: 'COUPON123' }

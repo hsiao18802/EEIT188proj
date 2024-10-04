@@ -158,6 +158,22 @@ public class OrderService {
     // 新增訂單
     @Transactional
     public OrderDTO createOrder(OrderDTO orderDTO) {
+    	
+    	// 處理折扣碼
+        if (orderDTO.getDiscountCode() != null) {
+            Discount discount = discountService.findDiscountByCode(orderDTO.getDiscountCode());
+            if (discount != null && discount.getIsActive()) {
+                // 更新使用次數
+                discount.setUsageCount(discount.getUsageCount() + 1);
+                discountService.updateDiscount(discount.getDiscountId(), discount);
+                orderDTO.setDiscountValue(discount.getDiscountValue()); // 將折扣值設置到訂單 DTO 中
+                orderDTO.setDiscountCode(discount.getCode()); // 設置折扣碼到訂單中
+            } else {
+                // 處理無效的折扣碼情況
+                throw new InvalidDiscountCodeException("Invalid or expired discount code");
+            }
+        }
+
         
       
         Order order = new Order();
@@ -172,22 +188,11 @@ public class OrderService {
         order.setPayMethod(orderDTO.getPayMethod());
         order.setRemarks(orderDTO.getRemarks());
         order.setRentalStartDate(orderDTO.getRentalStartDate());
-        order.setRentalEndDate(orderDTO.getRentalEndDate());
-        order.setDiscountValue(orderDTO.getDiscountValue());
+    //    order.setRentalEndDate(orderDTO.getRentalEndDate());
+      //  order.setDiscountValue(orderDTO.getDiscountValue());
 
         order.setOrderStatus(OrderStatus.PENDING); // 預設為待付款
         
-     // 處理折扣碼
-        if (orderDTO.getDiscountCode() != null) {
-            Discount discount = discountService.findDiscountByCode(orderDTO.getDiscountCode());
-            if (discount != null && discount.getIsActive()) {
-                order.setDiscountCode(orderDTO.getDiscountCode());
-                // 可以根據需要計算折扣金額並更新訂單總價
-            } else {
-                // 處理無效的折扣碼情況
-                throw new InvalidDiscountCodeException("Invalid or expired discount code");
-            }
-        }
 
         
         // 設置會員資訊

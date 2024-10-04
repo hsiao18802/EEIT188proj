@@ -24,6 +24,8 @@ import OrderDetail from '@/components/orders/OrderDetail.vue';
 import readyToPay from '@/views/pages/readyToPay.vue'
 import PaymentCallback from '@/components/orders/payResult.vue';
 import coupon from '@/components/orders/coupon.vue';
+import discount from "@/views/pages/discount.vue";
+
 
 
 
@@ -81,7 +83,7 @@ const routes = [
   { path: "/pages/checkout", name: "checkout-link", component: checkout },
   { path: "/pages/readyToPay", name: "readyToPay-link", component: readyToPay },
   { path: "/PaymentCallback", name: "PaymentCallback-link", component: PaymentCallback },
-  { path: "/PaymentCallback", name: "PaymentCallback-link", component: PaymentCallback },
+  { path: "/pages/discount", name: "discount-link", component: discount },
 
   // { path: "/members/memberOrder", name: "memberOrderlink", component: memberOrder },
   {
