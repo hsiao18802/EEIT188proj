@@ -87,7 +87,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useOrderStore } from '@/stores/orderStore';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
-import { ecpayAPI } from '@/apis/order';
+import { validateCouponAPI } from '@/apis/disc';
 
 const hasAppliedCoupon = ref(false); // 新增變數以追蹤是否已輸入折扣碼
 const discountMessage = ref('');
@@ -158,35 +158,29 @@ const showCouponPrompt = async () => {
 };
 
 
-// 驗證優惠碼
+
 const validateCoupon = async (code) => {
   try {
-    const response = await fetch(`http://localhost:8080/rent/discount/validate?code=${code}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
+    const response = await validateCouponAPI(code);
+     
     // 檢查回應的狀態
     console.log(response.status); // 紀錄狀態碼
 
-    if (!response.ok) {
-      // 如果不是 200 OK，獲取文本回應
-      const text = await response.text();
-      console.error('錯誤回應:', text); // 紀錄錯誤回應
+    // 這裡不需要使用 response.text()
+    if (response.status !== 200) {
+      console.error('錯誤回應:', response.data); // 紀錄錯誤回應
       discountMessage.value = '沒有這個折扣碼。';
       return false; // 回傳 false 表示驗證失敗
     }
 
-    // 確保在這裡成功解析 JSON
-    const message = await response.json(); // 假設成功時返回 JSON 格式
+    // 直接從 response.data 獲取資料
+    const message = response.data; // 獲取數據
     discountValue.value = parseFloat(message.message.match(/(\d+(\.\d+)?)/)[0]); // 擷取折扣金額
     discountMessage.value = message.message; // 更新消息內容
     return true; // 回傳 true 表示驗證成功
   } catch (error) {
     discountMessage.value = '驗證過程中發生錯誤。';
-    console.error(error);
+    console.error('驗證錯誤:', error); // 紀錄詳細錯誤信息
     return false; // 回傳 false 表示驗證失敗
   }
 };

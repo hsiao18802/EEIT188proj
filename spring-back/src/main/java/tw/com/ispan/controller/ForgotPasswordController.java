@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tw.com.ispan.service.MemberService;
 
-@CrossOrigin
+@CrossOrigin(origins = "https://03fd-1-160-24-98.ngrok-free.app")
+
 @RestController
 @RequestMapping("/ajax/secure")
 public class ForgotPasswordController {
