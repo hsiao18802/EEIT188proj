@@ -57,6 +57,10 @@ public class ProductDAOImpl implements ProductDAO {
             System.out.println("Added Name Predicate: productName LIKE '%" + productName + "%'");
         }
 
+        // 加入 status_id = 2 的條件
+        predicates.add(cb.equal(product.get("statusId"), 2));
+        System.out.println("Added Status Predicate: statusId = 2");
+
         // 如果有條件，將其加入到查詢中
         if (!predicates.isEmpty()) {
             cq.where(predicates.toArray(new Predicate[0]));
@@ -109,6 +113,9 @@ public class ProductDAOImpl implements ProductDAO {
             predicates.add(cb.like(product.get("productName"), "%" + productName + "%"));
         }
 
+        // 加入 status_id = 2 的條件
+        predicates.add(cb.equal(product.get("statusId"), 2));
+
         if (!predicates.isEmpty()) {
             cq.where(predicates.toArray(new Predicate[0]));
         }
@@ -118,5 +125,6 @@ public class ProductDAOImpl implements ProductDAO {
 
         return entityManager.createQuery(cq).getSingleResult();
     }
+
 
 }

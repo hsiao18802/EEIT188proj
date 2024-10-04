@@ -19,4 +19,7 @@ public interface OrderProductRepository extends JpaRepository<OrderProduct, Inte
 		                                           @Param("dateA") LocalDate dateA, 
 		                                           @Param("dateB") LocalDate dateB);
     
+    // 根據 product_id 查詢是否存在
+    boolean existsByProduct_ProductId(Integer productId);
+	
 }

@@ -20,7 +20,8 @@
                                 <td>商品名稱</td>
                                 <td>
                                     <span v-show="isShowChangepic">{{ product.productName }}</span>
-                                    <input v-show="!isShowChangepic" type="text" name="name" v-model="product.productName" @input="onNameInserted">
+                                    <input v-show="!isShowChangepic" type="text" name="name"
+                                        v-model="product.productName" @input="onNameInserted">
                                 </td>
                             </tr>
                             <tr v-show="!isShowChangepic">
@@ -36,7 +37,8 @@
                             <tr v-show="isShowUpdate">
                                 <td>現有圖片</td>
                                 <td v-if="product.mainPhoto">
-                                    <img :src="`data:image/jpeg;base64,${product.mainPhoto}`" :alt="product.productName" style="max-width: 100px; max-height: 100px;">
+                                    <img :src="`data:image/jpeg;base64,${product.mainPhoto}`" :alt="product.productName"
+                                        style="max-width: 100px; max-height: 100px;">
                                 </td>
                                 <td v-else style="color: red;">
                                     沒有圖片，請上傳檔案
@@ -73,11 +75,12 @@
                             </tr>
                             <tr>
                                 <td>上架設定</td>
-                                <td v-if="isShowInsert">
+                                <!-- <td v-if="isShowInsert">
                                     <input type="hidden" name="statusId" v-model="product.statusId">
                                     <span>預設為上架，如果不加功能記得要隱藏</span>
                                 </td>
-                                <td v-else>
+                                <td v-else> -->
+                                <td>
                                     <select name="statusId" v-model="product.statusId" @input="onFieldInteraction">
                                         <option v-for="status in statuslist" :key="status.statusId"
                                             :value="status.statusId">
@@ -88,7 +91,8 @@
                             </tr>
                             <tr v-show="isShowUpdate">
                                 <td>新增員工ID</td>
-                                <td><input type="number" name="addEmployeeId" v-model="product.addEmployeeId" readonly></td>
+                                <td><input type="number" name="addEmployeeId" v-model="product.addEmployeeId" readonly>
+                                </td>
                             </tr>
                             <tr v-show="isShowUpdate">
                                 <td>新增日期</td>
@@ -96,8 +100,8 @@
                             </tr>
                             <tr v-show="isShowUpdate">
                                 <td>最後更新員工ID</td>
-                                <td><input type="number" name="lastUpdateEmployeeId" v-model="product.lastUpdateEmployeeId"
-                                        readonly></td>
+                                <td><input type="number" name="lastUpdateEmployeeId"
+                                        v-model="product.lastUpdateEmployeeId" readonly></td>
                             </tr>
                             <tr v-show="isShowUpdate">
                                 <td>最後更新日期</td>
@@ -107,8 +111,10 @@
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" v-show="isShowInsert" @click="handleIAClick" :disabled="isDisabled">新增</button>
-                    <button class="btn btn-primary" v-show="isShowUpdate" @click="handleIAClick" :disabled="isDisabled">修改</button>
+                    <button class="btn btn-primary" v-show="isShowInsert" @click="handleIAClick"
+                        :disabled="isDisabled">新增</button>
+                    <button class="btn btn-primary" v-show="isShowUpdate" @click="handleIAClick"
+                        :disabled="isDisabled">修改</button>
                     <button class="btn btn-primary" v-show="isShowChangepic" @click="emits('changepic')">上傳圖檔</button>
                     <button type="button" class="btn btn-secondary" @click="handleCloseClick">關閉</button>
                 </div>
@@ -155,6 +161,7 @@ function hideModal() {
     fieldsInteracted.value = false;
     exampleObj.value.hide();
     clearImage();  // 清除圖片
+    clearDailyFeeOriginal();
     isDisabled.value = false;
 }
 defineExpose({
@@ -167,7 +174,7 @@ function onFieldInteraction() {
     fieldsInteracted.value = true;
 }
 
-function onNameInserted(){
+function onNameInserted() {
     onFieldInteraction();
     isDisabled.value = false;
 }
@@ -183,12 +190,23 @@ function onImageSelected(event) {
     }
 }
 
-function handleIAClick(){
+function handleIAClick() {
+    // 檢查 productId
+    if (props.product && props.product.productId) {
+        console.log('Product ID during onMounted:', props.product.productId);
+        console.log('Product ID during onMounted:', props.product.productId);
+        console.log('Product ID during onMounted:', props.product.productId);
+        fetchDailyFeeOriginal(props.product.productId);
+    } else {
+        console.warn('Product ID is missing during onMounted.');
+        console.warn('Product ID is missing during onMounted.');
+        console.warn('Product ID is missing during onMounted.');
+    }
     const nameIsEmpty = !props.product.productName;
     const isEmpty = !props.product.dailyFeeOriginal || !props.product.maxAvailableQuantity ||
         !props.product.description || !props.product.categoryId || !(selectedImage.value || props.product.mainPhoto);
     console.log("props.product.mainPhoto = " + props.product.mainPhoto + ", isEmpty  = " + isEmpty);
-    if (nameIsEmpty){
+    if (nameIsEmpty) {
         Swal.fire({
             title: '請輸入產品名稱',
             icon: 'error',
@@ -196,8 +214,8 @@ function handleIAClick(){
             showCancelButton: true,
             cancelButtonText: '確定'
         });
-    } else if (isEmpty){
-            Swal.fire({
+    } else if (isEmpty) {
+        Swal.fire({
             title: '產品資料尚未完成',
             text: '新增產品至「未上架」？',
             icon: 'question',
@@ -207,18 +225,42 @@ function handleIAClick(){
         }).then((result) => {
             if (result.isConfirmed) {
                 props.product.statusId = 1;
-                if (props.isShowInsert){
+                if (props.isShowInsert) {
                     emits('insert');
                 } else {
                     emits('update');
-        }
+                }
             }
         });
     } else {
-        if (props.isShowInsert){
+        if (props.isShowInsert) {
             emits('insert');
         } else {
+            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
+            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
+            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
+            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
+            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
+            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
+            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1.value);
+            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1);
+            console.log('dailyFeeOriginal1 = ' + props.dailyFeeOriginal1);
+            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1);
+            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1);
+            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1);
+
+            // if (dailyFeeOriginal1 && (dailyFeeOriginal1 !== props.product.dailyFeeOriginal)) {
+            //     // 如果 dailyFeeOriginal1 存在且不等於 props.product.dailyFeeOriginal，攔下來
+            //     Swal.fire({
+            //         title: '警告',
+            //         text: 'dailyFeeOriginal 不一致，無法更新',
+            //         icon: 'warning',
+            //         confirmButtonText: '確定'
+            //     });
+            // } else {
+            //     // 如果條件不成立，繼續執行 emits
             emits('update');
+            // }
         }
     }
 }
@@ -229,7 +271,7 @@ function handleCloseClick() {
     const isEmpty = !props.product.productName && !props.product.dailyFeeOriginal &&
         !props.product.maxAvailableQuantity && !props.product.description &&
         !props.product.categoryId && !selectedImage.value;
-    
+
     // console.log("props.isShowInsert = " + props.isShowInsert + ", isEmpty = " + isEmpty)
     // console.log("!props.isShowInsert = " + !props.isShowInsert + ", selectedImage.value = " + selectedImage.value + ", fieldsInteracted.value = " + fieldsInteracted.value)
 
@@ -307,6 +349,46 @@ async function fetchStatuses() {
     }
 }
 
+const dailyFeeOriginal1 = ref(null);
+
+// 函數1: 取得 dailyFeeOriginal
+function fetchDailyFeeOriginal(productId) {
+    // 確保 productId 存在
+    if (!productId) {
+        console.error('Product ID is missing inside fetchDailyFeeOriginal.');
+        return;
+    }
+
+    console.log('Fetching order-product exist for productId:', productId);
+
+    axiosapi.get(`/rent/product/order-product/exist/${productId}`)
+
+        .then(response => {
+            const exists = response.data;
+            console.log(`Order Product exists: ${exists}`);
+
+            if (exists) {
+                console.log(`Fetching daily fee original for productId: ${productId}`);
+                return axiosapi.get(`/rent/product/${productId}/daily-fee-original`);
+            }
+        })
+        .then(response => {
+            if (response) {
+                dailyFeeOriginal1.value = response.data;
+                console.log(`Daily Fee Original for productId ${productId}: ${dailyFeeOriginal1.value}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching daily fee original:', error);
+        });
+}
+
+
+// 函數2: 清除 dailyFeeOriginal
+function clearDailyFeeOriginal() {
+    dailyFeeOriginal1.value = null;
+    console.log('Daily Fee Original cleared.');
+}
 </script>
 
 <style></style>

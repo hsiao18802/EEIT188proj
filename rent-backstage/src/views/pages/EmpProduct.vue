@@ -1,9 +1,9 @@
 <template>
     <h1 style="font-family: '微軟正黑體', sans-serif; font-size: xx-large; font-weight: bold;">商品管理</h1>
     <div class="row">
-        <div class="col-2">
+        <div class="col-2 btn-group">
             <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
-            <button type="button" class="btn btn-primary" @click="openCategory">分類管理</button>
+            <button type="button" class="btn btn-outline-primary" @click="openCategory">分類管理</button>
         </div>
         <div class="col-4">
             <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind">
@@ -37,11 +37,10 @@
                 <td>{{ product.categoryId }}</td>
                 <td>{{ product.dailyFeeOriginal }}</td>
                 <td>{{ product.maxAvailableQuantity }}</td>
-                <td>{{ product.description }}</td>
-                <td v-if="product.lastUpdateEmployeeId">{{ product.lastUpdateEmployeeId }}</td>
-                <td v-else>{{ product.addEmployeeId }}</td>
-                <td v-if="product.lastUpdateDatetime">{{ formatDate(product.lastUpdateDatetime) }}</td>
-                <td v-else>{{ formatDate(product.addDatetime) }}</td>
+                <td>{{ truncateText(product.description, 20) }}</td>
+                <td v-if="product.employeeAccount !== 'N/A'">{{ product.employeeAccount }}</td>
+                <td v-else></td>
+                <td>{{ formatDate(product.lastUpdateDatetime) }}</td>
                 <td>
                     <div class="btn-group col text-end">
                         <a class="btn btn-primary" @click="openModal('update', product.productId)">修改</a>
@@ -53,16 +52,19 @@
         </tbody>
     </table>
 
-    <div class="row">
+    <!-- <div class="row">
         <ProductCard v-for="product in products" :key="product.id" :item="product" @delete="callRemove"
             @open-update="openModal"></ProductCard>
-    </div>
+    </div> -->
 
-    <ProductModal ref="productModal" v-model:product="product"
-        :is-show-insert="isShowInsert" :is-show-changepic="isShowChangepic" :is-show-update="isShowUpdate"
-        @insert="callCreate" @update="callModify" @changepic="callChangePic" @imageSelected="handleImageSelected" @clearImage="clearImage">
+    <ProductModal ref="productModal" v-model:product="product" :is-show-insert="isShowInsert"
+        :is-show-changepic="isShowChangepic" :is-show-update="isShowUpdate" @insert="callCreate" @update="callModify"
+        @changepic="callChangePic" @imageSelected="handleImageSelected" @clearImage="clearImage">
     </ProductModal>
-    <CategoryModal ref="categoryModal" :categories="categories" @catDelete="callCatRemove" @catUpdate="callCatModify"></CategoryModal>
+    <!-- <CategoryModal ref="categoryModal" :categories="categories" @catDelete="callCatRemove" @catUpdate="callCatModify"></CategoryModal> -->
+    <CategoryModal ref="categoryModal" :categories="categories" @cat-delete="callCatRemove" @catUpdate="callCatModify"
+        @update:categories="categories = $event" @add-category="addCategory"></CategoryModal>
+
 
 </template>
 
@@ -102,11 +104,11 @@ function openModal(action, id) {
         product.value.statusId = 1;
     } else {
         isShowInsert.value = false;
-        if (action === 'changepic'){
+        if (action === 'changepic') {
             console.log("changepic = true");
             isShowUpdate.value = false;
             isShowChangepic.value = true;
-        } else{
+        } else {
             console.log("changepic = false");
             isShowUpdate.value = true;
             isShowChangepic.value = false;
@@ -126,18 +128,39 @@ async function openCategory() {
     }
 }
 
+// 父組件中的新增分類方法
+function addCategory() {
+    const categoryName = prompt("請輸入分類名稱:");
+
+    if (categoryName) {
+        // 發送新增請求到後端
+        axiosapi.post('/rent/category/add', { categoryName })
+            .then(response => {
+                alert('分類已成功新增');
+                callFindCategory(); // 重新獲取分類數據
+            })
+            .catch(error => {
+                alert('新增失敗，請重試');
+            });
+    } else if (categoryName === "") {
+        alert('分類名稱不能為空！');
+    } else {
+        alert('您已取消新增分類');
+    }
+}
+
 async function callFindCategory() {
     const response = await axiosapi.get('/rent/category/find');
     if (response.data) {
         categories.value = response.data; // 確保資料被賦值到 category
         console.log("成功獲取資料:", categories.value);
     }
-console.log("(2)categories : " + JSON.stringify(categories.value));
+    console.log("(2)categories : " + JSON.stringify(categories.value));
 }
 
 function reloadCategories() {
     console.log("重刷 啟動");
-    axiosapi.get('/rent/category/find')  
+    axiosapi.get('/rent/category/find')
         .then(response => {
             console.log("API 回應：", response.data);  // 打印回應資料
 
@@ -327,17 +350,33 @@ function callFind(page) {
     findName.value = findName.value || null;
 
     let body = { start: start.value, max: max.value, dir: false, order: "id", name: findName.value };
-    axiosapi.get("/rent/product/find", body)
-        .then(function (response) {
-            if (response.data) {
+
+    Swal.fire({
+        text: "Loading...",
+        showConfirmButton: false,
+        allowOutsideClick: false,
+    });
+
+    axiosapi.get("/rent/product/find", { params: body })
+        .then(async function (response) {
+            if (response.data && Array.isArray(response.data)) {
+                // 直接將 response.data 賦值給 products
                 products.value = response.data;
-                total.value = response.data.count;
+                total.value = response.data.length;
+
+                // 查詢所有產品的 employeeAccount
+                await fetchEmployeeAccounts();
+            } else {
+                console.error("產品數據格式不正確", response.data);
             }
             setTimeout(function () {
                 Swal.close();
             }, 500);
         })
-        .catch(handleError);
+        .catch(function (error) {
+            Swal.close();
+            console.error('查詢失敗', error);
+        });
 }
 
 async function callCreate() {
@@ -347,7 +386,14 @@ async function callCreate() {
         allowOutsideClick: false,
     });
 
-    let body = product.value;
+    // 從 localStorage 取得 employee_id，並設為 addEmployeeId
+    const employeeId = localStorage.getItem('employee_id');
+
+    let body = {
+        ...product.value,
+        addEmployeeId: employeeId || null,  // 將 employee_id 設為 addEmployeeId
+        lastUpdateEmployeeId: employeeId || null,  // 將 employee_id 設為 addEmployeeId
+    };
 
     try {
         if (selectedImage.value) {
@@ -379,13 +425,18 @@ async function sendCreateRequest(body) {
     }
 }
 
+
 function callModify() {
     Swal.fire({
         text: "Loading......",
         showConfirmButton: false,
         allowOutsideClick: false,
     });
-console.log(product.value.statusId);
+    console.log(product.value.statusId);
+
+    // 從 localStorage 取得 employee_id，並設為 lastUpdateEmployeeId
+    const employeeId = localStorage.getItem('employee_id');
+
     let body = {
         productId: product.value.productId,
         productName: product.value.productName || null,
@@ -394,12 +445,12 @@ console.log(product.value.statusId);
         description: product.value.description || null,
         categoryId: product.value.categoryId || null,
         statusId: product.value.statusId || null,
+        lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
     };
 
-
     axiosapi.put(`/rent/product/${body.productId}`, body).then(function (response) {
-console.log(product.value.statusId);
-        
+        console.log(product.value.statusId);
+
         if (selectedImage.value) {
             const reader = new FileReader();
             reader.onloadend = function () {
@@ -425,11 +476,12 @@ console.log(product.value.statusId);
     }).catch(handleError);
 }
 
+
 function callCatModify(updatedCategory) {
     console.log("修改 啟動");
     console.log("接收到的更新內容: ", updatedCategory);
     console.log("category.value.categoryId: ", updatedCategory.categoryId);
-console.log("category.value.categoryName: ", updatedCategory.categoryName);
+    console.log("category.value.categoryName: ", updatedCategory.categoryName);
     Swal.fire({
         text: "Loading......",
         showConfirmButton: false,
@@ -441,7 +493,7 @@ console.log("category.value.categoryName: ", updatedCategory.categoryName);
     };
 
     axiosapi.put(`/rent/category/${body.categoryId}`, body).then(function (response) {
-console.log(product.value.statusId);
+        console.log(product.value.statusId);
 
         if (response.data.success) {
             handleSuccess(response.data.message, productModal.value);
@@ -542,6 +594,35 @@ function showFullImage(imageData) {
 onMounted(function () {
     callFind();
 });
+
+function truncateText(text, length) {
+    if (!text) return '';
+    return text.length > length ? text.substring(0, length) + '...' : text;
+}
+
+// 查詢員工帳號
+// 查詢員工帳號
+const fetchEmployeeAccounts = async () => {
+    // 確保 products.value 是一個數組
+    if (Array.isArray(products.value)) {
+        const promises = products.value.map(async (product) => {
+            if (product.lastUpdateEmployeeId) {
+                try {
+                    const response = await axiosapi.get(`/api/employee/account/${product.lastUpdateEmployeeId}`);
+                    // 將查詢到的 employeeAccount 存入產品數據
+                    product.employeeAccount = response.data;
+                } catch (error) {
+                    console.error('無法查詢 employeeAccount', error);
+                }
+            } else {
+                product.employeeAccount = 'N/A'; // 如果 lastUpdateEmployeeId 為空，設為 'N/A'
+            }
+        });
+
+        // 等待所有查詢完成
+        await Promise.all(promises);
+    }
+};
 </script>
 
 <style></style>

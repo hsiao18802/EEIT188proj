@@ -1,10 +1,12 @@
 <template>
-    <!-- <span v-if="total>0">查到{{ total }}筆資料，</span>
-    <span v-else>查無資料，</span> -->
-    每頁顯示
-    <select :value="modelValue" @change="dochange">
-        <option v-for="option in options" :key="option" :value="option">{{option}}</option>
-    </select>筆
+    <span>共{{ total }}筆資料，</span>
+    <span class="d-inline-flex align-items-center">
+        每頁顯示
+        <select :value="modelValue" @change="dochange" class="form-select mx-2 shadow1" style="width: auto;">
+            <option v-for="option in options" :key="option" :value="option">{{ option }}</option>
+        </select>
+        筆
+    </span>
 </template>
     
 <script setup>
@@ -17,5 +19,8 @@
 </script>
     
 <style>
-    
+      /* 調整陰影 */
+  .shadow1 {
+    box-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.5); /* 給輸入框和按鈕加上陰影 */
+  }
 </style>

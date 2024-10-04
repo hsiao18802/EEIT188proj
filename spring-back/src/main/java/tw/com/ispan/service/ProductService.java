@@ -65,7 +65,7 @@ public class ProductService {
             Product existingProduct = optionalProduct.get();
 
             // 更新產品資訊
-            existingProduct.setStatusId(2);
+            existingProduct.setStatusId(3);
             
          // 設定最後更新時間為當前時間
             existingProduct.setLastUpdateDatetime(new Date());
@@ -104,6 +104,7 @@ public class ProductService {
         try {
             // 儲存產品
         	product.setAddDatetime(new Date());
+        	product.setLastUpdateDatetime(new Date());
             Product savedProduct = productRepository.save(product);
             System.out.println("產品新增成功: " + savedProduct.getProductId());
             return savedProduct;
@@ -128,6 +129,7 @@ public class ProductService {
             existingProduct.setDescription(updatedProduct.getDescription());
             existingProduct.setCategoryId(updatedProduct.getCategoryId());
             existingProduct.setStatusId(updatedProduct.getStatusId());
+            existingProduct.setLastUpdateEmployeeId(updatedProduct.getLastUpdateEmployeeId());
             
          // 設定最後更新時間為當前時間
             existingProduct.setLastUpdateDatetime(new Date());
@@ -187,5 +189,18 @@ public class ProductService {
 
     public Long countByCategoryId(Integer categoryId) {
         return productRepository.countByCategoryId(categoryId);
+    }
+    
+    public Long countAvailableByCategoryId(Integer categoryId) {
+        return productRepository.countAvailableByCategoryId(categoryId);
+    }
+    
+    // 根據 product_id 查詢是否存在
+    public boolean existsByProductId(Integer productId) {
+        return orderProductRepository.existsByProduct_ProductId(productId);
+    }
+    
+    public Integer getDailyFeeOriginalByProductId(Integer productId) {
+        return productRepository.findDailyFeeOriginalByProductId(productId);
     }
 }

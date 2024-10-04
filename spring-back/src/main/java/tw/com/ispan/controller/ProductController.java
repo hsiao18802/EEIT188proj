@@ -279,5 +279,30 @@ public class ProductController {
         Long count = productService.countByCategoryId(categoryId);
         return ResponseEntity.ok(count);
     }
+    
+    @GetMapping("/countAvailableByCategory/{categoryId}")
+    public ResponseEntity<Long> countAvailableProductsByCategoryId(@PathVariable Integer categoryId) {
+        Long count = productService.countAvailableByCategoryId(categoryId);
+        return ResponseEntity.ok(count);
+    }
+    
+    // 根據 product_id 返回是否存在
+    @GetMapping("/order-product/exist/{productId}")
+    public ResponseEntity<Boolean> checkIfProductExists(@PathVariable Integer productId) {
+    	System.out.println("fdsafsaf");
+        boolean exists = productService.existsByProductId(productId);
+        return ResponseEntity.ok(exists);
+    }
+    
+    @GetMapping("/{productId}/daily-fee-original")
+    public ResponseEntity<Integer> getDailyFeeOriginal(@PathVariable Integer productId) {
+    	System.out.println("aaaaaaaaaaas");
+        Integer dailyFeeOriginal = productService.getDailyFeeOriginalByProductId(productId);
+        if (dailyFeeOriginal != null) {
+            return ResponseEntity.ok(dailyFeeOriginal);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 
 }

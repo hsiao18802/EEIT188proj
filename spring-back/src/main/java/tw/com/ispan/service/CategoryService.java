@@ -71,4 +71,37 @@ public class CategoryService {
             throw new RuntimeException("該分類不存在，無法更新");
         }
     }
+    
+    // 取得所有分類並按 displaySequence 排序
+    public List<ProductCategory> getAllCategoriesSorted() {
+        return categoryRepository.findAllByOrderByDisplaySequenceAsc();
+    }
+
+    // 更新分類排序
+    public void updateCategoryOrder(List<ProductCategory> updatedCategories) {
+        for (ProductCategory category : updatedCategories) {
+            // 根據傳入的分類ID和新的 display_sequence 更新資料
+            ProductCategory existingCategory = categoryRepository.findById(category.getCategoryId()).orElse(null);
+            if (existingCategory != null) {
+                existingCategory.setDisplaySequence(category.getDisplaySequence());
+                categoryRepository.save(existingCategory);
+            }
+        }
+    }
+    
+    // 新增分類並調整 display_sequence
+    public ProductCategory addCategory(String categoryName) {
+        // Step 1: 將所有現有分類的 display_sequence 向後推
+        List<ProductCategory> allCategories = categoryRepository.findAllByOrderByDisplaySequenceAsc();
+        for (ProductCategory category : allCategories) {
+            category.setDisplaySequence(category.getDisplaySequence() + 1);
+            categoryRepository.save(category);
+        }
+
+        // Step 2: 新增一個 display_sequence = 1 的分類
+        ProductCategory newCategory = new ProductCategory();
+        newCategory.setCategoryName(categoryName);
+        newCategory.setDisplaySequence(1); // 新增分類排在最上面
+        return categoryRepository.save(newCategory);
+    }
 }
