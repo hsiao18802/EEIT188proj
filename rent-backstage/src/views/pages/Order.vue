@@ -68,18 +68,21 @@
           <el-button @click="viewOrderDetails(scope.row.orderId)">查看</el-button>
           <el-button type="danger" @click="deleteOrder(scope.row.orderId)">刪除訂單</el-button>
           <el-dropdown @command="handleUpdateOrderStatus(scope.row.orderId, $event)">
-            <el-button>更改狀態</el-button>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="PENDING">待付款</el-dropdown-item>
-              <el-dropdown-item command="PAID">已付款/等待取貨</el-dropdown-item>
-              <el-dropdown-item command="SHIPPED">運送中</el-dropdown-item>
-              <el-dropdown-item command="DELIVERED">已領貨</el-dropdown-item>
-              <el-dropdown-item command="DONE">交易完成</el-dropdown-item>
-              <el-dropdown-item command="CANCELLED">不成立</el-dropdown-item>
-              <el-dropdown-item command="RETURNED">退貨/退款</el-dropdown-item>
-              <el-dropdown-item command="DAMAGED">商品損壞</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
+  <el-button>更改狀態</el-button>
+  <template #dropdown>
+    <el-dropdown-menu>
+      <el-dropdown-item command="PENDING">待付款</el-dropdown-item>
+      <el-dropdown-item command="PAID">已付款/等待取貨</el-dropdown-item>
+      <el-dropdown-item command="SHIPPED">運送中</el-dropdown-item>
+      <el-dropdown-item command="DELIVERED">已領貨</el-dropdown-item>
+      <el-dropdown-item command="DONE">交易完成</el-dropdown-item>
+      <el-dropdown-item command="CANCELLED">不成立</el-dropdown-item>
+      <el-dropdown-item command="RETURNED">退貨/退款</el-dropdown-item>
+      <el-dropdown-item command="DAMAGED">商品損壞</el-dropdown-item>
+    </el-dropdown-menu>
+  </template>
+</el-dropdown>
+
         </template>
       </el-table-column>
     </el-table>
@@ -114,13 +117,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import Swal from 'sweetalert2';
-import { updateOrderStatusAPI, getAllOrdersAPI, getOrderByIdAPI, deleteOrderAPI } from '@/apis/order';
+import { updateOrderStatusAPI, getAllOrdersAPI, getOrderByIdAPI, deleteOrderAPI,getOrdersByMemberIdAPI } from '@/apis/order';
 
 const activeTab = ref('ALL'); // 當前選中的 Tab
 const searchQuery = ref(''); // 搜尋欄的訂單號碼
 const loading = ref(false); // 是否正在加載數據
 const orderDialog = ref(false); // 控制彈窗顯示
-const currentOrder = ref(null); // 當前顯示的訂單
+const currentOrder = ref({});
 const orders = ref([]); // 儲存訂單列表
 const currentPage = ref(1); // 當前頁碼
 const pageSize = ref(5); // 每頁顯示的訂單數量
