@@ -74,4 +74,30 @@ public class CategoryController {
             return ResponseEntity.status(500).body(response);
         }
     }
+    
+    // 取得所有分類並根據 display_sequence 排序
+    @GetMapping("/sorted")
+    public ResponseEntity<List<ProductCategory>> getAllCategoriesSorted() {
+        List<ProductCategory> categories = categoryService.getAllCategoriesSorted();
+        return ResponseEntity.ok(categories);
+    }
+
+    // 接收排序更新請求
+    @PostMapping("/rearrange")
+    public ResponseEntity<String> updateCategoryOrder(@RequestBody List<ProductCategory> updatedCategories) {
+        categoryService.updateCategoryOrder(updatedCategories);
+        return ResponseEntity.ok("分類排序已更新");
+    }
+    
+    // 新增分類 API
+    @PostMapping("/add")
+    public ResponseEntity<ProductCategory> addCategory(@RequestBody Map<String, String> request) {
+        String categoryName = request.get("categoryName");
+        if (categoryName == null || categoryName.isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        ProductCategory newCategory = categoryService.addCategory(categoryName);
+        return ResponseEntity.ok(newCategory);
+    }
 }

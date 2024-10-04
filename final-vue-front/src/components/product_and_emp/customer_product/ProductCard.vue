@@ -3,7 +3,7 @@
 
     <div class="col-lg-3 col-md-6">
         <!-- 將 @click 綁定到整個卡片上 -->
-        <div class="card position-relative" @click="openRent">
+        <div class="card position-relative shadow1 mb-4" @click="openRent">
             <!-- 圖片 -->
             <div class="image-container">
                 <img class="card-img-top" :alt="item.productName" v-default-img="item.mainPhoto">
@@ -215,4 +215,9 @@ const addCart = async () => {
 .card {
     cursor: pointer;
 }
+
+      /* 調整陰影 */
+  .shadow1 {
+    box-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.5); /* 給輸入框和按鈕加上陰影 */
+  }
 </style>

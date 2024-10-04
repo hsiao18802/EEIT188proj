@@ -23,4 +23,11 @@ public class EmployeeService {
         }
         return null; // 登錄失敗
     }
+    
+    // 使用 employeeId 查找 employeeAccount
+    public String findEmployeeAccountById(int employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new IllegalArgumentException("Employee not found with id: " + employeeId));
+        return employee.getEmployeeAccount(); // 返回員工的帳號
+    }
 }

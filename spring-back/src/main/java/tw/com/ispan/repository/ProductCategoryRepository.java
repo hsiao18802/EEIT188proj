@@ -22,4 +22,6 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
     @Transactional
     @Query("DELETE FROM ProductCategory pc WHERE pc.categoryId = :categoryId")
     void deleteById(Integer categoryId);
+    
+    List<ProductCategory> findAllByOrderByDisplaySequenceAsc();
 }

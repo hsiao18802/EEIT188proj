@@ -14,6 +14,7 @@ import lombok.Setter;
 public class ProductCategory {
 	
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 使用自動生成主鍵
     @Column(name = "category_id")
     private Integer categoryId;
     
