@@ -322,27 +322,35 @@ function callCatRemove(id) {
     });
 }
 
-function callFindById(id) {
-    Swal.fire({
-        text: "Loading......",
-        showConfirmButton: false,
-        allowOutsideClick: false,
-    });
+const hasSalesRecord = ref(false);  // 儲存是否有售出紀錄
+const dailyFeeOriginalBackup = ref(null);  // 儲存 dailyFeeOriginal 的副本
 
-    axiosapi.get(`/rent/product/${id}`).then(function (response) {
+function callFindById(id) {
+    console.log("開始檢查商品是否有售出紀錄，商品ID:", id);
+
+    // 檢查是否有售出紀錄
+    axiosapi.get(`/rent/product/order-product/exist/${id}`).then(function (existResponse) {
+        hasSalesRecord.value = existResponse.data;
+        console.log("是否有售出紀錄:", hasSalesRecord.value);
+
+        // 無論結果為 true 或 false，繼續查詢商品詳細資料
+        return axiosapi.get(`/rent/product/${id}`);
+    }).then(function (response) {
         if (response.data) {
             product.value = response.data;
+            console.log("成功取得商品資料:", product.value);
+
+            // 存儲 dailyFeeOriginal 的副本
+            dailyFeeOriginalBackup.value = product.value.dailyFeeOriginal;
+            console.log("dailyFeeOriginal 的副本:", dailyFeeOriginalBackup.value);
         } else {
-            Swal.fire({
-                text: "找不到產品資料",
-                icon: "error",
-            });
+            console.log("找不到產品資料，ID:", id);
         }
-        setTimeout(function () {
-            Swal.close();
-        }, 500);
-    }).catch(handleError);
+    }).catch(function (error) {
+        console.error("發生錯誤:", error);
+    });
 }
+
 
 function callFind(page) {
     current.value = page || 1;
@@ -427,11 +435,35 @@ async function sendCreateRequest(body) {
 
 
 function callModify() {
+    // 檢查是否有售出紀錄且價格是否有變動
+    if (hasSalesRecord.value && dailyFeeOriginalBackup.value !== product.value.dailyFeeOriginal) {
+        // 如果商品有售出紀錄且價格不同，顯示警告並阻止修改
+        Swal.fire({
+            title: "價格無法修改",
+            html: "本商品已有售出的紀錄，無法直接修改價格。<br>是否下架原商品、以新價目重新上架？",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "下架並重新上架",
+            cancelButtonText: "取消",
+            preConfirm: () => {
+                // 左邊按鈕的邏輯將會在這裡實現，稍後補充
+            },
+            preCancel: () => {
+                // 取消按鈕的行為：恢復原始價格
+                product.value.dailyFeeOriginal = dailyFeeOriginalBackup.value;
+                console.log("已恢復原始價格:", dailyFeeOriginalBackup.value);
+            }
+        });
+        return;  // 阻止後續的修改操作
+    }
+
+    // 顯示 Loading 提示
     Swal.fire({
         text: "Loading......",
         showConfirmButton: false,
         allowOutsideClick: false,
     });
+
     console.log(product.value.statusId);
 
     // 從 localStorage 取得 employee_id，並設為 lastUpdateEmployeeId
@@ -475,6 +507,8 @@ function callModify() {
         }
     }).catch(handleError);
 }
+
+
 
 
 function callCatModify(updatedCategory) {

@@ -161,7 +161,6 @@ function hideModal() {
     fieldsInteracted.value = false;
     exampleObj.value.hide();
     clearImage();  // 清除圖片
-    clearDailyFeeOriginal();
     isDisabled.value = false;
 }
 defineExpose({
@@ -194,12 +193,7 @@ function handleIAClick() {
     // 檢查 productId
     if (props.product && props.product.productId) {
         console.log('Product ID during onMounted:', props.product.productId);
-        console.log('Product ID during onMounted:', props.product.productId);
-        console.log('Product ID during onMounted:', props.product.productId);
-        fetchDailyFeeOriginal(props.product.productId);
     } else {
-        console.warn('Product ID is missing during onMounted.');
-        console.warn('Product ID is missing during onMounted.');
         console.warn('Product ID is missing during onMounted.');
     }
     const nameIsEmpty = !props.product.productName;
@@ -236,31 +230,7 @@ function handleIAClick() {
         if (props.isShowInsert) {
             emits('insert');
         } else {
-            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
-            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
-            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
-            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
-            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
-            console.log('props.product.dailyFeeOriginal = ' + props.product.dailyFeeOriginal);
-            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1.value);
-            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1);
-            console.log('dailyFeeOriginal1 = ' + props.dailyFeeOriginal1);
-            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1);
-            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1);
-            console.log('dailyFeeOriginal1 = ' + dailyFeeOriginal1);
-
-            // if (dailyFeeOriginal1 && (dailyFeeOriginal1 !== props.product.dailyFeeOriginal)) {
-            //     // 如果 dailyFeeOriginal1 存在且不等於 props.product.dailyFeeOriginal，攔下來
-            //     Swal.fire({
-            //         title: '警告',
-            //         text: 'dailyFeeOriginal 不一致，無法更新',
-            //         icon: 'warning',
-            //         confirmButtonText: '確定'
-            //     });
-            // } else {
-            //     // 如果條件不成立，繼續執行 emits
             emits('update');
-            // }
         }
     }
 }
@@ -347,47 +317,6 @@ async function fetchStatuses() {
     } catch (error) {
         console.log("fetchStatuses 發生錯誤:", error);
     }
-}
-
-const dailyFeeOriginal1 = ref(null);
-
-// 函數1: 取得 dailyFeeOriginal
-function fetchDailyFeeOriginal(productId) {
-    // 確保 productId 存在
-    if (!productId) {
-        console.error('Product ID is missing inside fetchDailyFeeOriginal.');
-        return;
-    }
-
-    console.log('Fetching order-product exist for productId:', productId);
-
-    axiosapi.get(`/rent/product/order-product/exist/${productId}`)
-
-        .then(response => {
-            const exists = response.data;
-            console.log(`Order Product exists: ${exists}`);
-
-            if (exists) {
-                console.log(`Fetching daily fee original for productId: ${productId}`);
-                return axiosapi.get(`/rent/product/${productId}/daily-fee-original`);
-            }
-        })
-        .then(response => {
-            if (response) {
-                dailyFeeOriginal1.value = response.data;
-                console.log(`Daily Fee Original for productId ${productId}: ${dailyFeeOriginal1.value}`);
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching daily fee original:', error);
-        });
-}
-
-
-// 函數2: 清除 dailyFeeOriginal
-function clearDailyFeeOriginal() {
-    dailyFeeOriginal1.value = null;
-    console.log('Daily Fee Original cleared.');
 }
 </script>
 
