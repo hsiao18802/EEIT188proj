@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading">
+  <!-- <div v-if="!isLoading"> -->
     <div v-if="employeeAccount">
       <h1 class="welcome-message">
         歡迎回來，{{ employeeAccount }}
@@ -10,9 +10,10 @@
         登出
       </button>
     </div>
+    <div v-else></div>
 
     <!-- placeholder: 當未登入時，顯示登入表單 -->
-    <div v-else class="login-container left-aligned">
+    <!-- <div v-else class="login-container left-aligned">
       <h2>後台登入</h2>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
@@ -27,7 +28,7 @@
         <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
       </form>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
@@ -82,19 +83,37 @@ const handleLogin = async () => {
 };
 
 // 登出邏輯
-const logout = () => {
-  Swal.fire({
-    icon: 'success',
-    title: '成功登出',
-    confirmButtonText: '確定',
-    confirmButtonColor: '#28a745', // 綠色背景
-  }).then(() => {
-    // 清除本地登入資訊
-    localStorage.removeItem('employee_id');
+const logout = async () => {
+  try {
+    // 清除本地的登入資訊
+    localStorage.removeItem('employee_id'); // 清除員工 ID
 
-    // 重刷頁面
-    window.location.reload();
-  });
+    // 彈出成功提示
+    Swal.fire({
+      icon: 'success',
+      title: '成功登出',
+      confirmButtonText: '確定',
+      confirmButtonColor: '#28a745', // 綠色背景
+    }).then(() => {
+      // 先跳轉到 /employee/emphome
+      router.push('/emp/login').then(() => {
+        // 然後刷新 navbar
+        window.location.reload();
+      });
+    });
+
+  } catch (error) {
+    console.error('登出失敗', error);
+
+    // 彈出失敗提示
+    Swal.fire({
+      icon: 'error',
+      title: '登出失敗',
+      text: '請稍後再試',
+      confirmButtonText: '確定',
+      confirmButtonColor: '#28a745', // 綠色背景
+    });
+  }
 };
 
 </script>

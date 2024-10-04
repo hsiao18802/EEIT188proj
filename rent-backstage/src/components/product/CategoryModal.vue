@@ -189,6 +189,13 @@ function startEdit(index, category) {
     });
 }
 
+// 提交編輯
+function submitEdit(category) {
+    category.categoryName = categoryEditName.value; // 更新分類名稱
+    emits('catUpdate', category); // 發送更新事件
+    clearEditState();
+}
+
 // 取消編輯
 function cancelEdit() {
     if (categoryEditName.value !== originalCategoryName.value) {

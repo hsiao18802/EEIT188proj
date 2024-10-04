@@ -91,10 +91,14 @@ public class Order {
     
     @Column(name = "order_creation_date")
     private LocalDateTime orderDate = LocalDateTime.now();
-
+    
+    
+    @Column(name = "merchant_trade_no")
     private String merchantTradeNo; // ECPay的商家交易編號
+    
+    @Column(name = "ecpay_trade_no")
     private String ecpayTradeNo;     // ECPay的交易編號
-   
+    
     // 新增的方法
     public static String getOrderStatusString(int status) {
         switch (status) {

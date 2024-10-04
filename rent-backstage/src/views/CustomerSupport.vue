@@ -42,7 +42,7 @@
       // 連接 WebSocket 並訂閱新請求
       const connectWebSocket = () => {
         stompClient = new Client({
-          brokerURL: 'ws://localhost:8080/ws/websocket', // WebSocket 服務器的 URL
+          brokerURL: 'ws://192.168.36.65:8080/ws/websocket', // WebSocket 服務器的 URL
           connectHeaders: {
             login: 'user', // 如果需要身份驗證，這裡可以設置用戶名
             passcode: 'password', // 密碼

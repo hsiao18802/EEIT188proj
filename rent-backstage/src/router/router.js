@@ -5,8 +5,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 
 
-
-
+import discount from "@/views/pages/discount.vue";
+import Order from "@/views/pages/Order.vue";
 
 
 
@@ -57,7 +57,8 @@ const routes = [
 
 
 
-
+  { path: "/pages/discount", name: "discount-link", component: discount, meta: { navbar: 'EmpNavbar' } },
+  { path: "/pages/Order", name: "Order-link", component: Order, meta: { navbar: 'EmpNavbar' } },
 
 
 
@@ -71,7 +72,7 @@ const routes = [
   { path: "/employee/emphome", name: EmployeeHome, component: EmployeeHome, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/employee/empproduct", name: EmpProduct, component: EmpProduct, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/employee/empadd", name: EmpAdd, component: EmpAdd, meta: { navbar: 'EmpNavbar', style: 'default' } },
- 
+
 
 
 

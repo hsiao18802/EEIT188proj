@@ -19,12 +19,10 @@
           <li class="nav-item">
             <RouterLink class="nav-link active" aria-current="page" to="/productpage">我們的商品</RouterLink>
           </li>
-          <li class="nav-item">
-                        <RouterLink class="nav-link active" aria-current="page" to="/pages/Cart">TEST</RouterLink>
-                    </li>
+      
 
                     <li class="nav-item">
-                        <RouterLink class="nav-link active" aria-current="page" to="/pages/Order">訂單詳情(放後台)</RouterLink>
+                        <RouterLink class="nav-link active" aria-current="page" to="/pages/Order">訂單詳情</RouterLink>
                     </li>
                     
                     <li class="nav-item">

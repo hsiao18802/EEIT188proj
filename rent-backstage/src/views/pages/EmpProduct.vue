@@ -435,77 +435,126 @@ async function sendCreateRequest(body) {
 
 
 function callModify() {
-    // 檢查是否有售出紀錄且價格是否有變動
-    if (hasSalesRecord.value && dailyFeeOriginalBackup.value !== product.value.dailyFeeOriginal) {
-        // 如果商品有售出紀錄且價格不同，顯示警告並阻止修改
-        Swal.fire({
-            title: "價格無法修改",
-            html: "本商品已有售出的紀錄，無法直接修改價格。<br>是否下架原商品、以新價目重新上架？",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "下架並重新上架",
-            cancelButtonText: "取消",
-            preConfirm: () => {
-                // 左邊按鈕的邏輯將會在這裡實現，稍後補充
-            },
-            preCancel: () => {
-                // 取消按鈕的行為：恢復原始價格
-                product.value.dailyFeeOriginal = dailyFeeOriginalBackup.value;
-                console.log("已恢復原始價格:", dailyFeeOriginalBackup.value);
-            }
-        });
-        return;  // 阻止後續的修改操作
-    }
 
-    // 顯示 Loading 提示
+const employeeId = localStorage.getItem('employee_id');
+
+// 檢查是否有售出紀錄且價格是否有變動
+if (hasSalesRecord.value && dailyFeeOriginalBackup.value !== product.value.dailyFeeOriginal) {
+    // 如果商品有售出紀錄且價格不同，顯示警告並阻止修改
     Swal.fire({
-        text: "Loading......",
-        showConfirmButton: false,
-        allowOutsideClick: false,
-    });
+title: "價格無法修改",
+html: "本商品已有售出的紀錄，無法直接修改價格。<br>是否下架原商品、以新價目重新上架？",
+icon: "warning",
+showCancelButton: true,
+confirmButtonText: "下架並重新上架",
+cancelButtonText: "取消"
+}).then((result) => {
+if (result.isDismissed) {
+    // 取消按鈕的行為：恢復原始價格
+    product.value.dailyFeeOriginal = dailyFeeOriginalBackup.value;
+    console.log("已恢復原始價格:", dailyFeeOriginalBackup.value);
+} else if (result.isConfirmed) {
+    // 下架
+    let bodyM = {
+    productId: product.value.productId,
+    productName: product.value.productName || null,
+    dailyFeeOriginal: dailyFeeOriginalBackup.value,
+    maxAvailableQuantity: product.value.maxAvailableQuantity || null,
+    description: product.value.description || null,
+    categoryId: product.value.categoryId || null,
+    statusId: 3,
+    lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
+};
+let bodyA = {
 
+    productName: product.value.productName || null,
+    mainPhoto: product.value.mainPhoto || null,
+    dailyFeeOriginal: product.value.dailyFeeOriginal || null,
+    maxAvailableQuantity: product.value.maxAvailableQuantity || null,
+    description: product.value.description || null,
+    categoryId: product.value.categoryId || null,
+    statusId: product.value.statusId || null,
+    lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
+    addEmployeeId: employeeId || null, // 將 employee_id 塞進 body
+};
+    console.log("用戶選擇了下架並重新上架");
+    axiosapi.put(`/rent/product/${bodyM.productId}`, bodyM).then(function (responseM) {
+        console.log("商品已下架", responseM.data);
+
+        // 下架成功後，進行重新上架操作
+        axiosapi.post("/rent/product/add", bodyA).then(function (responseA) {
+            console.log("商品已重新上架", responseA.data);
+            handleSuccess("商品已成功下架並重新上架", productModal.value);  // 使用 handleSuccess 函數
+        }).catch(function (errorA) {
+            console.error("重新上架時發生錯誤", errorA);
+            Swal.fire({
+                text: "重新上架時發生錯誤",
+                icon: "error",
+                confirmButtonText: "確定"
+            });
+        });
+    }).catch(function (errorM) {
+        console.error("下架時發生錯誤", errorM);
+        Swal.fire({
+            text: "下架時發生錯誤",
+            icon: "error",
+            confirmButtonText: "確定"
+        });
+    });
+}
+});
+    return;  // 阻止後續的修改操作
+}
+
+// 顯示 Loading 提示
+Swal.fire({
+    text: "Loading......",
+    showConfirmButton: false,
+    allowOutsideClick: false,
+});
+
+console.log(product.value.statusId);
+
+// 從 localStorage 取得 employee_id，並設為 lastUpdateEmployeeId
+// const employeeId = localStorage.getItem('employee_id');
+
+let body = {
+    productId: product.value.productId,
+    productName: product.value.productName || null,
+    dailyFeeOriginal: product.value.dailyFeeOriginal || null,
+    maxAvailableQuantity: product.value.maxAvailableQuantity || null,
+    description: product.value.description || null,
+    categoryId: product.value.categoryId || null,
+    statusId: product.value.statusId || null,
+    lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
+};
+
+axiosapi.put(`/rent/product/${body.productId}`, body).then(function (response) {
     console.log(product.value.statusId);
 
-    // 從 localStorage 取得 employee_id，並設為 lastUpdateEmployeeId
-    const employeeId = localStorage.getItem('employee_id');
-
-    let body = {
-        productId: product.value.productId,
-        productName: product.value.productName || null,
-        dailyFeeOriginal: product.value.dailyFeeOriginal || null,
-        maxAvailableQuantity: product.value.maxAvailableQuantity || null,
-        description: product.value.description || null,
-        categoryId: product.value.categoryId || null,
-        statusId: product.value.statusId || null,
-        lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
-    };
-
-    axiosapi.put(`/rent/product/${body.productId}`, body).then(function (response) {
-        console.log(product.value.statusId);
-
-        if (selectedImage.value) {
-            const reader = new FileReader();
-            reader.onloadend = function () {
-                const base64String = reader.result.split(",")[1];
-                let photoBody = { mainPhoto: base64String };
-                axiosapi.put(`/rent/product/${product.value.productId}/photo`, photoBody).then(function (response) {
-                    if (response.data.success) {
-                        handleSuccessReload(response.data.message);
-                    } else {
-                        handleError(new Error(response.data.message));
-                    }
-                }).catch(handleError);
-            };
-            reader.onerror = handleError;
-            reader.readAsDataURL(selectedImage.value);
+    if (selectedImage.value) {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+            const base64String = reader.result.split(",")[1];
+            let photoBody = { mainPhoto: base64String };
+            axiosapi.put(`/rent/product/${product.value.productId}/photo`, photoBody).then(function (response) {
+                if (response.data.success) {
+                    handleSuccessReload(response.data.message);
+                } else {
+                    handleError(new Error(response.data.message));
+                }
+            }).catch(handleError);
+        };
+        reader.onerror = handleError;
+        reader.readAsDataURL(selectedImage.value);
+    } else {
+        if (response.data.success) {
+            handleSuccess(response.data.message, productModal.value);
         } else {
-            if (response.data.success) {
-                handleSuccess(response.data.message, productModal.value);
-            } else {
-                handleError(new Error(response.data.message));
-            }
+            handleError(new Error(response.data.message));
         }
-    }).catch(handleError);
+    }
+}).catch(handleError);
 }
 
 

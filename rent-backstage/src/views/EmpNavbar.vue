@@ -8,10 +8,17 @@
     <!-- 如果已登入，顯示其他選項 -->
     <ul v-if="employeeId" class="list-unstyled ps-0">
       <li class="mb-1">
-        <RouterLink to="/employee/order"
-          class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">會員訂單
+        <RouterLink to="/pages/Order"
+          class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">訂單管理
         </RouterLink>
       </li>
+      <li class="mb-1">
+        <RouterLink to="/pages/discount"
+          class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">折扣碼管理
+        </RouterLink>
+      </li>
+
+
       <li class="mb-1">
         <RouterLink to="/employee/empproduct"
           class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">商品管理
@@ -22,6 +29,11 @@
       <li class="mb-1">
         <RouterLink to="/plceholder/forphoto/remembertodelete"
           class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">員工管理
+        </RouterLink>
+      </li>
+      <li class="mb-1">
+        <RouterLink to="/employee/empmember"
+          class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">會員管理
         </RouterLink>
       </li>
       <li class="mb-1">
@@ -74,7 +86,7 @@ const logout = async () => {
       confirmButtonColor: '#28a745', // 綠色背景
     }).then(() => {
       // 先跳轉到 /employee/emphome
-      router.push('/employee/emphome').then(() => {
+      router.push('/emp/login').then(() => {
         // 然後刷新 navbar
         window.location.reload();
       });
