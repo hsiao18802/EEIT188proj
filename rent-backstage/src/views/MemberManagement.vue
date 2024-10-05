@@ -16,7 +16,7 @@
         <tbody>
           <tr v-for="member in members" :key="member.membersId">
             <td>{{ member.membersId }}</td>
-            <td>{{ member.username }}</td>
+            <td>{{ member.realName }}</td>
             <td>{{ member.email }}</td>
             <td>{{ member.phone }}</td>
             <td>{{ member.address }}</td>

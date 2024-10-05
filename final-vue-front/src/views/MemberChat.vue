@@ -29,6 +29,8 @@
 
 <script>
 import { Client } from '@stomp/stompjs';
+import router from '@/router/router';
+import Swal from 'sweetalert2';
 import { ref, onMounted, watch, nextTick } from 'vue';
 import axiosapi from '@/plugins/axios';
 import useUserStore from '@/stores/user'; // 引入 Pinia 的 store
@@ -81,7 +83,7 @@ export default {
 
       // 初始化 Stomp 客戶端
       stompClient = new Client({
-        brokerURL: 'wss://03fd-1-160-24-98.ngrok-free.app/ws/websocket',
+        brokerURL: 'wss://9aba-2001-b011-3801-1f04-118a-dd66-580d-6ff1.ngrok-free.app/ws/websocket',
         connectHeaders: {
           login: 'user',
           passcode: 'password',
@@ -171,7 +173,17 @@ export default {
     };
 
     onMounted(() => {
-      if (membersId.value) {
+      // 檢查是否已登錄
+      if (!userStore.isLogin) { 
+        Swal.fire({
+          icon: 'warning',
+          title: '請先登錄會員',
+          text: '請登錄後再繼續操作',
+          confirmButtonText: '前往登錄',
+        }).then(() => {
+          router.push('/secure/login'); // 重定向到登錄頁面
+        });
+      } else if (membersId.value) {
         connectWebSocket();
         loadChatHistory(); // 加載歷史紀錄
       } else {
