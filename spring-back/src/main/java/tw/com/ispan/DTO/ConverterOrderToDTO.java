@@ -55,6 +55,7 @@ public class ConverterOrderToDTO {
         // 確保 products 正確初始化，避免 NullPointerException
         List<OrderProduct> products = order.getOrderProduct() != null ? order.getOrderProduct() : new ArrayList<>();
 
+
         // 將 products 轉換成 DTO
         List<OrderProductDTO> productDTOs = products.stream()
             .map(product -> {
@@ -68,6 +69,7 @@ public class ConverterOrderToDTO {
                 productDTO.setPrice(product.getProduct().getDailyFeeOriginal()); // 獲取產品價格
                 productDTO.setMainPhoto(product.getProduct().getMainPhoto()); // 獲取產品價格
 
+                System.out.println("Product DTO: " + productDTO);
 
                 
                 return productDTO; // 返回轉換後的 DTO
@@ -75,6 +77,7 @@ public class ConverterOrderToDTO {
             .collect(Collectors.toList());
 
         dto.setOrderProducts(productDTOs); // 將轉換後的產品列表設置到 dto
+
 
         return dto; // 返回完整的 OrderDTO
     }
