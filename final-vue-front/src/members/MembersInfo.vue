@@ -144,6 +144,8 @@ function uploadPhoto() {
     // 更新顯示新的大頭貼
     member.value.memberPhoto = response.data.memberPhoto;
     photoPreviewUrl.value = 'data:image/jpeg;base64,' + response.data.memberPhoto;  // 更新圖片預覽
+     // **更新 Pinia 中的 memberPhoto**
+     userStore.setMemberPhoto(response.data.memberPhoto); // 即時更新 Pinia 中的大頭貼
   }).catch(error => {
     Swal.fire({
       title: '更新失敗',

@@ -34,6 +34,10 @@ spring:
           auth: true
           starttls:
             enable: true
+  cloud:
+    gcp:
+      credentials:
+        location: file:C:/final-exam/spring-back/src/main/resources/gcp/demo1-ufum-6b8b1556c965.json  # 確保文件路徑正確
 redis:
     host: localhost
     port: 6379
@@ -47,10 +51,6 @@ line:
   bot:
     channelToken: 'k6s9lpZH/+jBD/rxpuuLf7iQR2rq2k0KVq0WZ/dYCPi5ZjrJKScJQFI1ZAIHLVHWi0A9NeWK7KVlLXe65oGFW31NuTZjjzCEWRei1G7wGUqrzDpGJ/6+MCpB15tTF06gsQ1JyQe1PfoZanhr4cqs3gdB04t89/1O/w1cDnyilFU='
     channelSecret: '3770f6038a028afd9f78e48a76eb3708'
-  cloud:
-    gcp:
-      credentials:
-        location: file:C:/finalexam/spring-back/src/main/resources/gcp/demo1-ufum-6b8b1556c965.json  # 確保文件路徑正確
 
 dialogflow:
   project-id: demo1-ufum  # 請替換為你的 Dialogflow 專案 ID

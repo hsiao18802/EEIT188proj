@@ -104,6 +104,8 @@ async function login() {
         userStore.setRealname(response.data.realname);
         userStore.setToken(response.data.token);
         userStore.setMembersId(response.data.membersId);
+        userStore.setMemberPhoto(response.data.membersPhoto);
+
         axiosapi.defaults.headers.authorization = `Bearer ${response.data.token}`;
 
         // 確保獲取最新的購物車內容
@@ -171,6 +173,8 @@ onMounted(async () => {
           userStore.setRealname(res.data.realname);
           userStore.setToken(res.data.token);
           userStore.setMembersId(res.data.membersId);
+          userStore.setMemberPhoto(res.data.membersPhoto);
+
 
           axiosapi.defaults.headers.authorization = `Bearer ${res.data.token}`;
           Swal.fire({

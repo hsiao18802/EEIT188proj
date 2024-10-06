@@ -83,7 +83,7 @@ export default {
 
       // 初始化 Stomp 客戶端
       stompClient = new Client({
-        brokerURL: 'wss://9aba-2001-b011-3801-1f04-118a-dd66-580d-6ff1.ngrok-free.app/ws/websocket',
+        brokerURL: 'wss://edc1-1-160-11-21.ngrok-free.app/ws/websocket',
         connectHeaders: {
           login: 'user',
           passcode: 'password',

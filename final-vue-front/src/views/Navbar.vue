@@ -1,8 +1,8 @@
 <template>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <nav class="navbar navbar-expand-lg navbar-modern">
     <div class="container-fluid">
       <div class="navbar-brand d-flex align-items-center">
-        <!-- 加入LOGO -->
+        <!-- LOGO -->
         <img src="/logo.webp" alt="Logo" width="40" height="40" class="me-2">
         <span>趣露營</span>
       </div>
@@ -19,32 +19,19 @@
           <li class="nav-item">
             <RouterLink class="nav-link active" aria-current="page" to="/productpage">我們的商品</RouterLink>
           </li>
-      
-
-                    <li class="nav-item">
-                        <RouterLink class="nav-link active" aria-current="page" to="/pages/Order">訂單詳情</RouterLink>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <RouterLink class="nav-link active" aria-current="page" to="/support/memberchat">客服</RouterLink>
-                    </li>
-
-
-                    <li class="nav-item dropdown">
-                        <span class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">功能</span>
-                        <ul class="dropdown-menu">
-                  
-                            <li><RouterLink class="dropdown-item" to="/coupon">索取折扣碼</RouterLink></li>
-                            <li><RouterLink class="dropdown-item" to="/pages/discount">折扣碼(放後台)</RouterLink></li>
-                            <li><RouterLink class="dropdown-item" to="/pages/Card">訂單管理</RouterLink></li>
-                        </ul>
-                    </li>
-
-                 
+          <li class="nav-item">
+            <RouterLink class="nav-link active" aria-current="page" to="/pages/Order">訂單詳情</RouterLink>
+          </li>
+          <li class="nav-item dropdown">
+            <span class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">功能</span>
+            <ul class="dropdown-menu">
+              <li><RouterLink class="dropdown-item" to="/coupon">索取折扣碼</RouterLink></li>
+              <li><RouterLink class="dropdown-item" to="/pages/discount">折扣碼(放後台)</RouterLink></li>
+              <li><RouterLink class="dropdown-item" to="/pages/Card">訂單管理</RouterLink></li>
+            </ul>
+          </li>
         </ul>
         <ul class="navbar-nav ms-auto">
-          
-
           <li class="nav-item" v-if="!userStore.isLogin">
             <RouterLink class="nav-link active" aria-current="page" to="/secure/login">登入</RouterLink>
           </li>
@@ -52,30 +39,30 @@
             <RouterLink class="nav-link active" aria-current="page" to="/secure/register">註冊</RouterLink>
           </li>
 
+          <!-- 顯示會員大頭貼與 "你好 realName" -->
+          <li class="nav-item d-flex align-items-center" v-if="userStore.isLogin">
+            <!-- 在此處確認圖片是JPEG或PNG，並正確設置Base64前綴 -->
+            <img :src="'data:image/jpeg;base64,' + userStore.memberPhoto" alt="會員大頭貼" class="member-photo me-2" />
+            <span class="text-white">你好，{{ userStore.realname }} !!</span>
+          </li>
+
           <li class="nav-item" v-if="userStore.isLogin">
             <a class="nav-link" href="#" @click="logout">登出</a>
           </li>
 
-          <li class="nav-item dropdown">
-            <span class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">會員頁面</span>
+          <li class="nav-item dropdown" v-if="userStore.isLogin">
+            <span class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">會員頁面</span>
             <ul class="dropdown-menu">
-              <li>
-                <RouterLink class="dropdown-item" to="/members/info">會員資料</RouterLink>
-              </li>
-              <li>
-                <RouterLink class="dropdown-item" to="/members/memberOrder">會員訂單</RouterLink>
-              </li>
-
+              <li><RouterLink class="dropdown-item" to="/members/info">會員資料</RouterLink></li>
+              <li><RouterLink class="dropdown-item" to="/members/memberOrder">會員訂單</RouterLink></li>
+              <li><RouterLink class="dropdown-item" to="/support/memberchat">會員客服</RouterLink></li>
             </ul>
           </li>
-        
         </ul>
       </div>
     </div>
   </nav>
 </template>
-
 
 <script setup>
 import { useRouter } from 'vue-router';
@@ -99,42 +86,22 @@ async function logout() {
     });
 
     if (result.isConfirmed) {
-      // 發送登出請求到後端
       await axiosapi.post('/ajax/secure/logout');
-
-      // 清除 Pinia 狀態
       userStore.setLogin(false);
       userStore.setRealname('');
       userStore.setToken('');
       userStore.setMembersId('');
-      // 清除購物車資料
+      userStore.setMemberPhoto(''); // 清除會員大頭貼
       cartStore.clearCart(); 
-
-
-      // 清除 sessionStorage 中的狀態
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('login');
-
-      // 清除 localStorage 中的狀態
-      localStorage.removeItem('token');
-      localStorage.removeItem('login');
-      localStorage.removeItem('cartList');  // 清除 cartList
-      localStorage.clear();              // 清除所有項目
-      console.log('登出後 localStorage:', localStorage);  // 應該顯示為空
-
-      console.log('登出後 localStorage:', localStorage); // 檢查清除結果
-
-
-      // 清除 Google 的客戶端狀態
+      localStorage.clear(); 
       google.accounts.id.disableAutoSelect();
       google.accounts.id.revoke(userStore.realname, done => {
         console.log('Google user revoked.');
       });
-
-      // 跳轉到登入頁面
       router.push({ name: 'secure-login-link' }).then(() => {
-        // 等導航完成後自動刷新頁面
-        window.location.reload(); // 強制刷新頁面
+        window.location.reload();
       });
     }
   } catch (error) {
@@ -146,14 +113,85 @@ async function logout() {
     });
   }
 }
-
 </script>
 
-<style>
+<style scoped>
+/* 現代化的導航欄樣式 */
+.navbar-modern {
+  background: linear-gradient(135deg, #51595e, #004080);
+  padding: 15px 30px;
+  border-radius: 0 0 15px 15px;
+}
 
+.navbar-brand {
+  font-size: 26px;
+  font-weight: 600;
+  color: white;
+}
 
+.navbar-toggler {
+  border-color: white;
+}
 
+.nav-link {
+  color: white;
+  font-size: 18px;
+  padding: 10px 20px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
 
+.nav-link:hover {
+  color: #ffcc00;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
 
+.nav-link.active {
+  color: white; /* 修改活躍鏈接的顏色，與普通鏈接保持一致 */
+  background-color: transparent; /* 去除背景色 */
+}
 
+/* 當活躍鏈接被懸停時，應用懸停效果 */
+.nav-link.active:hover {
+  color: #ffcc00;  /* 懸停時同樣應用黃色 */
+  background-color: rgba(255, 255, 255, 0.1);  /* 懸停時應用背景 */
+  border-radius: 8px;
+}
+
+/* 會員大頭貼樣式 */
+.member-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dropdown-menu {
+  background-color: #5b6672;
+  border-color: #4e5d64;
+  border-radius: 10px;
+}
+
+.dropdown-item {
+  color: white;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #ffcc00;
+  color: #56626e;
+}
+
+/* 手機端的響應式樣式 */
+@media (max-width: 768px) {
+  .navbar-nav {
+    text-align: center;
+    padding: 15px 0;
+  }
+
+  .nav-link {
+    padding: 10px;
+  }
+}
 </style>

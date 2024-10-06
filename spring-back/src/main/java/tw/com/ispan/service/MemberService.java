@@ -1,6 +1,7 @@
 package tw.com.ispan.service;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -105,6 +106,14 @@ public class MemberService {
 	            responseJson.put("token", token);
 	            responseJson.put("realname", member.getRealName()); // 返回 realname
 	            responseJson.put("membersId", member.getMembersId());
+	         // 檢查 membersPhoto 是否存在，並轉換為 base64 編碼
+	            String photoBase64 = "";
+	            if (member.getMemberPhoto() != null) {
+	                photoBase64 = Base64.getEncoder().encodeToString(member.getMemberPhoto()); // 將 byte[] 轉換為 base64
+	            }
+	            responseJson.put("membersPhoto", photoBase64); // 返回 base64 字符串          
+	            System.out.println("Base64 Encoded Photo: " + photoBase64);
+
 	            responseJson.put("blacklisted", false); // 用户未被列入黑名单
 	            return responseJson;
 
