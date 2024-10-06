@@ -158,7 +158,7 @@ const showCouponPrompt = async () => {
 };
 
 
-
+// 驗證優惠碼
 const validateCoupon = async (code) => {
   try {
     const response = await validateCouponAPI(code);
@@ -180,10 +180,13 @@ const validateCoupon = async (code) => {
     return true; // 回傳 true 表示驗證成功
   } catch (error) {
     discountMessage.value = '驗證過程中發生錯誤。';
+
     console.error('驗證錯誤:', error); // 紀錄詳細錯誤信息
     return false; // 回傳 false 表示驗證失敗
   }
 };
+
+
 
 // 使用計算屬性來獲取原始價格
 const originalPrice = computed(() => {

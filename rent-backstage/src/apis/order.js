@@ -3,10 +3,6 @@ import axiosapi from "@/plugins/axios";
 const BASE_URL = '/rent/order';
 
 
-//綠界付款API
-export const ecpayAPI = (orderId) => {
-  return axiosapi.post(`${BASE_URL}/ecpayCheckout/${orderId}`);
-};
 
 
 
@@ -25,10 +21,10 @@ export const getAllOrdersAPI = () => {
   return axiosapi.get(`${BASE_URL}/all`);
 };
 
-// 更新訂單狀態
 export const updateOrderStatusAPI = (orderId, status) => {
-  return axiosapi.put(`${BASE_URL}/${orderId}/status`, { status });
+  return axiosapi.put(`${BASE_URL}/${orderId}/status?status=${status}`);
 };
+
 
 // 刪除訂單
 export const deleteOrderAPI = (orderId) => {

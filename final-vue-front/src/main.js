@@ -98,7 +98,7 @@ router.beforeEach(async (to, from, next) => {
     // 動態導入其他資源 
     await import('bootstrap/dist/css/bootstrap.min.css'); // 引入 Bootstrap CSS
     await import('bootstrap/dist/js/bootstrap.bundle.min.js'); // 引入 Bootstrap JS
-    await import('@mdi/font/css/materialdesignicons.css'); // 引入 Material Design Icons
+    import('@mdi/font/css/materialdesignicons.css'); // 引入 Material Design Icons
     import('element-plus/dist/index.css'); // 10/03 請不要把這個＋await memberOreder出現一大堆黃色警告 by hsiao
 
     const ElementPlus = (await import('element-plus')).default;
