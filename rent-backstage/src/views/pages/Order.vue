@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Tabs: 訂單分類 -->
-    <el-tabs v-model="activeTab">
+   <el-tabs v-model="activeTab">
       <el-tab-pane label="待付款" name="PENDING"></el-tab-pane>
       <el-tab-pane label="已付款/等待取貨" name="PAID"></el-tab-pane>
       <el-tab-pane label="運送中" name="SHIPPED"></el-tab-pane>
@@ -26,8 +26,8 @@
         <el-button type="primary" @click="searchOrder">搜尋訂單</el-button>
       </el-col>
       <el-col :span="12">
-        <el-button @click="clearSearch">清除搜尋</el-button>
-      </el-col>
+  <el-button @click="clearSearch">清除搜尋</el-button>
+</el-col>
     </el-row>
 
     <!-- 骨架屏: 加載中提示 -->
@@ -57,12 +57,11 @@
         </template>
       </el-table-column>
 
-      <el-table-column :label="`總金額`" :prop="'totalPrice'">
+      <el-table-column label="總金額" :prop="'totalPrice'">
         <template v-slot="scope">
           {{ formatPrice(scope.row.totalPrice) }}
         </template>
       </el-table-column>
-
       <el-table-column prop="shippingMethod" label="運送方式"></el-table-column>
       <el-table-column prop="orderStatus" label="訂單狀態"></el-table-column>
 
@@ -70,20 +69,21 @@
         <template v-slot="scope">
           <el-button type="danger" @click="deleteOrder(scope.row.orderId)">刪除訂單</el-button>
           <el-dropdown @command="handleUpdateOrderStatus(scope.row.orderId, $event)">
-            <el-button>更改狀態</el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="PENDING">待付款</el-dropdown-item>
-                <el-dropdown-item command="PAID">已付款/等待取貨</el-dropdown-item>
-                <el-dropdown-item command="SHIPPED">運送中</el-dropdown-item>
-                <el-dropdown-item command="DELIVERED">已領貨</el-dropdown-item>
-                <el-dropdown-item command="DONE">交易完成</el-dropdown-item>
-                <el-dropdown-item command="CANCELLED">不成立</el-dropdown-item>
-                <el-dropdown-item command="RETURNED">退貨/退款</el-dropdown-item>
-                <el-dropdown-item command="DAMAGED">商品損壞</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+  <el-button>更改狀態</el-button>
+  <template #dropdown>
+    <el-dropdown-menu>
+      <el-dropdown-item command="PENDING">待付款</el-dropdown-item>
+      <el-dropdown-item command="PAID">已付款/等待取貨</el-dropdown-item>
+      <el-dropdown-item command="SHIPPED">運送中</el-dropdown-item>
+      <el-dropdown-item command="DELIVERED">已領貨</el-dropdown-item>
+      <el-dropdown-item command="DONE">交易完成</el-dropdown-item>
+      <el-dropdown-item command="CANCELLED">不成立</el-dropdown-item>
+      <el-dropdown-item command="RETURNED">退貨/退款</el-dropdown-item>
+      <el-dropdown-item command="DAMAGED">商品損壞</el-dropdown-item>
+    </el-dropdown-menu>
+  </template>
+</el-dropdown>
+
         </template>
       </el-table-column>
     </el-table>
@@ -103,15 +103,32 @@
       <p>聯絡號碼: {{ currentOrder?.shippingPhoneNum }}</p>
       <p>開租日期: {{ currentOrder?.rentalEndDate }}</p>
       <p>退回日期: {{ currentOrder?.rentalStartDate }}</p>
+      <p>租賃天數: {{ currentOrder?.rentalDays }}</p>
       <p>送貨方式: {{ currentOrder?.shippingMethod }}</p>
       <p>送貨地址: {{ currentOrder?.shippingAddress }}</p>
 
+      
+
+
       <!-- 其他訂單詳情展示 -->
       <el-table :data="currentOrder?.orderProducts">
-        <el-table-column prop="productName" label="商品名稱"></el-table-column>
-        <el-table-column prop="count" label="數量"></el-table-column>
-        <el-table-column :label="`單價`" :prop="'price'"></el-table-column>
-      </el-table>
+  <el-table-column prop="productName" label="商品名稱"></el-table-column>
+  <el-table-column prop="count" label="數量"></el-table-column>
+
+  <!-- 單價，使用 formatPrice 格式化 -->
+  <el-table-column label="單價">
+    <template v-slot="scope">
+      {{ formatPrice(scope.row.price) }}
+    </template>
+  </el-table-column>
+
+  <!-- 小計，使用 formatPrice 格式化 -->
+  <el-table-column label="小計">
+    <template v-slot="scope">
+      {{ formatPrice(calculateSubtotal(scope.row.count, scope.row.price, currentOrder?.rentalDays)) }}
+    </template>
+  </el-table-column>
+</el-table>
 
       <template #footer>
         <el-button @click="closeOrderDialog">關閉</el-button>
@@ -194,7 +211,6 @@ const paginatedOrders = computed(() => {
   return filteredOrders.value.slice(start, end);
 });
 
-// 查看訂單詳情
 const viewOrderDetails = async (orderId) => {
   loading.value = true;
   try {
@@ -203,101 +219,126 @@ const viewOrderDetails = async (orderId) => {
 
     // 確保訂單資料中的 orderProducts 不為空
     if (response.data && response.data.orderProducts) {
-      currentOrder.value = response.data; // 將當前訂單設置為選中的訂單
-      orderDialog.value = true; // 顯示彈窗
+      orderProducts.value = response.data.orderProducts; // 更新 orderProducts
     } else {
-      console.error('當前訂單資料缺少 orderProducts:', response.data);
-      Swal.fire('錯誤', '無法獲取訂單詳情，請稍後再試。', 'error');
+      console.warn('Order products is empty or undefined.'); // 加入警告提示
     }
+
+    currentOrder.value = response.data; // 保存當前訂單
+    orderDialog.value = true; // 顯示彈窗
+
   } catch (error) {
-    console.error('查看訂單詳情失敗:', error);
-    Swal.fire('錯誤', '無法獲取訂單詳情，請稍後再試。', 'error');
+    console.error('獲取訂單詳情失敗:', error);
   } finally {
     loading.value = false;
   }
 };
 
-// 刪除訂單
+// 刪除訂單功能
 const deleteOrder = async (orderId) => {
-  const result = await Swal.fire({
-    title: '確認刪除?',
-    text: '刪除後將無法恢復!',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: '刪除',
-    cancelButtonText: '取消',
-  });
-
-  if (result.isConfirmed) {
-    try {
-      await deleteOrderAPI(orderId);
-      Swal.fire('刪除成功', '訂單已成功刪除', 'success');
-      await getAllOrders(); // 刪除成功後重新加載訂單列表
-    } catch (error) {
-      console.error('刪除訂單失敗:', error);
-      Swal.fire('錯誤', '刪除訂單失敗，請稍後再試。', 'error');
-    }
-  }
-};
-
-// 更改訂單狀態
-const handleUpdateOrderStatus = async (orderId, newStatus) => {
-  const result = await Swal.fire({
-    title: '確認更改狀態?',
-    text: `將訂單狀態更改為 ${newStatus} !`,
+  const confirmed = await Swal.fire({
+    title: '確定要刪除訂單嗎？',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: '確定',
     cancelButtonText: '取消',
   });
 
-  if (result.isConfirmed) {
+  if (confirmed.isConfirmed) {
     try {
-      await updateOrderStatusAPI(orderId, newStatus);
-      Swal.fire('更新成功', '訂單狀態已成功更改', 'success');
-      await getAllOrders(); // 更新成功後重新加載訂單列表
+      await deleteOrderAPI(orderId);
+      Swal.fire('訂單已刪除', '', 'success');
+      await getAllOrders(); // 刪除後刷新訂單列表
     } catch (error) {
-      console.error('更改訂單狀態失敗:', error);
-      Swal.fire('錯誤', '更改訂單狀態失敗，請稍後再試。', 'error');
+      console.error('刪除訂單失敗:', error);
     }
   }
 };
 
-// 格式化日期時間
-const formatDateTime = (dateTime) => {
-  if (!dateTime) return '';
-  const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-  return new Date(dateTime).toLocaleString('zh-TW', options);
+// 改變訂單狀態
+const handleUpdateOrderStatus = async (orderId, status) => {
+  loading.value = true;
+  try {
+    await updateOrderStatusAPI(orderId, status);
+    Swal.fire('訂單狀態已更新', '', 'success');
+    await getAllOrders(); // 更新後刷新訂單列表
+  } catch (error) {
+    console.error('更新訂單狀態失敗:', error);
+  } finally {
+    loading.value = false;
+  }
 };
 
-// 格式化價格
-const formatPrice = (price) => {
-  if (!price) return '';
-  return `$${price.toFixed(2)}`; // 格式化價格為貨幣格式
+// 搜尋訂單
+const searchOrder = async () => {
+  currentPage.value = 1; // 搜尋時重置到第一頁
+  loading.value = true; // 顯示加載狀態
+
+  try {
+    if (searchQuery.value) {
+      searchQuery.value = searchQuery.value.trim(); // 去掉前後空白
+      console.log('搜尋查詢:', searchQuery.value); // 檢查輸入的搜尋查詢
+      await getAllOrders(); // 重新獲取所有訂單以便搜尋
+
+      // 過濾出符合條件的訂單
+      const filtered = orders.value.filter(order => {
+        const orderId = order.orderId?.toString() || ""; // 確保是字符串
+        return orderId.includes(searchQuery.value);
+      });
+
+      orders.value = filtered; // 更新為搜尋結果
+
+      console.log('搜尋結果:', orders.value); // 確認搜尋後的結果
+
+      if (orders.value.length === 0) {
+        Swal.fire('未找到相關訂單', '', 'info'); // 提示未找到相關訂單
+      }
+    } else {
+      await getAllOrders(); // 如果搜尋欄為空，則重新獲取所有訂單
+    }
+  } catch (error) {
+    console.error('獲取訂單時出現錯誤:', error); // 捕獲並顯示錯誤
+    Swal.fire('獲取訂單數據錯誤', '請檢查服務器或網路連接', 'error');
+  } finally {
+    loading.value = false; // 隱藏加載狀態
+  }
 };
 
 // 清除搜尋
 const clearSearch = () => {
-  searchQuery.value = ''; // 清空搜尋框
+  searchQuery.value = ''; // 重置搜尋欄
+  getAllOrders(); // 重新獲取所有訂單
 };
 
 // 關閉訂單詳情彈窗
 const closeOrderDialog = () => {
-  orderDialog.value = false; // 隱藏訂單詳情彈窗
+  orderDialog.value = false;
+  currentOrder.value = null; // 關閉時重置當前訂單
+};
+
+const calculateSubtotal = (count, price, rentalDays) => {
+  return count * price * rentalDays;
+};
+
+// 日期和時間格式化
+const formatDateTime = (date) => {
+  const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  return new Date(date).toLocaleString('zh-TW', options);
+};
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('zh-TW', {
+    style: 'currency',
+    currency: 'TWD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.round(price)); // 確保傳入的是有效的整數
 };
 </script>
 
+
 <style scoped>
-/* 自定義按鈕樣式 */
-.el-button {
-  transition: background-color 0.3s;
-}
-
-.el-button:hover {
-  background-color: #dcdcdc; /* 設定懸停顏色 */
-}
-
-.el-input {
-  width: 100%; /* 輸入框寬度自適應 */
+.mb-4 {
+  margin-bottom: 1rem;
 }
 </style>
