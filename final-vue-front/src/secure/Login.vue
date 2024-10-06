@@ -228,7 +228,7 @@ onMounted(async () => {
   align-items: flex-start;
   height: 100vh;
   background-color: white;
-  padding-top: 0;
+  padding-top: 50px;
 }
 
 .login-container {

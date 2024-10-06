@@ -68,7 +68,7 @@ public class Members {
     private byte[] memberPhoto;
 
     
-    // 黑名單標記
+//    // 黑名單標記
     @Column(name = "black_listed", nullable = false)
     private boolean blacklisted = false;
     

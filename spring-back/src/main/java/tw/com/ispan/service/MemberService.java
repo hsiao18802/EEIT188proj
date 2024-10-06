@@ -281,7 +281,7 @@ public class MemberService {
         return membersRepository.findAll();
     }
 
-    // 將會員加入黑名單
+//    // 將會員加入黑名單
     public void addToBlacklist(Integer id) {
         Members member = membersRepository.findById(id).orElseThrow(() -> new RuntimeException("會員未找到"));
         member.setBlacklisted(true);

@@ -1,6 +1,6 @@
 <template>
   <div class="member-chat">
-    <h3>會員對話</h3>
+    <h3>客服對話</h3>
     <div class="messages" ref="messageContainer">
       <div
         v-for="message in messages"
@@ -83,7 +83,7 @@ export default {
 
       // 初始化 Stomp 客戶端
       stompClient = new Client({
-        brokerURL: 'wss://edc1-1-160-11-21.ngrok-free.app/ws/websocket',
+        brokerURL: 'ws://192.168.1.102:8080/ws/websocket',
         connectHeaders: {
           login: 'user',
           passcode: 'password',
@@ -205,13 +205,17 @@ export default {
 <style scoped>
 .member-chat {
   width: 600px;
-  margin: 0 auto;
+  margin: 50px auto;
   font-family: 'Helvetica Neue', Arial, sans-serif;
-  background-color: #fff;
+  background-color: #3d4e68;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
+  /* 添加黑色漸層邊框 */
+  border: 1px solid #000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), /* 外邊框 */
+              inset 0 0 15px rgba(0, 0, 0, 0.3); /* 內邊框漸層 */
 }
+
 
 h3 {
   font-size: 24px;

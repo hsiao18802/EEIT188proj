@@ -29,7 +29,7 @@ public class BackendMemberController {
         return ResponseEntity.ok(membersList);
     }
 
-    // 將會員加入黑名單
+     //將會員加入黑名單
     @PostMapping("/blacklist/{id}")
     public ResponseEntity<String> addToBlacklist(@PathVariable Integer id) {
         memberService.addToBlacklist(id);
