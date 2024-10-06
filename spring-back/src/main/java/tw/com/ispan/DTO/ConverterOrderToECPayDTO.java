@@ -27,10 +27,10 @@ public class ConverterOrderToECPayDTO {
             .map(op -> op.getProduct().getProductName() + " x " + op.getCount())
             .collect(Collectors.joining(", "));
         dto.setItemName(itemNames);
-        dto.setReturnURL("https://03fd-1-160-24-98.ngrok-free.app/rent/order/ecpay/callback");
+        dto.setReturnURL("https://edc1-1-160-11-21.ngrok-free.app/rent/order/ecpay/callback");
       
        
-        dto.setClientBackURL("https://03fd-1-160-24-98.ngrok-free.app/");  // 設置商店轉跳網址
+        dto.setClientBackURL("https://edc1-1-160-11-21.ngrok-free.app/");  // 設置商店轉跳網址
        // dto.setPaymentMethod(order.getPayMethod());  // 設置付款方式
 
         return dto;

@@ -346,6 +346,8 @@ try {
   if (typeof response.data === 'number') {
     console.log(`成功獲取 productId ${productId} 的可租借數量:`, response.data);
     availableQuantities.value[productId] = response.data; // 直接將數據分配給 productId 對應的可租借數量
+    console.log('availableQuantities:', availableQuantities.value);
+    
   } else {
     console.error('無法取得可租借數量，API 返回的數據異常:', response.data);
   }
@@ -354,17 +356,30 @@ try {
 }
 };
 
-onMounted(() => {
-  cartStore.sortedCartList.forEach(product => {
-    fetchAvailableQuantity(product.productId, rentalStartDate.value, rentalEndDate.value);
-  });
-});
+// onMounted(() => {
+//   console.log('rentalStartDate:', rentalStartDate.value);
+//   console.log('rentalEndDate:', rentalEndDate.value);
+//   cartStore.sortedCartList.forEach(product => {
+//     fetchAvailableQuantity(product.productId, rentalStartDate.value, rentalEndDate.value);
+//   });
+// });
 
 // 當租借日期變化時重新獲取數據
 watch([rentalStartDate, rentalEndDate], () => {
   cartStore.sortedCartList.forEach(product => {
     fetchAvailableQuantity(product.productId, rentalStartDate.value, rentalEndDate.value);
   });
+});
+
+watch(showCartDrawer, (newVal) => {
+  console.log('rentalStartDate:', rentalStartDate.value);
+  console.log('rentalEndDate:', rentalEndDate.value);
+  // 當 showCartDrawer 的值變化時執行的邏輯
+  if (newVal) { // 當抽屜打開時執行
+    cartStore.sortedCartList.forEach(product => {
+      fetchAvailableQuantity(product.productId, rentalStartDate.value, rentalEndDate.value);
+    });
+  }
 });
 
 

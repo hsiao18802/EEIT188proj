@@ -5,9 +5,16 @@
       <v-card class="mb-3">
         <v-card-title>租用日期</v-card-title>
         <v-card-text>
-          <flat-pickr v-model="rentalStartDate" @input="doInput('rentalStartDate', $event)" placeholder="請選擇日期"
-            :config="{ maxDate: rentalEndDate ? new Date(new Date(rentalEndDate).setDate(new Date(rentalEndDate).getDate() - 1)) : null, }" />
-        </v-card-text>
+    <flat-pickr
+      v-model="rentalStartDate"
+      @input="doInput('rentalStartDate', $event)"
+      placeholder="請選擇日期"
+      :config="{
+        minDate: new Date(new Date().setDate(new Date().getDate() + 1)), // 當天的隔一天
+        maxDate: rentalEndDate ? new Date(new Date(rentalEndDate).setDate(new Date(rentalEndDate).getDate() - 1)) : null,
+      }"
+    />
+  </v-card-text>
       </v-card>
 
       <v-card class="mb-3">

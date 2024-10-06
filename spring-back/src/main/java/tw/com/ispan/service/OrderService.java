@@ -188,7 +188,7 @@ public class OrderService {
         order.setPayMethod(orderDTO.getPayMethod());
         order.setRemarks(orderDTO.getRemarks());
         order.setRentalStartDate(orderDTO.getRentalStartDate());
-    //    order.setRentalEndDate(orderDTO.getRentalEndDate());
+        order.setRentalEndDate(orderDTO.getRentalEndDate());
       //  order.setDiscountValue(orderDTO.getDiscountValue());
 
         order.setOrderStatus(OrderStatus.PENDING); // 預設為待付款

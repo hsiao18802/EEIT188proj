@@ -14,7 +14,7 @@
             </div>
             <div class="card-body position-relative">
                 <h4 class="card-title">{{ item.productName }}</h4> <!-- 顯示產品名稱 -->
-                <h5>每日租金：{{ item.dailyFeeOriginal }} 元</h5> <!-- 顯示產品名稱 -->
+                <h5>{{ item.dailyFeeOriginal }} 元/天</h5> <!-- 顯示產品名稱 -->
                 <!-- 購物車圖示放置於卡片右下角 -->
                 <button
                     type="button"
