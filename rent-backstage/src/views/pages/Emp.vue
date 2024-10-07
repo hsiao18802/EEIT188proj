@@ -1,6 +1,6 @@
 <template>
   <!-- 顯示當前登入的員工帳號和權限等級 -->
-  <h1>員工管理：{{ selfAccount }}：{{ selfAdmin }}</h1>
+  <h1>員工管理：{{ selfAccount }}</h1>
 
   <div class="row">
     <div class="col-2 btn-group" v-if="selfAdmin === 1">
