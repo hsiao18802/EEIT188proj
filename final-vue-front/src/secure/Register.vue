@@ -25,7 +25,7 @@
           @blur="validatePassword"
           required
         />
-        <span v-if="passwordError" class="error-message">✘ 密碼必須包含至少6個字元，並且至少包含一個大寫字母、一個小寫字母和一個數字。</span>
+        <span v-if="passwordError" class="error-message">✘ 密碼必須包含至少6個字元，並且至少包含一個大寫字母、一個小寫字母。</span>
         <span v-else-if="passwordValid" class="success-message">✔ 符合格式</span>
       </div>
 

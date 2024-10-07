@@ -1,5 +1,6 @@
 package tw.com.ispan.controller;
 
+import java.util.Base64;
 import java.util.Map;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,13 @@ public class LoginAjaxController {
             responseJson.put("token", token);
             responseJson.put("realname", member.getRealName());
             responseJson.put("membersId", member.getMembersId());
+            // 檢查 membersPhoto 是否存在，並轉換為 base64 編碼
+            String photoBase64 = "";
+            if (member.getMemberPhoto() != null) {
+                photoBase64 = Base64.getEncoder().encodeToString(member.getMemberPhoto()); // 將 byte[] 轉換為 base64
+            }
+            responseJson.put("membersPhoto", photoBase64); // 返回 base64 字符串          
+            System.out.println("Base64 Encoded Photo: " + photoBase64);
 
             // 檢查是否為黑名單會員
             if (member.isBlacklisted()) {

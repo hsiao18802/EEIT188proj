@@ -6,6 +6,8 @@
         <p class="profile-photo-container" @click="onClickPhoto">
           <img :src="photoPreviewUrl || defaultPhoto" alt="會員照片" class="profile-photo" />
         </p>
+        <!-- 確保 input file 的 ref 正確綁定 -->
+        <input type="file" ref="fileInput" style="display: none;" @change="onFileChange" />
         <p><strong>使用者名稱:</strong> {{ member.username }}</p>
         <p>
           <label><strong>姓名:</strong></label>
@@ -83,7 +85,11 @@ onMounted(() => {
 
 // 當點擊圖片時觸發文件選擇器
 function onClickPhoto() {
-  fileInput.value.click();  // 觸發隱藏的文件選擇器
+  if (fileInput.value) {
+    fileInput.value.click();  // 觸發隱藏的文件選擇器
+  } else {
+    console.error('fileInput is not defined');
+  }
 }
 
 // 當用戶選擇圖片時觸發，將圖片存儲到 selectedFile 中，並即時預覽
