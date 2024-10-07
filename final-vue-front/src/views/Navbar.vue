@@ -3,8 +3,14 @@
     <div class="container-fluid">
       <div class="navbar-brand d-flex align-items-center">
         <!-- LOGO -->
-        <img src="/logo.webp" alt="Logo" width="40" height="40" class="me-2">
-        <span>趣露營</span>
+        <RouterLink  to="/">
+          <img src="/logo.webp" alt="Logo" width="60" height="60" class="me-2 logo-jump" />
+      </RouterLink>
+   <!-- 趣露營商店名稱帶有連結 -->
+   <RouterLink class="brand-logo" to="/">
+          <span>趣露營</span>
+        </RouterLink>
+       
       </div>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
         aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -14,14 +20,13 @@
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <RouterLink class="nav-link active" aria-current="page" to="/">首頁</RouterLink>
+            <RouterLink class="nav-link active" aria-current="page" to="/coupon">關於我們</RouterLink>
           </li>
+
           <li class="nav-item">
-            <RouterLink class="nav-link active" aria-current="page" to="/productpage">我們的商品</RouterLink>
+            <RouterLink class="nav-link active" aria-current="page" to="/productpage">租借產品</RouterLink>
           </li>
-          <li class="nav-item">
-            <RouterLink class="nav-link active" aria-current="page" to="/coupon">索取折扣碼</RouterLink>
-          </li>
+          
          
         </ul>
         <ul class="navbar-nav ms-auto">
@@ -187,4 +192,44 @@ async function logout() {
     padding: 10px;
   }
 }
+
+
+
+.brand-logo {
+  font-size: 28px;
+  font-weight: 700; /* 使用適中的粗度來保留優雅感 */
+  font-family: 'Raleway', sans-serif; /* 更圓潤且現代的字體選擇 */
+  color: white; 
+  text-transform: uppercase; /* 全大寫字母，提升標誌感 */
+  letter-spacing: 3px; /* 增加字距讓設計更開放 */
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: inline-block; /* 使動畫效果能正常運作 */
+}
+
+
+
+.logo-jump {
+  display: inline-block; /* 使圖片能進行變形動畫 */
+  transition: transform 0.3s ease; /* 變形過渡效果 */
+}
+
+/* 在滑鼠懸停時添加跳躍動畫 */
+.logo-jump:hover {
+  animation: jump 0.5s ease; /* 加入跳躍動畫 */
+}
+
+@keyframes jump {
+  0% {
+    transform: translateY(0); /* 起始位置 */
+  }
+  50% {
+    transform: translateY(-10px); /* 向上移動 */
+  }
+  100% {
+    transform: translateY(0); /* 回到起始位置 */
+  }
+}
+
+
 </style>

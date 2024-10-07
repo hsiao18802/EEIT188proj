@@ -6,7 +6,7 @@
       </div>
     </div>
     <div class="pointer"></div>
-    <button @click="spinWheel" :disabled="isSpinning">Spin the Wheel</button>
+    <button @click="spinWheel" :disabled="isSpinning">點我開轉 GO!GO!</button>
     <p v-if="selectedCoupon" class="coupon-message">
       恭喜!你抽到的優惠碼是:
       <span class="coupon-code">{{ selectedCoupon }}</span>
