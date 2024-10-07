@@ -23,7 +23,7 @@ import MemberManagement from '../views/MemberManagement.vue';
 
 import EmployeeHome from '@/views/pages/EmpHome.vue';
 import EmpProduct from '@/views/pages/EmpProduct.vue';
-import EmpAdd from '@/views/pages/EmpAdd.vue';
+import Emp from '@/views/pages/Emp.vue';
 import Login from '../secure/Login.vue';
 
 
@@ -71,7 +71,7 @@ const routes = [
 
   { path: "/employee/emphome", name: EmployeeHome, component: EmployeeHome, meta: { navbar: 'EmpNavbar', style: 'default' } },
   { path: "/employee/empproduct", name: EmpProduct, component: EmpProduct, meta: { navbar: 'EmpNavbar', style: 'default' } },
-  { path: "/employee/empadd", name: EmpAdd, component: EmpAdd, meta: { navbar: 'EmpNavbar', style: 'default' } },
+  { path: "/employee/employee", name: Emp, component: Emp, meta: { navbar: 'EmpNavbar', style: 'default' } },
 
 
 

@@ -5,16 +5,11 @@
       <v-card class="mb-3">
         <v-card-title>租用日期</v-card-title>
         <v-card-text>
-    <flat-pickr
-      v-model="rentalStartDate"
-      @input="doInput('rentalStartDate', $event)"
-      placeholder="請選擇日期"
-      :config="{
+          <flat-pickr v-model="rentalStartDate" @input="doInput('rentalStartDate', $event)" placeholder="請選擇日期" :config="{
         minDate: new Date(new Date().setDate(new Date().getDate() + 1)), // 當天的隔一天
         maxDate: rentalEndDate ? new Date(new Date(rentalEndDate).setDate(new Date(rentalEndDate).getDate() - 1)) : null,
-      }"
-    />
-  </v-card-text>
+      }" />
+        </v-card-text>
       </v-card>
 
       <v-card class="mb-3">
@@ -27,16 +22,17 @@
 
 
       <!-- 陰影效果添加 -->
-      <!-- <div class="d-flex mb-6">
-        <button class="btn btn-danger shadow1" @click="clearDates">重新選擇</button>
-      </div> -->
+      <div class="mb-3 mt-3">
+        <div class="btn-group" role="group">
+          <button class="btn btn-primary shadow1" @click="updateSelectedDates">選擇日期</button>
+          <button class="btn btn-danger shadow1" @click="clearDates">重新選擇</button>
+        </div>
+      </div>
 
       <!-- 搜尋輸入欄和按鈕組 -->
-      <div class="mb-3 mt-3">
-        <input type="text" placeholder="請輸入產品名稱" 
-              v-model="findName" 
-              class="form-control mb-3 mt-3 shadow1" 
-              @keyup.enter="handleSearch" /> <!-- 監聽 Enter 鍵事件 -->
+      <div class="mb-3 mt-6">
+        <input type="text" placeholder="請輸入產品名稱" v-model="findName" class="form-control mb-3 mt-3 shadow1"
+          @keyup.enter="handleSearch" /> <!-- 監聽 Enter 鍵事件 -->
         <div class="btn-group" role="group">
           <button type="button" class="btn btn-primary shadow1" @click="handleSearch">確認搜尋</button>
           <button type="button" class="btn btn-secondary shadow1" @click="handleClearSearch">清除搜尋</button>
@@ -46,7 +42,8 @@
       <br>
       <h4>商品分類</h4>
       <table>
-        <tr v-for="category in categories" :key="category.categoryId" @click="callFind(1, category.categoryId)" class="category-link">
+        <tr v-for="category in categories" :key="category.categoryId" @click="callFind(1, category.categoryId)"
+          class="category-link">
           <td>{{ category.categoryName }} ({{ category.productCount }})</td>
         </tr>
         <br>
@@ -60,31 +57,29 @@
     <div class="col-md-10">
       <!-- 產品列表 -->
       <div class="row">
-        <ProductCard v-for="product in products" :key="product.productId" :item="product" :isDateSelected="isDateSelected"
-        :available-quantity="availableQuantities[product.productId]" @open-rent="openModal"></ProductCard>
+        <ProductCard v-for="product in products" :key="product.productId" :item="product"
+          :isDateSelected="isDateSelected" :available-quantity="availableQuantities[product.productId]"
+          @open-rent="openModal"></ProductCard>
       </div>
 
       <!-- 分頁與選擇欄 -->
       <div class="row mt-3">
         <div class="d-flex justify-content-between align-items-center w-100">
 
-            <!-- 置中 Paginate -->
-            <div class="d-flex justify-content-center flex-grow-1">
-                <Paginate v-if="total > 0"
-                    :first-last-button="true"
-                    first-button-text="&lt;&lt;" last-button-text="&gt;&gt;"
-                    prev-text="&lt;" next-text="&gt;"
-                    :page-count="pages" :initial-page="current" v-model="current"
-                    :click-handler="callFind" class="shadow-p">
-                </Paginate>
-                <h2 v-else-if="!loading">查無資料😭</h2>
-            </div>
-            
-            <!-- 右側的 ProductSelect -->
-            <div v-show="total>0" class="ms-auto">
-                <ProductSelect v-model="max" :total="total" :options="[4, 8, 12, 16]" @max-change="callFind">
-                </ProductSelect>
-            </div>
+          <!-- 置中 Paginate -->
+          <div class="d-flex justify-content-center flex-grow-1">
+            <Paginate v-if="total > 0" :first-last-button="true" first-button-text="&lt;&lt;"
+              last-button-text="&gt;&gt;" prev-text="&lt;" next-text="&gt;" :page-count="pages" :initial-page="current"
+              v-model="current" :click-handler="callFind" class="shadow-p">
+            </Paginate>
+            <h2 v-else-if="!loading">查無資料😭</h2>
+          </div>
+
+          <!-- 右側的 ProductSelect -->
+          <div v-show="total>0" class="ms-auto">
+            <ProductSelect v-model="max" :total="total" :options="[4, 8, 12, 16]" @max-change="callFind">
+            </ProductSelect>
+          </div>
         </div>
       </div>
     </div>
@@ -469,6 +464,27 @@ function fetchCartDates() {
         }
     }
 }
+
+const updateSelectedDates = () => {
+  if (!rentalStartDate.value || !rentalEndDate.value) {
+    Swal.fire({
+      icon: 'error',
+      title: '錯誤',
+      text: '請選擇租用日期和歸還日期。',
+    });
+    return;
+  }
+
+  // 更新日期並刷新可用庫存
+  triggerAvailabilityCheck();
+
+  // 提示用戶日期已選擇成功
+  Swal.fire({
+    icon: 'success',
+    title: '成功',
+    text: '日期已選擇！',
+  });
+};
 
 </script>
 

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale.Category;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -99,5 +100,16 @@ public class CategoryController {
 
         ProductCategory newCategory = categoryService.addCategory(categoryName);
         return ResponseEntity.ok(newCategory);
+    }
+    
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductCategory> getProductCategoryById(@PathVariable Integer id) {
+        Optional<ProductCategory> productCategory = categoryService.findById(id);
+        if (productCategory.isPresent()) {
+            return ResponseEntity.ok(productCategory.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

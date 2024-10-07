@@ -4,15 +4,15 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel" v-show="isShowInsert">新增商品</h1>
-                    <h1 class="modal-title fs-5" id="exampleModalLabel" v-show="isShowUpdate">修改商品資料</h1>
-                    <h1 class="modal-title fs-5" id="exampleModalLabel" v-show="isShowChangepic">新增商品圖片</h1>
+                    <h1 class="modal-title fs-2" id="exampleModalLabel" v-show="isShowInsert">新增商品</h1>
+                    <h1 class="modal-title fs-2" id="exampleModalLabel" v-show="isShowUpdate">修改商品資料</h1>
+                    <h1 class="modal-title fs-2" id="exampleModalLabel" v-show="isShowChangepic">新增商品圖片</h1>
                     <button type="button" class="btn-close" @click="handleCloseClick" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <table>
+                    <table class="table">
                         <tbody>
-                            <tr v-show="!isShowInsert">
+                            <tr style="display: none;">
                                 <td>商品編號</td>
                                 <td>{{ product.productId }}</td>
                             </tr>
@@ -20,8 +20,8 @@
                                 <td>商品名稱</td>
                                 <td>
                                     <span v-show="isShowChangepic">{{ product.productName }}</span>
-                                    <input v-show="!isShowChangepic" type="text" name="name"
-                                        v-model="product.productName" @input="onNameInserted">
+                                    <textarea v-show="!isShowChangepic" name="name" v-model="product.productName"
+                                        @input="onNameInserted"></textarea>
                                 </td>
                             </tr>
                             <tr v-show="!isShowChangepic">
@@ -60,15 +60,15 @@
                             <tr v-show="!isShowChangepic">
                                 <td>商品描述</td>
                                 <td><textarea name="description" v-model="product.description"
-                                        @input="onFieldInteraction"></textarea></td>
+                                        @input="onFieldInteraction"></textarea>
+                                </td>
                             </tr>
                             <tr v-show="!isShowChangepic">
                                 <td>商品分類</td>
                                 <td>
                                     <select name="categoryId" v-model="product.categoryId">
-                                        <option v-for="category in categories" :key="category.categoryId"
-                                            :value="category.categoryId">
-                                            {{ category.categoryId }}：{{ category.categoryName }}
+                                        <option v-for="category in sortedCategories" :key="category.categoryId"
+                                            :value="category.categoryId">{{ category.categoryName }}
                                         </option>
                                     </select>
                                 </td>
@@ -76,10 +76,10 @@
                             <tr>
                                 <td>上架設定</td>
                                 <!-- <td v-if="isShowInsert">
-                                    <input type="hidden" name="statusId" v-model="product.statusId">
-                                    <span>預設為上架，如果不加功能記得要隱藏</span>
-                                </td>
-                                <td v-else> -->
+                                        <input type="hidden" name="statusId" v-model="product.statusId">
+                                        <span>預設為上架，如果不加功能記得要隱藏</span>
+                                    </td>
+                                    <td v-else> -->
                                 <td>
                                     <select name="statusId" v-model="product.statusId" @input="onFieldInteraction">
                                         <option v-for="status in statuslist" :key="status.statusId"
@@ -90,18 +90,19 @@
                                 </td>
                             </tr>
                             <tr v-show="isShowUpdate">
-                                <td>新增員工ID</td>
-                                <td><input type="number" name="addEmployeeId" v-model="product.addEmployeeId" readonly>
-                                </td>
+                                <td>商品新增員工</td>
+                                <td v-if="product.addEmployeeAccount !== 'N/A'">{{ product.addEmployeeAccount }}</td>
+                                <td v-else></td>
                             </tr>
                             <tr v-show="isShowUpdate">
                                 <td>新增日期</td>
                                 <td>{{ formatDate(product.addDatetime) }}</td>
                             </tr>
                             <tr v-show="isShowUpdate">
-                                <td>最後更新員工ID</td>
-                                <td><input type="number" name="lastUpdateEmployeeId"
-                                        v-model="product.lastUpdateEmployeeId" readonly></td>
+                                <td>最後更新員工</td>
+                                <td v-if="product.lastUpdateEmployeeAccount !== 'N/A'">{{
+                                    product.lastUpdateEmployeeAccount }}</td>
+                                <td v-else></td>
                             </tr>
                             <tr v-show="isShowUpdate">
                                 <td>最後更新日期</td>
@@ -121,6 +122,8 @@
             </div>
         </div>
     </div>
+
+    
 </template>
 
 
@@ -129,6 +132,7 @@ import { ref, onMounted, nextTick } from 'vue';
 import Swal from 'sweetalert2';
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import axiosapi from '@/plugins/axios';  // 確保你有正確配置 axios
+
 
 // Props and emits
 const props = defineProps(["product", "isShowInsert", "isShowUpdate", "isShowChangepic"]);
@@ -150,10 +154,16 @@ onMounted(() => {
     fetchStatuses();
 });
 function showModal() {
-    exampleObj.value.show();
+    console.log("showModal called");
+    console.log("exampleObj value:", exampleObj.value);  // 檢查 exampleObj 是否正確
+    exampleObj.value.show();  // 顯示模態框
+
     nextTick(() => {
+        console.log("nextTick called");
+        console.log("props.isShowInsert:", props.isShowInsert);  // 檢查 props.isShowInsert 是否正確
         if (props.isShowInsert) {
             isDisabled.value = true;
+            console.log("isDisabled set to true");
         }
     });
 }
@@ -165,7 +175,8 @@ function hideModal() {
 }
 defineExpose({
     showModal,
-    hideModal
+    hideModal,
+    fetchCategories
 });
 
 // Handling field interaction
@@ -176,6 +187,28 @@ function onFieldInteraction() {
 function onNameInserted() {
     onFieldInteraction();
     isDisabled.value = false;
+}
+
+
+function setGeneratedImage(imageUrl) {
+    // 使用 axios 下載圖片並創建 File 對象，模擬選擇圖片的效果
+    axios({
+        url: imageUrl,
+        method: 'GET',
+        responseType: 'blob',
+    })
+        .then((response) => {
+            const file = new File([response.data], 'generated-image.jpg', { type: 'image/jpeg' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            imageInput.value.files = dataTransfer.files;
+            // 觸發 "change" 事件
+            const event = new Event('change', { bubbles: true });
+            imageInput.value.dispatchEvent(event);
+        })
+        .catch((error) => {
+            console.error('Error setting generated image:', error);
+        });
 }
 
 // Handle image selection and preview
@@ -290,14 +323,15 @@ function formatDate(utcDateString) {
 }
 
 // Fetch categories and statuses
-const categories = ref([]);
+// const product = ref({ categoryId: null });
+const sortedCategories = ref([]); // 使用排序過的分類
 const statuslist = ref([]);
 async function fetchCategories() {
     try {
         const response = await axiosapi.get('/rent/category/find');
-        console.log("fetchCategories 成功 response:", response);
         if (response.data) {
-            categories.value = response.data;
+            // 將分類進行排序
+            sortedCategories.value = response.data.slice().sort((a, b) => a.displaySequence - b.displaySequence);
         } else {
             console.log("fetchCategories 無有效的數據:", response);
         }
@@ -318,6 +352,7 @@ async function fetchStatuses() {
         console.log("fetchStatuses 發生錯誤:", error);
     }
 }
+
 </script>
 
 <style></style>

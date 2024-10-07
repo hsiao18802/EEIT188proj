@@ -90,7 +90,7 @@ import draggable from 'vuedraggable';
 
 // Props and emits
 const props = defineProps(["categories"]);
-const emits = defineEmits(['update:categories', 'catDelete', 'catUpdate']);
+const emits = defineEmits(['update:categories', 'catDelete', 'catUpdate', 'callFetchRearrange']);
 
 // Modal handling
 const exampleModal = ref(null);
@@ -262,6 +262,7 @@ function submitDrag() {
         .then(response => {
             Swal.fire('成功', '順序已更新', 'success');
             // 更新完成後重新加載分類數據
+            emits('callFetchRearrange');
             fetchCategories();  // 在這裡重新獲取最新數據
             isDragging.value = false;
         })

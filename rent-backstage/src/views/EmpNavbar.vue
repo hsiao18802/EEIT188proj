@@ -27,7 +27,7 @@
       <li class="mb-1">
       </li>
       <li class="mb-1">
-        <RouterLink to="/plceholder/forphoto/remembertodelete"
+        <RouterLink to="/employee/employee"
           class="link-body-emphasis btn-toggle-nav text-white d-inline-flex text-decoration-none rounded">員工管理
         </RouterLink>
       </li>

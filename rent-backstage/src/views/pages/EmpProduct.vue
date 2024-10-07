@@ -6,7 +6,8 @@
             <button type="button" class="btn btn-outline-primary" @click="openCategory">分類管理</button>
         </div>
         <div class="col-4">
-            <ProductSelect v-model="max" :total="total" :options="[2, 3, 4, 5, 7, 10]" @max-change="callFind">
+            <ProductSelect v-model="max" :total="total" :options="[4, 8, 12, 16]" :categories="categories"
+                @max-change="callFind" @categoryChange="onCategoryChange" @statusChange="onStatusChange">
             </ProductSelect>
         </div>
     </div>
@@ -14,34 +15,35 @@
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">圖片</th>
-                <th scope="col">產品名稱</th>
-                <th scope="col">產品分類</th>
-                <th scope="col">每日租金</th>
-                <th scope="col">庫存數量</th>
-                <th scope="col">產品描述</th>
-                <th scope="col">增修人員</th>
-                <th scope="col">最後增修</th>
-                <th scope="col">修改刪除</th>
+                <th scope="col" style="text-align: left;">點圖放大</th>
+                <th scope="col" style="text-align: left;">產品名稱</th>
+                <th scope="col" style="text-align: right;">產品狀態</th>
+                <th scope="col" style="text-align: right;">產品分類</th>
+                <th scope="col" style="text-align: right;">庫存數量</th>
+                <th scope="col" style="text-align: right;">每日租金</th>
+                <th scope="col" style="text-align: right;">產品描述</th>
+                <th scope="col" style="text-align: right;">修改刪除</th>
             </tr>
         </thead>
         <tbody>
-            <tr v-for="product in products" :key="product.id">
-                <td>
+            <tr v-for="product in products" :key="product.id" style="vertical-align: middle;">
+                <td style="text-align: left;">
                     <img v-if="product.mainPhoto" :alt="product.productName" v-default-img="product.mainPhoto"
                         style="width: 100px; height: 100px;" @click="showFullImage(product.mainPhoto)">
                     <span v-else><a class="btn btn-primary"
                             @click="openModal('changepic', product.productId)">新增圖片</a></span>
                 </td>
-                <th scope="row">{{ product.productName }}</th>
-                <td>{{ product.categoryId }}</td>
-                <td>{{ product.dailyFeeOriginal }}</td>
-                <td>{{ product.maxAvailableQuantity }}</td>
-                <td>{{ truncateText(product.description, 20) }}</td>
-                <td v-if="product.employeeAccount !== 'N/A'">{{ product.employeeAccount }}</td>
-                <td v-else></td>
-                <td>{{ formatDate(product.lastUpdateDatetime) }}</td>
-                <td>
+                <th scope="row" style="text-align: left;">{{ product.productName }}</th>
+                <td style="text-align: right;">
+                    <span v-if="product.statusId === 1">未上架</span>
+                    <span v-else-if="product.statusId === 2">販售中</span>
+                    <span v-else-if="product.statusId === 3">已下架</span>
+                </td>
+                <td style="text-align: right;">{{ product.categoryName }}</td>
+                <td style="text-align: right;">{{ product.maxAvailableQuantity }}</td>
+                <td style="text-align: right;">{{ formatCurrency(product.dailyFeeOriginal) }}</td>
+                <td style="text-align: right;" v-html="truncateTextWithLineBreak(product.description, 15)"></td>
+                <td style="text-align: right;">
                     <div class="btn-group col text-end">
                         <a class="btn btn-primary" @click="openModal('update', product.productId)">修改</a>
                         <a class="btn btn-outline-danger" @click="callDiscontinue(product.productId)">下架</a>
@@ -51,6 +53,8 @@
             </tr>
         </tbody>
     </table>
+
+
 
     <!-- <div class="row">
         <ProductCard v-for="product in products" :key="product.id" :item="product" @delete="callRemove"
@@ -63,8 +67,24 @@
     </ProductModal>
     <!-- <CategoryModal ref="categoryModal" :categories="categories" @catDelete="callCatRemove" @catUpdate="callCatModify"></CategoryModal> -->
     <CategoryModal ref="categoryModal" :categories="categories" @cat-delete="callCatRemove" @catUpdate="callCatModify"
-        @update:categories="categories = $event" @add-category="addCategory"></CategoryModal>
+        @update:categories="categories = $event" @add-category="addCategory" @callFetchRearrange="callChildAMethod">
+    </CategoryModal>
 
+    <!-- 分頁元件 -->
+    <div class="row mt-3">
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <!-- 左側空白 -->
+            <div></div>
+
+            <!-- 置中的分頁 -->
+            <div class="d-flex justify-content-center flex-grow-1">
+                <Paginate v-if="total > 0" :page-count="pages" :click-handler="callFind" :prev-text="'上一頁'"
+                    :next-text="'下一頁'" :container-class="'pagination'">
+                </Paginate>
+                <h2 v-else-if="!loading">查無資料</h2>
+            </div>
+        </div>
+    </div>
 
 </template>
 
@@ -73,14 +93,16 @@ import ProductCard from '@/components/product/EmpProductCard.vue';
 import Swal from 'sweetalert2';
 import axiosapi from '@/plugins/axios';
 import { onMounted, ref } from 'vue';
-
+import Paginate from 'vuejs-paginate-next';
 import ProductModal from '@/components/product/EmpProductModal.vue';
 import CategoryModal from '@/components/product/CategoryModal.vue';
+import ProductSelect from '@/components/product/ProductSelect.vue'
 
 const start = ref(0);
-const max = ref(3);
+const max = ref(8);
 const current = ref(1);
 const total = ref(0);
+const pages = ref(0);
 const lastPageRows = ref(0);
 const productModal = ref(null);
 const categoryModal = ref(null);
@@ -94,29 +116,116 @@ const findName = ref("");
 const products = ref([]);
 const categories = ref([]);
 const emits = defineEmits(["delete", "openUpdate"]);
+const selectedCategoryId = ref(null);  // 儲存當前選中的分類
+const selectedStatusId = ref(null);    // 儲存當前選中的狀態
+
+function callFind(page = 1) {
+    current.value = page;
+    start.value = (page - 1) * max.value;
+
+    let body = {
+        start: start.value,
+        max: max.value,
+        order: "productId",
+        categoryId: selectedCategoryId.value || null,  // 傳入分類 ID
+        statusId: selectedStatusId.value || null       // 傳入狀態 ID
+    };
+
+    Swal.fire({
+        text: "Loading...",
+        showConfirmButton: false,
+        allowOutsideClick: false,
+    });
+
+    axiosapi.post("/rent/product/find-advanced", body)
+        .then(async function (response) {
+            products.value = response.data.list;
+            total.value = response.data.count;
+            pages.value = Math.ceil(total.value / max.value);
+            Swal.close();
+
+            // 遍歷每個產品並通過 categoryId 呼叫 /rent/category/{id} 來獲取分類名稱
+            for (const product of products.value) {
+                console.log('Product ID:', product.productId);
+                console.log('Category ID:', product.categoryId);
+
+                if (product.categoryId) {
+                    try {
+                        // 呼叫後端 API 根據 categoryId 獲取分類信息
+                        const categoryResponse = await axiosapi.get(`/rent/category/${product.categoryId}`);
+                        console.log(`Category Response for Product ID ${product.productId}:`, categoryResponse);
+
+                        if (categoryResponse.data) {
+                            const categoryName = categoryResponse.data.name || categoryResponse.data.categoryName;
+                            console.log(`Category Name for Product ID ${product.productId}:`, categoryName);
+                            // 可以在這裡將 categoryName 賦值到產品對象中
+                            product.categoryName = categoryName;
+                        } else {
+                            console.log(`No category data received for Product ID ${product.productId}`);
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching category for Product ID ${product.productId}:`, error);
+                    }
+                } else {
+                    console.log(`No category ID found for Product ID ${product.productId}`);
+                }
+            }
+
+            // 這裡可以在模板中渲染帶有分類名稱的產品
+        })
+        .catch(function (error) {
+            Swal.fire({ text: "錯誤：" + error.message, icon: "error" });
+        });
+}
+
+
+
+
+
+
+
+
+function onCategoryChange(categoryId) {
+    selectedCategoryId.value = categoryId;  // 更新選擇的分類 ID
+    callFind(1, categoryId);  // 重新查詢，並傳遞選中的分類 ID
+}
+
+// 當狀態變更時重新查詢
+function onStatusChange(statusId) {
+    selectedStatusId.value = statusId;  // 更新選擇的狀態 ID
+    callFind(1);  // 重新查詢
+}
 
 function openModal(action, id) {
+    console.log("openModal called with action:", action, "and id:", id);  // 檢查 action 和 id
+
     if (action === 'insert') {
+        console.log("Action is 'insert'");
         isShowInsert.value = true;
         isShowUpdate.value = false;
         isShowChangepic.value = false;
         product.value = {};
         product.value.statusId = 1;
+        console.log("Product after insert action:", product.value);  // 檢查 product 的值
     } else {
         isShowInsert.value = false;
         if (action === 'changepic') {
-            console.log("changepic = true");
+            console.log("Action is 'changepic'");
             isShowUpdate.value = false;
             isShowChangepic.value = true;
         } else {
-            console.log("changepic = false");
+            console.log("Action is not 'changepic', setting update to true");
             isShowUpdate.value = true;
             isShowChangepic.value = false;
         }
-        callFindById(id);
+        console.log("Calling callFindById with id:", id);  // 檢查傳遞給 callFindById 的 id
+        callFindById(id);  // 檢查 callFindById 函數內部
     }
-    productModal.value.showModal();
+
+    console.log("Displaying modal, productModal reference:", productModal);  // 檢查 modal 引用
+    productModal.value.showModal();  // 顯示模態窗口
 }
+
 
 async function openCategory() {
     await callFindCategory(); // 等待資料加載完成
@@ -137,6 +246,7 @@ function addCategory() {
         axiosapi.post('/rent/category/add', { categoryName })
             .then(response => {
                 alert('分類已成功新增');
+                productModal.value.fetchCategories();
                 callFindCategory(); // 重新獲取分類數據
             })
             .catch(error => {
@@ -293,6 +403,7 @@ function callCatRemove(id) {
             axiosapi.delete(`/rent/category/${id}`)
                 .then(function (response) {
                     if (response.data && response.data.success) {
+                        callChildAMethod();
                         handleSuccess(response.data.message);
                     } else {
                         handleError(new Error(response.data.message || "刪除失敗，請稍後再試"));
@@ -339,7 +450,7 @@ function callFindById(id) {
         if (response.data) {
             product.value = response.data;
             console.log("成功取得商品資料:", product.value);
-
+            findEmployeeAccounts(product.value);  // 這裡傳入單一產品
             // 存儲 dailyFeeOriginal 的副本
             dailyFeeOriginalBackup.value = product.value.dailyFeeOriginal;
             console.log("dailyFeeOriginal 的副本:", dailyFeeOriginalBackup.value);
@@ -352,40 +463,59 @@ function callFindById(id) {
 }
 
 
-function callFind(page) {
-    current.value = page || 1;
-    start.value = (current.value - 1) * max.value;
-    findName.value = findName.value || null;
 
-    let body = { start: start.value, max: max.value, dir: false, order: "id", name: findName.value };
+// function callFind(page = 1) {
+//     current.value = page;
+//     start.value = (page - 1) * max.value;
 
-    Swal.fire({
-        text: "Loading...",
-        showConfirmButton: false,
-        allowOutsideClick: false,
-    });
+//     let body = {
+//         start: start.value,
+//         max: max.value,
+//         order: "productId"
+//     };
 
-    axiosapi.get("/rent/product/find", { params: body })
-        .then(async function (response) {
-            if (response.data && Array.isArray(response.data)) {
-                // 直接將 response.data 賦值給 products
-                products.value = response.data;
-                total.value = response.data.length;
+//     Swal.fire({
+//         text: "Loading...",
+//         showConfirmButton: false,
+//         allowOutsideClick: false,
+//     });
 
-                // 查詢所有產品的 employeeAccount
-                await fetchEmployeeAccounts();
-            } else {
-                console.error("產品數據格式不正確", response.data);
+//     axiosapi.post("/rent/product/find-advanced", body)
+//         .then(async function (response) {
+//             products.value = response.data.list;
+//             total.value = response.data.count;
+//             pages.value = Math.ceil(total.value / max.value);
+
+//             // 查詢每個產品的 categoryName 和 employeeAccount
+//             await fetchCategoryNames();
+//             await fetchEmployeeAccounts();
+
+//             Swal.close();
+//         })
+//         .catch(function (error) {
+//             Swal.fire({ text: "錯誤：" + error.message, icon: "error" });
+//         });
+// }
+
+
+// 新增查詢 categoryName 的函數
+const fetchCategoryNames = async () => {
+    const promises = products.value.map(async (product) => {
+        if (product.categoryId) {
+            try {
+                const response = await axiosapi.get(`/rent/category/${product.categoryId}`);
+                product.categoryName = response.data.categoryName;  // 假設回傳值有 categoryName
+            } catch (error) {
+                console.error('無法查詢 categoryName', error);
+                product.categoryName = 'N/A';  // 若查詢失敗，設為 'N/A'
             }
-            setTimeout(function () {
-                Swal.close();
-            }, 500);
-        })
-        .catch(function (error) {
-            Swal.close();
-            console.error('查詢失敗', error);
-        });
-}
+        } else {
+            product.categoryName = 'N/A';
+        }
+    });
+    await Promise.all(promises);  // 等待所有查詢完成
+};
+
 
 async function callCreate() {
     Swal.fire({
@@ -436,125 +566,125 @@ async function sendCreateRequest(body) {
 
 function callModify() {
 
-const employeeId = localStorage.getItem('employee_id');
+    const employeeId = localStorage.getItem('employee_id');
 
-// 檢查是否有售出紀錄且價格是否有變動
-if (hasSalesRecord.value && dailyFeeOriginalBackup.value !== product.value.dailyFeeOriginal) {
-    // 如果商品有售出紀錄且價格不同，顯示警告並阻止修改
-    Swal.fire({
-title: "價格無法修改",
-html: "本商品已有售出的紀錄，無法直接修改價格。<br>是否下架原商品、以新價目重新上架？",
-icon: "warning",
-showCancelButton: true,
-confirmButtonText: "下架並重新上架",
-cancelButtonText: "取消"
-}).then((result) => {
-if (result.isDismissed) {
-    // 取消按鈕的行為：恢復原始價格
-    product.value.dailyFeeOriginal = dailyFeeOriginalBackup.value;
-    console.log("已恢復原始價格:", dailyFeeOriginalBackup.value);
-} else if (result.isConfirmed) {
-    // 下架
-    let bodyM = {
-    productId: product.value.productId,
-    productName: product.value.productName || null,
-    dailyFeeOriginal: dailyFeeOriginalBackup.value,
-    maxAvailableQuantity: product.value.maxAvailableQuantity || null,
-    description: product.value.description || null,
-    categoryId: product.value.categoryId || null,
-    statusId: 3,
-    lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
-};
-let bodyA = {
-
-    productName: product.value.productName || null,
-    mainPhoto: product.value.mainPhoto || null,
-    dailyFeeOriginal: product.value.dailyFeeOriginal || null,
-    maxAvailableQuantity: product.value.maxAvailableQuantity || null,
-    description: product.value.description || null,
-    categoryId: product.value.categoryId || null,
-    statusId: product.value.statusId || null,
-    lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
-    addEmployeeId: employeeId || null, // 將 employee_id 塞進 body
-};
-    console.log("用戶選擇了下架並重新上架");
-    axiosapi.put(`/rent/product/${bodyM.productId}`, bodyM).then(function (responseM) {
-        console.log("商品已下架", responseM.data);
-
-        // 下架成功後，進行重新上架操作
-        axiosapi.post("/rent/product/add", bodyA).then(function (responseA) {
-            console.log("商品已重新上架", responseA.data);
-            handleSuccess("商品已成功下架並重新上架", productModal.value);  // 使用 handleSuccess 函數
-        }).catch(function (errorA) {
-            console.error("重新上架時發生錯誤", errorA);
-            Swal.fire({
-                text: "重新上架時發生錯誤",
-                icon: "error",
-                confirmButtonText: "確定"
-            });
-        });
-    }).catch(function (errorM) {
-        console.error("下架時發生錯誤", errorM);
+    // 檢查是否有售出紀錄且價格是否有變動
+    if (hasSalesRecord.value && dailyFeeOriginalBackup.value !== product.value.dailyFeeOriginal) {
+        // 如果商品有售出紀錄且價格不同，顯示警告並阻止修改
         Swal.fire({
-            text: "下架時發生錯誤",
-            icon: "error",
-            confirmButtonText: "確定"
+            title: "價格無法修改",
+            html: "本商品已有售出的紀錄，無法直接修改價格。<br>是否下架原商品、以新價目重新上架？",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "下架並重新上架",
+            cancelButtonText: "取消"
+        }).then((result) => {
+            if (result.isDismissed) {
+                // 取消按鈕的行為：恢復原始價格
+                product.value.dailyFeeOriginal = dailyFeeOriginalBackup.value;
+                console.log("已恢復原始價格:", dailyFeeOriginalBackup.value);
+            } else if (result.isConfirmed) {
+                // 下架
+                let bodyM = {
+                    productId: product.value.productId,
+                    productName: product.value.productName || null,
+                    dailyFeeOriginal: dailyFeeOriginalBackup.value,
+                    maxAvailableQuantity: product.value.maxAvailableQuantity || null,
+                    description: product.value.description || null,
+                    categoryId: product.value.categoryId || null,
+                    statusId: 3,
+                    lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
+                };
+                let bodyA = {
+
+                    productName: product.value.productName || null,
+                    mainPhoto: product.value.mainPhoto || null,
+                    dailyFeeOriginal: product.value.dailyFeeOriginal || null,
+                    maxAvailableQuantity: product.value.maxAvailableQuantity || null,
+                    description: product.value.description || null,
+                    categoryId: product.value.categoryId || null,
+                    statusId: product.value.statusId || null,
+                    lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
+                    addEmployeeId: employeeId || null, // 將 employee_id 塞進 body
+                };
+                console.log("用戶選擇了下架並重新上架");
+                axiosapi.put(`/rent/product/${bodyM.productId}`, bodyM).then(function (responseM) {
+                    console.log("商品已下架", responseM.data);
+
+                    // 下架成功後，進行重新上架操作
+                    axiosapi.post("/rent/product/add", bodyA).then(function (responseA) {
+                        console.log("商品已重新上架", responseA.data);
+                        handleSuccess("商品已成功下架並重新上架", productModal.value);  // 使用 handleSuccess 函數
+                    }).catch(function (errorA) {
+                        console.error("重新上架時發生錯誤", errorA);
+                        Swal.fire({
+                            text: "重新上架時發生錯誤",
+                            icon: "error",
+                            confirmButtonText: "確定"
+                        });
+                    });
+                }).catch(function (errorM) {
+                    console.error("下架時發生錯誤", errorM);
+                    Swal.fire({
+                        text: "下架時發生錯誤",
+                        icon: "error",
+                        confirmButtonText: "確定"
+                    });
+                });
+            }
         });
+        return;  // 阻止後續的修改操作
+    }
+
+    // 顯示 Loading 提示
+    Swal.fire({
+        text: "Loading......",
+        showConfirmButton: false,
+        allowOutsideClick: false,
     });
-}
-});
-    return;  // 阻止後續的修改操作
-}
 
-// 顯示 Loading 提示
-Swal.fire({
-    text: "Loading......",
-    showConfirmButton: false,
-    allowOutsideClick: false,
-});
-
-console.log(product.value.statusId);
-
-// 從 localStorage 取得 employee_id，並設為 lastUpdateEmployeeId
-// const employeeId = localStorage.getItem('employee_id');
-
-let body = {
-    productId: product.value.productId,
-    productName: product.value.productName || null,
-    dailyFeeOriginal: product.value.dailyFeeOriginal || null,
-    maxAvailableQuantity: product.value.maxAvailableQuantity || null,
-    description: product.value.description || null,
-    categoryId: product.value.categoryId || null,
-    statusId: product.value.statusId || null,
-    lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
-};
-
-axiosapi.put(`/rent/product/${body.productId}`, body).then(function (response) {
     console.log(product.value.statusId);
 
-    if (selectedImage.value) {
-        const reader = new FileReader();
-        reader.onloadend = function () {
-            const base64String = reader.result.split(",")[1];
-            let photoBody = { mainPhoto: base64String };
-            axiosapi.put(`/rent/product/${product.value.productId}/photo`, photoBody).then(function (response) {
-                if (response.data.success) {
-                    handleSuccessReload(response.data.message);
-                } else {
-                    handleError(new Error(response.data.message));
-                }
-            }).catch(handleError);
-        };
-        reader.onerror = handleError;
-        reader.readAsDataURL(selectedImage.value);
-    } else {
-        if (response.data.success) {
-            handleSuccess(response.data.message, productModal.value);
+    // 從 localStorage 取得 employee_id，並設為 lastUpdateEmployeeId
+    // const employeeId = localStorage.getItem('employee_id');
+
+    let body = {
+        productId: product.value.productId,
+        productName: product.value.productName || null,
+        dailyFeeOriginal: product.value.dailyFeeOriginal || null,
+        maxAvailableQuantity: product.value.maxAvailableQuantity || null,
+        description: product.value.description || null,
+        categoryId: product.value.categoryId || null,
+        statusId: product.value.statusId || null,
+        lastUpdateEmployeeId: employeeId || null, // 將 employee_id 塞進 body
+    };
+
+    axiosapi.put(`/rent/product/${body.productId}`, body).then(function (response) {
+        console.log(product.value.statusId);
+
+        if (selectedImage.value) {
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                const base64String = reader.result.split(",")[1];
+                let photoBody = { mainPhoto: base64String };
+                axiosapi.put(`/rent/product/${product.value.productId}/photo`, photoBody).then(function (response) {
+                    if (response.data.success) {
+                        handleSuccessReload(response.data.message);
+                    } else {
+                        handleError(new Error(response.data.message));
+                    }
+                }).catch(handleError);
+            };
+            reader.onerror = handleError;
+            reader.readAsDataURL(selectedImage.value);
         } else {
-            handleError(new Error(response.data.message));
+            if (response.data.success) {
+                handleSuccess(response.data.message, productModal.value);
+            } else {
+                handleError(new Error(response.data.message));
+            }
         }
-    }
-}).catch(handleError);
+    }).catch(handleError);
 }
 
 
@@ -579,6 +709,8 @@ function callCatModify(updatedCategory) {
         console.log(product.value.statusId);
 
         if (response.data.success) {
+            productModal.value.fetchCategories();
+
             handleSuccess(response.data.message, productModal.value);
         } else {
             handleError(new Error(response.data.message));
@@ -661,18 +793,25 @@ function formatDate(utcDateString) {
 }
 
 function showFullImage(imageData) {
-    // 將二進制的圖片資料轉換成 URL
-    const blob = new Blob([new Uint8Array(imageData)], { type: 'image/jpeg' }); // 假設是 JPEG 格式
-    const imageUrl = URL.createObjectURL(blob);
+    if (!imageData) {
+        console.error('No image data provided.');
+        return;
+    }
+
+    // 假設圖片是 Base64 編碼的
+    const imageUrl = `data:image/jpeg;base64,${imageData}`;
+    console.log('Generated Image URL (Base64):', imageUrl);
 
     Swal.fire({
-        imageUrl: product.mainPhoto,   // 使用圖片 URL
+        imageUrl: imageUrl,
         imageAlt: '產品圖片',
-        imageWidth: 'auto',   // 你可以根據需要調整
+        imageWidth: 'auto',
         imageHeight: 'auto',
         showConfirmButton: false
     });
 }
+
+
 
 onMounted(function () {
     callFind();
@@ -706,6 +845,48 @@ const fetchEmployeeAccounts = async () => {
         await Promise.all(promises);
     }
 };
+
+
+
+const findEmployeeAccounts = async (product) => {
+    if (product.lastUpdateEmployeeId) {
+        try {
+            const lastUpdateResponse = await axiosapi.get(`/api/employee/account/${product.lastUpdateEmployeeId}`);
+            product.lastUpdateEmployeeAccount = lastUpdateResponse.data;
+        } catch (error) {
+            console.error('無法查詢 lastUpdateEmployeeAccount', error);
+            product.lastUpdateEmployeeAccount = 'N/A';
+        }
+    } else {
+        product.lastUpdateEmployeeAccount = 'N/A';
+    }
+
+    if (product.addEmployeeId) {
+        try {
+            const addEmployeeResponse = await axiosapi.get(`/api/employee/account/${product.addEmployeeId}`);
+            product.addEmployeeAccount = addEmployeeResponse.data;
+        } catch (error) {
+            console.error('無法查詢 addEmployeeAccount', error);
+            product.addEmployeeAccount = 'N/A';
+        }
+    } else {
+        product.addEmployeeAccount = 'N/A';
+    }
+};
+function callChildAMethod() {
+    productModal.value.fetchCategories();
+}
+
+function truncateTextWithLineBreak(text, length) {
+    if (!text) return '';
+    const regex = new RegExp(`(.{${length}})`, 'g');
+    return text.replace(regex, '$1<br>');
+}
+
+function formatCurrency(amount) {
+    if (amount === null || amount === undefined) return '';
+    return '$' + amount.toLocaleString();
+}
 </script>
 
 <style></style>
