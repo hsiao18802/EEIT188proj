@@ -99,7 +99,7 @@ import CategoryModal from '@/components/product/CategoryModal.vue';
 import ProductSelect from '@/components/product/ProductSelect.vue'
 
 const start = ref(0);
-const max = ref(8);
+const max = ref(50);
 const current = ref(1);
 const total = ref(0);
 const pages = ref(0);
