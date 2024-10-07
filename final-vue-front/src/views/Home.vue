@@ -19,8 +19,16 @@
 </template>
 
 <script setup>
-import Carousel from '@/components/Carousel.vue';
+import Carousel from '@/components/layout/Carousel.vue';
 import useUserStore from '@/stores/user';
 const userStore = useUserStore();
+
+
+
 </script>
-<style></style>
+<style>
+
+
+
+
+</style>

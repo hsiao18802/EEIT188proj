@@ -65,8 +65,8 @@
 
       <div class="agreement-section">
         <input type="checkbox" id="terms-checkbox" v-model="termsAccepted" />
-        <label for="terms-checkbox">我接受上述條款與條件</label>
-        <button type="button" @click="showTerms">了解更多</button>
+        <label for="terms-checkbox">我接受網站條款與條件</label>
+        <button type="button" @click="showTerms">點擊了解更多</button>
       </div>
 
       <button @click="submitOrder" type="submit" class="checkout-button" :disabled="!termsAccepted">繼續付款</button>
@@ -212,7 +212,7 @@ const getProductImage = (productId) => {
 const showTerms = async () => {
   await Swal.fire({
     title: '租借規則',
-    text: '搞破壞會罰錢',
+    text: '搞破壞會罰錢。裝備可以在我們的位置取件或送到您的住處。要安排送貨，請致電 208-206-9011。租用裝備的送貨服務基於先到先得的原則。裝備歸還所有租用的裝備租期為 24 小時。裝備必須在此期間內歸還，否則會收取額外租金。',
     icon: 'info',
     confirmButtonText: '了解'
   });
@@ -445,58 +445,32 @@ const formatDate = (dateString) => {
 }
 
 .agreement-section {
-  position: fixed;
-  /* 固定在畫面底部 */
-  bottom: 200px;
-  /* 距離底部 60px（留出空間給付款按鈕） */
-  left: 63%;
-  /* 居中 */
-  transform: translateX(-50%);
-  /* 確保水平居中 */
-  background-color: rgba(255, 255, 255, 0.9);
-  /* 背景顏色 */
-  padding: 10px;
-  /* 內邊距 */
-  border-radius: 8px;
-  /* 圓角邊框 */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  /* 陰影效果 */
-  text-align: center;
-  /* 文字置中 */
-  width: 90%;
-  /* 寬度 90%（可根據需求調整） */
-  max-width: 400px;
-  /* 最大寬度 */
+  display: flex;
+  align-items: center;
+  margin-top: 20px; /* 這個可以根據需要調整 */
+}
+
+.agreement-section button {
+  margin-left: 15px; /* 增加按鈕之間的間距 */
 }
 
 .checkout-button {
   position: fixed;
   /* 固定在畫面底部 */
-  bottom: 200Px;
-  /* 距離底部 px */
+  bottom: 150px; /* 調整這裡的距離以符合需求 */
   left: 50%;
-  /* 居中 */
   transform: translateX(-50%);
-  /* 確保水平居中 */
   padding: 10px 20px;
-  /* 按鈕內邊距 */
   border: none;
-  /* 無邊框 */
   border-radius: 5px;
-  /* 圓角 */
   background-color: #007BFF;
-  /* 按鈕顏色 */
   color: white;
-  /* 字體顏色 */
   cursor: pointer;
-  /* 游標變為手形 */
 }
 
 .checkout-button:disabled {
   background-color: #A9A9A9;
-  /* 禁用狀態的顏色 */
   cursor: not-allowed;
-  /* 游標變為禁止 */
 }
 
 
