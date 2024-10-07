@@ -104,4 +104,8 @@ public class CategoryService {
         newCategory.setDisplaySequence(1); // 新增分類排在最上面
         return categoryRepository.save(newCategory);
     }
+    
+    public Optional<ProductCategory> findById(Integer id) {
+        return categoryRepository.findById(id);
+    }
 }

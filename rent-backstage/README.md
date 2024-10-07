@@ -5,7 +5,7 @@ npm install element-plus
 
 ## Lu
 npm install vuedraggable
-
+npm install vuejs-paginate-next --save
 
 # rent-backstage
 

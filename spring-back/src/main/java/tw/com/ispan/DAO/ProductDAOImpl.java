@@ -30,8 +30,8 @@ public class ProductDAOImpl implements ProductDAO {
         Integer max = obj.isNull("max") ? 10 : obj.getInt("max");
         Boolean dir = obj.isNull("dir") ? false : obj.getBoolean("dir");
         String order = obj.isNull("order") ? "productId" : obj.getString("order");
+        Integer statusId = obj.isNull("statusId") ? null : obj.getInt("statusId");  // 動態的 statusId
 
-        // 打印解析出來的查詢條件
         System.out.println("Parsed Query Conditions:");
         System.out.println("Category ID: " + categoryId);
         System.out.println("Product Name: " + productName);
@@ -39,6 +39,7 @@ public class ProductDAOImpl implements ProductDAO {
         System.out.println("Max: " + max);
         System.out.println("Dir (Descending Order): " + dir);
         System.out.println("Order by: " + order);
+        System.out.println("Status ID: " + statusId);
 
         // 使用 Criteria API 構建查詢
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -56,10 +57,11 @@ public class ProductDAOImpl implements ProductDAO {
             predicates.add(cb.like(product.get("productName"), "%" + productName + "%"));
             System.out.println("Added Name Predicate: productName LIKE '%" + productName + "%'");
         }
-
-        // 加入 status_id = 2 的條件
-        predicates.add(cb.equal(product.get("statusId"), 2));
-        System.out.println("Added Status Predicate: statusId = 2");
+        // 動態狀態篩選
+        if (statusId != null) {
+            predicates.add(cb.equal(product.get("statusId"), statusId));
+            System.out.println("Added Status Predicate: statusId = " + statusId);
+        }
 
         // 如果有條件，將其加入到查詢中
         if (!predicates.isEmpty()) {
@@ -93,6 +95,7 @@ public class ProductDAOImpl implements ProductDAO {
 
         return result;
     }
+
 
 
     @Override
