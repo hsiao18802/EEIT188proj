@@ -8,6 +8,8 @@ npm install dayjs
 npm install @mdi/font
 npm install element-plus
 npm install vue-countdown --save
+npm install --save @fortawesome/fontawesome-free
+
 
 
 
