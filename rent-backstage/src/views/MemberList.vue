@@ -34,29 +34,53 @@
   
   <style scoped>
   .member-list {
-    width: 200px;
-    border-right: 1px solid #ddd;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.member-list h3 {
+    font-family: 'Arial', sans-serif;
+    font-size: 1.2em;
+    text-align: center;
+    color: #333;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.member-list ul {
+    padding: 0 10px;
+}
+
+.member-list li {
+    font-family: 'Verdana', sans-serif;
+    font-size: 1em;
+    margin-bottom: 5px;
+    border-radius: 5px;
     padding: 10px;
-  }
-  .member-list ul {
-    list-style: none;
-    padding: 0;
-  }
-  .member-list li {
-    padding: 5px;
-    cursor: pointer;
-  }
-  .member-list li:hover {
-    background-color: #f0f0f0;
-    cursor: pointer; /* 滑鼠懸停時變成手指樣式 */
-    color: blue; /* 滑鼠懸停時改變字體顏色 */
-  }
-  .clickable-member {
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease; /* 平滑的點擊效果 */
-  }
-  .clickable-member:hover {
-    background-color: #e0e0e0; /* 滑鼠懸停時的背景顏色變化 */
-  }
+    transition: all 0.3s ease-in-out;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.member-list li:hover {
+    background: #e7f3ff;
+    transform: translateY(-3px);
+    color: #0056b3;
+}
+
+.clickable-member::before {
+    content: "👤 ";
+}
+
+.clickable-member:hover::before {
+    content: "👉 ";
+}
+
+.clickable-member:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid #007bff;
+}
+
   </style>
   

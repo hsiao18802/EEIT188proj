@@ -62,7 +62,7 @@
         }
   
         stompClient = new Client({
-          brokerURL: 'ws://192.168.1.102:8080/ws/websocket',
+          brokerURL: 'ws://192.168.36.65:8080/ws/websocket',
           connectHeaders: {
             login: 'user',
             passcode: 'password',
@@ -172,82 +172,122 @@
   </script>
   
   <style scoped>
-  .chat-window {
-    background-color: #f9f9f9;
+ .chat-window {
+    background-color: #2c3e50;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     padding: 20px;
     width: 100%;
-  }
-  
-  .messages {
+    color: #ecf0f1; /* 設定整體文字顏色 */
+}
+
+h3 {
+    font-size: 1.6em;
+    font-weight: bold;
+    text-align: center;
+    color: #ecf0f1;
+}
+
+.messages {
     height: 400px;
     overflow-y: auto;
-    border: 1px solid #ddd;
+    border: 1px solid #34495e;
     padding: 15px;
     margin-bottom: 10px;
-    background-color: white;
-  }
-  
-  .user-message {
-    text-align: left;
-    background-color: #d3e2ff;
-    padding: 10px;
+    background-color: #34495e;
     border-radius: 10px;
-    margin-bottom: 5px;
-    max-width: 70%;
-  }
-  
-  .support-message {
-    text-align: right;
-    background-color: #f0f0f0;
-    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.user-message {
+    align-self: flex-start;
+    background-color: #3498db;
+    color: white;
+    padding: 12px;
     border-radius: 10px;
-    margin-bottom: 5px;
     max-width: 70%;
-    margin-left: auto;
-  }
-  
-  .message-content {
-    font-size: 14px;
+    word-wrap: break-word;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.support-message {
+    align-self: flex-end;
+    background-color: #e74c3c;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    max-width: 70%;
+    word-wrap: break-word;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.message-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-content {
+    font-size: 1.1em;
     margin: 0;
-  }
-  
-  .message-timestamp {
-    font-size: 12px;
-    color: gray;
-    margin: 5px 0 0;
-  }
-  
-  textarea {
+}
+
+.message-timestamp {
+    font-size: 0.9em;
+    color: #bdc3c7;
+    margin-top: 5px;
+}
+
+textarea {
     width: 100%;
-    height: 50px;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-  }
-  
-  .send-btn, .resolve-btn {
+    height: 60px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1.1em;
+    background-color: #34495e;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+textarea:focus {
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0, 255, 255, 0.2);
+}
+
+.send-btn, .resolve-btn {
     margin-top: 10px;
-    padding: 10px;
-    width: 100px;
-    border-radius: 5px;
+    padding: 12px 20px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
-  }
-  
-  .send-btn {
-    background-color: #007bff;
+    font-size: 1.1em;
+}
+
+.send-btn {
+    background-color: #2980b9;
     color: white;
-  }
-  
-  .resolve-btn {
-    background-color: #28a745;
+    transition: background-color 0.3s ease;
+}
+
+.send-btn:hover {
+    background-color: #1c638c;
+}
+
+.resolve-btn {
+    background-color: #27ae60;
     color: white;
-  }
-  
-  .send-btn:hover, .resolve-btn:hover {
-    opacity: 0.8;
-  }
+    transition: background-color 0.3s ease;
+}
+
+.resolve-btn:hover {
+    background-color: #1e8e4a;
+}
+
+.send-btn:active, .resolve-btn:active {
+    background-color: #1c638c;
+}
+
   </style>
   

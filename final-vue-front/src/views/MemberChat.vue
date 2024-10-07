@@ -83,7 +83,7 @@ export default {
 
       // 初始化 Stomp 客戶端
       stompClient = new Client({
-        brokerURL: 'ws://192.168.1.102:8080/ws/websocket',
+        brokerURL: 'wss://09c6-1-160-11-21.ngrok-free.app/ws/websocket',
         connectHeaders: {
           login: 'user',
           passcode: 'password',
@@ -207,69 +207,66 @@ export default {
   width: 600px;
   margin: 50px auto;
   font-family: 'Helvetica Neue', Arial, sans-serif;
-  background-color: #3d4e68;
+  background: linear-gradient(135deg, #2c3e50, #4ca1af); /* 使用相同的背景漸層效果 */
   border-radius: 10px;
   padding: 20px;
-  /* 添加黑色漸層邊框 */
-  border: 1px solid #000;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), /* 外邊框 */
-              inset 0 0 15px rgba(0, 0, 0, 0.3); /* 內邊框漸層 */
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
 
 h3 {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
-  color: #333;
+  margin-bottom: 20px;
+  color: #ecf0f1;
 }
 
 .messages {
   height: 400px;
   overflow-y: auto;
-  border: 1px solid #eee;
   padding: 15px;
   margin-bottom: 20px;
-  background-color: #fafafa;
+  background-color: #34495e;
   border-radius: 10px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 10px; /* 增加訊息框之間的距離 */
+  gap: 12px;
 }
 
 .message-box {
-  padding: 12px;
+  padding: 14px;
   border-radius: 8px;
-  max-width: 75%; /* 限制最大寬度，不會超出視窗 */
-  word-wrap: break-word; /* 自動換行 */
-  transition: background-color 0.3s ease;
+  max-width: 75%;
+  word-wrap: break-word;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.3s ease;
 }
 
 .user-message {
-  align-self: flex-start; /* 讓用戶消息靠左 */
-  background-color: #e0f7fa;
-  color: #00796b;
+  align-self: flex-start;
+  background-color: #1abc9c;
+  color: white;
 }
 
 .support-message {
-  align-self: flex-end; /* 讓客服消息靠右 */
-  background-color: #ffebee;
-  color: #c62828;
+  align-self: flex-end;
+  background-color: #e74c3c;
+  color: white;
 }
 
 .message-sender {
-  font-weight: 700;
-  font-size: 12px;
-  margin-bottom: 6px;
-  color: #555;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: #ecf0f1;
 }
 
 .message-content {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .input-area {
@@ -282,35 +279,42 @@ h3 {
   flex: 1;
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid #ddd;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
+  border: none;
+  font-size: 15px;
+  background-color: #2c3e50;
+  color: #ecf0f1;
+  transition: box-shadow 0.3s ease;
 }
 
 .input-message:focus {
-  border-color: #00796b;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
   outline: none;
-  box-shadow: 0 0 5px rgba(0, 121, 107, 0.2);
 }
 
 .send-button {
-  background-color: #00796b;
+  background-color: #1abc9c;
   color: white;
   border: none;
-  padding: 12px 20px;
+  padding: 12px 18px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   transition: background-color 0.3s ease;
 }
 
 .send-button:hover {
-  background-color: #004d40;
+  background-color: #16a085;
 }
 
 .send-button:active {
-  background-color: #00251a;
+  background-color: #149174;
 }
+
+.send-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
 
 
 </style>

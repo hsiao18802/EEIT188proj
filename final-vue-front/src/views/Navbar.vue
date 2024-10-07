@@ -22,7 +22,6 @@
           <li class="nav-item">
             <RouterLink class="nav-link active" aria-current="page" to="/coupon">索取折扣碼</RouterLink>
           </li>
-         
         </ul>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item" v-if="!userStore.isLogin">
@@ -34,8 +33,12 @@
 
           <!-- 顯示會員大頭貼與 "你好 realName" -->
           <li class="nav-item d-flex align-items-center" v-if="userStore.isLogin">
-            <!-- 在此處確認圖片是JPEG或PNG，並正確設置Base64前綴 -->
-            <img :src="'data:image/jpeg;base64,' + userStore.memberPhoto" alt="會員大頭貼" class="member-photo me-2" />
+            <!-- 如果 memberPhoto 沒有值，則顯示預設圖片 -->
+            <img 
+              :src="userStore.memberPhoto ? 'data:image/jpeg;base64,' + userStore.memberPhoto : defaultPhoto" 
+              alt="會員大頭貼" 
+              class="member-photo me-2" 
+            />
             <span class="text-white">你好，{{ userStore.realname }} !!</span>
           </li>
 
@@ -48,7 +51,7 @@
             <ul class="dropdown-menu">
               <li><RouterLink class="dropdown-item" to="/members/info">會員資料</RouterLink></li>
               <li><RouterLink class="dropdown-item" to="/members/memberOrder">會員訂單</RouterLink></li>
-              <li><RouterLink class="dropdown-item" to="/support/memberchat">會員客服</RouterLink></li>
+              <li><RouterLink class="dropdown-item" to="/support/memberchat">即時人工客服</RouterLink></li>
             </ul>
           </li>
         </ul>
@@ -67,6 +70,7 @@ import { useCartStore } from '@/stores/cartStore';
 const userStore = useUserStore();
 const router = useRouter();
 const cartStore = useCartStore();
+const defaultPhoto = '/640.jpeg'; // 設置你的預設圖片路徑
 
 async function logout() {
   try {

@@ -84,63 +84,63 @@ const doInput = (name, event) => {
 const addCart = async () => {
     const membersId = userStore.membersId;
 
-    // if (!userStore.isLogin) {
-    //     // 未登入，跳轉到登入頁面
-    //     router.push('/secure/login');
-    //     return;
-    // } else {
-    //     try {
-    //         // 確認傳入了正確的商品資訊
-    //         await cartStore.addCart({
-    //             productId: props.product.productId,
-    //             productName: props.product.productName,
-    //             dailyFeeOriginal: props.product.dailyFeeOriginal,
-    //             count: count.value,
-    //             membersId: membersId,
-    //             mainPhoto: props.product.mainPhoto,
-    //             startDate: props.rentalStartDate, 
-    //             endDate: props.rentalEndDate  ,
-    //             cartId:null
+    if (!userStore.isLogin) {
+        // 未登入，跳轉到登入頁面
+        router.push('/secure/login');
+        return;
+    } else {
+        try {
+            // 確認傳入了正確的商品資訊
+            await cartStore.addCart({
+                productId: props.product.productId,
+                productName: props.product.productName,
+                dailyFeeOriginal: props.product.dailyFeeOriginal,
+                count: count.value,
+                membersId: membersId,
+                mainPhoto: props.product.mainPhoto,
+                startDate: props.rentalStartDate, 
+                endDate: props.rentalEndDate  ,
+                cartId:null
             
 
                 
-    //         });
+            });
 
-    //         // 執行動畫效果
-    //         await nextTick();
-    //         if (animationBall.value) {
-    //             animationBall.value.style.display = 'block';
-    //             await nextTick();
+            // 執行動畫效果
+            await nextTick();
+            if (animationBall.value) {
+                animationBall.value.style.display = 'block';
+                await nextTick();
                 
-    //             // GSAP 動畫
-    //             gsap.fromTo(animationBall.value, 
-    //                 { x: 0, y: 0, scale: 1 }, 
-    //                 { 
-    //                     duration: 1, 
-    //                     x: 400, 
-    //                     y: -300, 
-    //                     scale: 0, 
-    //                     ease: "power2.out",
-    //                     onComplete: async () => {
-    //                         animationBall.value.style.display = 'none';
-    //                         if (exampleObj.value) {
-    //                             exampleObj.value.hide();
-    //                         }
-    //                     }
-    //                 }
-    //             );
-    //         }
-    //     } catch (error) {
-    //         console.error('加入購物車失敗:', error);
-    //         Swal.fire({
-    //             title: '錯誤',
-    //             text: "加入購物車失敗，請稍後再試。",
-    //             icon: "error",
-    //             confirmButtonText: '確定',
-    //             position: 'center'
-    //         });
-    //     }
-    // }
+                // GSAP 動畫
+                gsap.fromTo(animationBall.value, 
+                    { x: 0, y: 0, scale: 1 }, 
+                    { 
+                        duration: 1, 
+                        x: 400, 
+                        y: -300, 
+                        scale: 0, 
+                        ease: "power2.out",
+                        onComplete: async () => {
+                            animationBall.value.style.display = 'none';
+                            if (exampleObj.value) {
+                                exampleObj.value.hide();
+                            }
+                        }
+                    }
+                );
+            }
+        } catch (error) {
+            console.error('加入購物車失敗:', error);
+            Swal.fire({
+                title: '錯誤',
+                text: "加入購物車失敗，請稍後再試。",
+                icon: "error",
+                confirmButtonText: '確定',
+                position: 'center'
+            });
+        }
+    }
 };
 
         
