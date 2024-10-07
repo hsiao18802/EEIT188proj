@@ -22,7 +22,7 @@
         class="message-input"
       ></textarea>
       <button @click="sendMessage" class="send-btn">發送</button>
-      <button @click="markAsResolved" class="resolve-btn">以解決</button> <!-- 新增按鈕 -->
+      <button @click="markAsResolved" class="resolve-btn">已解決</button> <!-- 新增按鈕 -->
     </div>
   </template>
   

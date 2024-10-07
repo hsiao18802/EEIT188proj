@@ -1,44 +1,33 @@
 <template>
-  <div class="member-info">
-    <h1>會員資料</h1>
-    <div v-if="member">
-      <!-- 大頭貼顯示，點擊圖片觸發文件選擇 -->
-      <p class="profile-photo-container" @click="onClickPhoto">
-        <img :src="photoPreviewUrl || defaultPhoto" alt="會員照片" class="profile-photo" />
-      </p>
-
-      <!-- 隱藏的文件選擇器 -->
-      <input type="file" ref="fileInput" style="display: none;" @change="onFileChange" />
-
-      <!-- 基本資料編輯表單 -->
-      <p><strong>使用者名稱:</strong> {{ member.username }}</p>
-
-      <p>
-        <label><strong>姓名:</strong></label>
-        <input type="text" v-model="member.realName" />
-      </p>
-
-      <p>
-        <label><strong>電子郵件:</strong></label>
-        <input type="email" v-model="member.email" />
-      </p>
-
-      <p>
-        <label><strong>電話號碼:</strong></label>
-        <input type="text" v-model="member.phone" />
-      </p>
-
-      <p>
-        <label><strong>地址:</strong></label>
-        <input type="text" v-model="member.address" />
-      </p>
-
-      <!-- 更新基本資料按鈕 -->
-      <button @click="updateMemberInfo">更新基本資料</button>
-
-    </div>
-    <div v-else>
-      <p>載入中...</p>
+  <div class="member-info-background"> <!-- 父容器，用於放置背景圖片 -->
+    <div class="member-info">
+      <h1>會員資料</h1>
+      <div v-if="member">
+        <p class="profile-photo-container" @click="onClickPhoto">
+          <img :src="photoPreviewUrl || defaultPhoto" alt="會員照片" class="profile-photo" />
+        </p>
+        <p><strong>使用者名稱:</strong> {{ member.username }}</p>
+        <p>
+          <label><strong>姓名:</strong></label>
+          <input type="text" v-model="member.realName" />
+        </p>
+        <p>
+          <label><strong>電子郵件:</strong></label>
+          <input type="email" v-model="member.email" />
+        </p>
+        <p>
+          <label><strong>電話號碼:</strong></label>
+          <input type="text" v-model="member.phone" />
+        </p>
+        <p>
+          <label><strong>地址:</strong></label>
+          <input type="text" v-model="member.address" />
+        </p>
+        <button @click="updateMemberInfo">更新基本資料</button>
+      </div>
+      <div v-else>
+        <p>載入中...</p>
+      </div>
     </div>
   </div>
 </template>
@@ -183,15 +172,40 @@ function updateMemberInfo() {
 </script>
 
 <style scoped>
+/* 父容器，負責顯示背景圖片 */
+.member-info-background {
+  margin-top: 50px;
+  background-image: url('https://t4.ftcdn.net/jpg/02/44/74/51/360_F_244745114_mK5n4nO4sAbJph8cdTrMT75uhetthlwJ.jpg');
+  background-size: contain;
+  background-position: center;
+  background-attachment: fixed;
+  padding: 20px;
+  position: relative;
+}
+
+/* 使用 ::before 添加遮罩來讓背景圖片變淡 */
+.member-info-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.1); /* 這個遮罩讓背景圖片變淡，0.6 是透明度 */
+  z-index: 0; /* 保證遮罩位於背景圖片之上 */
+}
+
 .member-info {
+  position: relative;
+  z-index: 1; /* 確保內容位於遮罩之上 */
   max-width: 600px;
   margin: 20px auto;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 10px;
-  background-color: #aaa0a0;
-  position: relative;
+  background-color: white; /* 保留背景顏色 */
 }
+
 
 .profile-photo {
   width: 200px;
