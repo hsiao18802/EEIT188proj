@@ -234,6 +234,7 @@ function callFind(page, categoryId = null, clear = false) {
         total.value = response.data.count;  // 更新頁面上的總數（會因為分類或其他條件變動）
 
         loading.value = false;  // 查詢完成，隱藏 loading 狀態
+      triggerAvailabilityCheck();
         
         setTimeout(function() {
             Swal.close();
@@ -385,6 +386,7 @@ const clearDates = () => {
   rentalStartDate.value = null;
   rentalEndDate.value = null;
   cartStore.setRentalDates(null, null); // 同步清除購物車中的日期
+  isDateSelected.value = false;
 };
 // 日期功能 end
 

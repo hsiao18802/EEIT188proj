@@ -29,7 +29,9 @@
             <tr v-for="product in products" :key="product.id" style="vertical-align: middle;">
                 <td style="text-align: left;">
                     <img v-if="product.mainPhoto" :alt="product.productName" v-default-img="product.mainPhoto"
-                        style="width: 100px; height: 100px;" @click="showFullImage(product.mainPhoto)">
+                        :key="product.productId" style="width: 100px; height: 100px;"
+                        @click="showFullImage(product.mainPhoto)">
+
                     <span v-else><a class="btn btn-primary"
                             @click="openModal('changepic', product.productId)">新增圖片</a></span>
                 </td>
@@ -99,7 +101,7 @@ import CategoryModal from '@/components/product/CategoryModal.vue';
 import ProductSelect from '@/components/product/ProductSelect.vue'
 
 const start = ref(0);
-const max = ref(50);
+const max = ref(16);
 const current = ref(1);
 const total = ref(0);
 const pages = ref(0);
@@ -139,6 +141,10 @@ function callFind(page = 1) {
 
     axiosapi.post("/rent/product/find-advanced", body)
         .then(async function (response) {
+            products.value.forEach(product => {
+                product.mainPhoto = null; // 清除舊圖片
+            });
+
             products.value = response.data.list;
             total.value = response.data.count;
             pages.value = Math.ceil(total.value / max.value);
@@ -177,6 +183,7 @@ function callFind(page = 1) {
             Swal.fire({ text: "錯誤：" + error.message, icon: "error" });
         });
 }
+
 
 
 
