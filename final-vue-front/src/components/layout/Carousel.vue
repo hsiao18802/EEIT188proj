@@ -76,9 +76,16 @@
 
 
 
-      <!-- 引入消費者心得組件 -->
-      <Testimonials :testimonials="testimonials" />
-      <HowTo></HowTo>
+
+     <!-- IG PO文 -->
+      <inst class="spaced-component" ></inst>
+
+            <!-- 消費者心得 -->
+            <Testimonials :testimonials="testimonials" />
+
+      
+      <HowTo class="spaced-component" ></HowTo>
+      
       
 </template>
 
@@ -87,6 +94,8 @@ import { ref, onMounted } from 'vue';
 import Testimonials from './Testimonials.vue'; // 引入消費者心得組件
 import ProductSection from '@/components/layout/ProductSection.vue'; 
 import HowTo from '@/components/layout/HowTo.vue'; 
+import inst from '@/components/layout/inst.vue'; 
+
 
 
 
@@ -224,6 +233,10 @@ onMounted(() => {
 .product-section {
   flex: 1; /* 使兩個區塊平分寬度 */
   color: black; /* 設定文字顏色為黑色 */
+}
+
+.spaced-component {
+  margin-bottom: 20px; /* 組件之間的垂直間距 */
 }
 
 

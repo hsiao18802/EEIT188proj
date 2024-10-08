@@ -57,7 +57,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('https://www.planetware.com/wpimages/2021/04/camping-for-beginners-how-to-camp-tents-along-a-river.jpg');
+    background-image: url('https://cdn.pixabay.com/photo/2021/10/09/00/15/landscape-6692712_1280.jpg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: 200% 100%; /* 設置圖片寬度為 200%，高度為 100% */
