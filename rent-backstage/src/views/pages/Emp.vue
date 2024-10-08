@@ -8,6 +8,9 @@
       <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
       <button type="button" class="btn btn-outline-primary" @click="openPasswordModal">修改密碼</button>
     </div>
+    <div v-else>
+      <button type="button" class="btn btn-outline-primary" @click="openPasswordModal">修改密碼</button>
+    </div>
   </div>
 
   <br>
@@ -23,10 +26,10 @@
     </thead>
     <tbody>
       <tr v-for="employee in employees" :key="employee.employeeId">
-        <th scope="row">{{ employee.employeeAccount }}</th>
-        <td>{{ employee.employeeEmail }}</td>
-        <td>{{ formatAccessLevel(employee.accessLevel) }}</td>
-        <td>
+        <th scope="row" style="vertical-align: middle;">{{ employee.employeeAccount }}</th>
+        <td style="vertical-align: middle;">{{ employee.employeeEmail }}</td>
+        <td style="vertical-align: middle;">{{ formatAccessLevel(employee.accessLevel) }}</td>
+        <td style="vertical-align: middle;">
           <div class="btn-group col text-end" v-if="selfAdmin === 1">
             <!-- 當前使用者是管理員時顯示操作按鈕 -->
             <a class="btn btn-primary" @click="openModal('update', employee.employeeId)">修改</a>
@@ -40,6 +43,7 @@
         </td>
       </tr>
     </tbody>
+
   </table>
 
   <!-- 綁定子組件的模態框 -->

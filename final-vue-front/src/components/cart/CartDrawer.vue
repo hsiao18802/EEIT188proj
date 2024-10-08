@@ -6,8 +6,14 @@
     <div class="cart-drawer">
       <div class="cart-header">
         <h3>My reservation</h3>
-        <p>租借日期: {{ formattedRentalStartDate }} 到 {{ formattedRentalEndDate }} </p>
-        <p>共 {{ rentalDays }} 天</p>
+        <p v-if="formattedRentalStartDate !== 'Invalid Date' && formattedRentalEndDate !== 'Invalid Date'">
+          租借日期: {{ formattedRentalStartDate }} 到 {{ formattedRentalEndDate }}
+        </p>
+        <p v-else>租借日期 : 請選擇日期</p>
+        <p v-if="!isNaN(rentalDays)">
+          共 {{ rentalDays }} 天
+        </p>
+
       </div>
 
       <div class="cart-content">

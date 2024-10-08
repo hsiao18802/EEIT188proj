@@ -7,14 +7,17 @@
       <h3>購物車確認</h3>
       <div class="rental-dates-card" @click="!rentalStartDate && !rentalEndDate ? showDatePicker = true : null">
         <div class="rental-date rental-start">
-          <p>開始日期</p>
-          <p>{{ formattedRentalStartDate }}</p>
-        </div>
-        <div class="rental-date rental-end">
-          <div class="rental-date rental-gap"></div>
-          <p>結束日期</p>
-          <p>{{ formattedRentalEndDate }}</p>
-        </div>
+  <p>開始日期</p>
+  <p v-if="formattedRentalStartDate !== 'Invalid Date'">{{ formattedRentalStartDate }}</p>
+  <p v-else>請選擇日期</p>
+</div>
+<div class="rental-date rental-end">
+  <div class="rental-date rental-gap"></div>
+  <p>結束日期</p>
+  <p v-if="formattedRentalEndDate !== 'Invalid Date'">{{ formattedRentalEndDate }}</p>
+  <p v-else>請選擇日期</p>
+</div>
+
       </div>
       <p class="rental-days">共 {{ rentalDays }} 天</p>
     </div>
