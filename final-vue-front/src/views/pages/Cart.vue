@@ -19,7 +19,7 @@
 </div>
 
       </div>
-      <p class="rental-days">共 {{ rentalDays }} 天</p>
+  <p v-if="formattedRentalEndDate !== 'Invalid Date'" class="rental-days">共 {{ rentalDays }} 天</p>
     </div>
 
 

@@ -236,17 +236,18 @@ const register = async () => {
   max-width: 380px;
   margin: 50px auto;
   padding: 40px;
-  background-color: #382d2d;
+  background-color: rgba(241, 239, 239);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(126, 118, 118, 0.1);
+  box-shadow: 0 10px 30px rgba(126, 118, 118, 0.6);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 
 h2 {
   text-align: center;
   font-size: 26px;
   font-weight: 600;
-  color: #eedddd;
+  color: #030303;
   margin-bottom: 30px;
 }
 
@@ -262,7 +263,7 @@ h2 {
 .form-group label {
   font-size: 14px;
   font-weight: 500;
-  color: #eedddd;
+  color: #050505;
   margin-bottom: 8px;
   display: block;
 }
@@ -304,7 +305,7 @@ h2 {
 /* 設置錯誤訊息為紅色 */
 .error-message {
   color: red;
-  font-size: 14px;
+  font-size: 20px;
   margin-top: 5px;
   display: block;
 }
@@ -312,7 +313,7 @@ h2 {
 /* 設置正確訊息為綠色 */
 .success-message {
   color: green;
-  font-size: 14px;
+  font-size: 20px;
   margin-top: 5px;
   display: block;
 }

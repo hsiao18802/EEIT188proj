@@ -21,7 +21,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { ecpayAPI } from '@/apis/order';
 import { useOrderStore } from '@/stores/orderStore';
 
-const countdownTime = 1; // 倒數30分鐘
+const countdownTime = 30; // 倒數30分鐘
 const remainingTime = ref(countdownTime * 60); // 倒數秒數
 const isExpired = ref(false);
 const orderStore = useOrderStore();

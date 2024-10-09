@@ -20,7 +20,7 @@
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <RouterLink class="nav-link active" aria-current="page" to="/coupon">關於我們</RouterLink>
+            <RouterLink class="nav-link active" aria-current="page" to="#">關於我們</RouterLink>
           </li>
 
           <li class="nav-item">

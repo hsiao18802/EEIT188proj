@@ -1,7 +1,8 @@
 <template>
     <h1 style="font-family: '微軟正黑體', sans-serif; font-size: xx-large; font-weight: bold;">商品管理</h1>
     <div class="row">
-        <div class="col-2 btn-group">
+      <div v-if="selfAdmin === 99"></div>
+        <div v-else class="col-2 btn-group">
             <button type="button" class="btn btn-primary" @click="openModal('insert')">開啟新增</button>
             <button type="button" class="btn btn-outline-primary" @click="openCategory">分類管理</button>
         </div>
@@ -46,7 +47,8 @@
                 <td style="text-align: right;">{{ formatCurrency(product.dailyFeeOriginal) }}</td>
                 <td style="text-align: right;" v-html="truncateTextWithLineBreak(product.description, 15)"></td>
                 <td style="text-align: right;">
-                    <div class="btn-group col text-end">
+                  <div v-if="selfAdmin === 99">請洽系統管理員</div>
+                    <div v-else class="btn-group col text-end">
                         <a class="btn btn-primary" @click="openModal('update', product.productId)">修改</a>
                         <a class="btn btn-outline-danger" @click="callDiscontinue(product.productId)">下架</a>
                         <a class="btn btn-danger" @click="callRemove(product.productId)">刪除</a>
@@ -820,9 +822,27 @@ function showFullImage(imageData) {
 
 
 
-onMounted(function () {
+onMounted(async () => {
     callFind();
+
+    // 查詢本地存儲中的 employeeId
+    const employeeId = localStorage.getItem('employee_id');
+
+    if (employeeId) {
+        try {
+            // 使用 employeeId 查詢對應的員工資料
+            const response = await axiosapi.get(`/api/employee/${employeeId}`);
+            const employeeData = response.data.employee; // 從 API 回應中提取員工資料
+
+            // 設置查詢結果到 selfAccount 和 selfAdmin
+            selfAdmin.value = employeeData.accessLevel; // 直接顯示 accessLevel 數字
+            console.log(selfAdmin.value);
+        } catch (error) {
+            console.error('無法查詢員工帳號', error);
+        }
+    }
 });
+
 
 function truncateText(text, length) {
     if (!text) return '';
@@ -894,6 +914,8 @@ function formatCurrency(amount) {
     if (amount === null || amount === undefined) return '';
     return '$' + amount.toLocaleString();
 }
+
+const selfAdmin = ref(null); // 判斷當前使用者是否是管理員
 </script>
 
 <style></style>

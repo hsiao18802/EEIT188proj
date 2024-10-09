@@ -27,27 +27,27 @@
     instagramPosts.value = [
       {
         id: 1,
-        media_url: '/public/i1.jpg',
+        media_url: '/i1.jpg',
         caption: '想念北海道的海邊與夕陽....'
       },
       {
         id: 2,
-        media_url: '/public/i2.jpg',
+        media_url: '/i2.jpg',
         caption: '真的有外星人嗎?金字塔好高啊!!!...'
       },
       {
         id: 3,
-        media_url: '/public/i3.jpg',
+        media_url: '/i3.jpg',
         caption: '謝謝趣露營教練帶我們去潛水~那天天氣超好的!好愛!'
       },
       {
         id: 4,
-        media_url: '/public/i4.jpg',
+        media_url: '/i4.jpg',
         caption: '謝謝趣露營辦的滑雪行程!超好玩的!我滑到腿痠了!'
       },
       {
         id: 5,
-        media_url: '/public/i55.jpg',
+        media_url: '/i55.jpg',
         caption: '台灣也可以划水喔!!還有裝備提供....'
       }
     ];
